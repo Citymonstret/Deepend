@@ -16,7 +16,8 @@
 
 package com.minecade.deepend.logging;
 
-import java.util.ResourceBundle;
+import com.minecade.deepend.resources.DeependBundle;
+
 import java.util.logging.ConsoleHandler;
 
 /**
@@ -32,7 +33,7 @@ public class LogHandler extends ConsoleHandler {
      * Constructor
      * @param bundle Resources used for translation
      */
-    protected LogHandler(final ResourceBundle bundle) {
+    protected LogHandler(final DeependBundle bundle) {
         setFormatter(new LogFormatter(bundle));
     }
 

@@ -18,6 +18,18 @@ package com.minecade.deepend.request;
 
 import com.minecade.deepend.object.DeependObject;
 
+/**
+ * @author Citymonstret
+ *
+ * @param <T> Object type
+ */
+@FunctionalInterface
 public interface ObjectCallback<T extends DeependObject> {
-    void act(T t);
+
+    /**
+     * Act on the specified object
+     *
+     * @param object Object to act on (do null checking)
+     */
+    void act(T object);
 }

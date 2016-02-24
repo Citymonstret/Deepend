@@ -22,6 +22,7 @@ import com.minecade.deepend.object.DeependObject;
 import com.minecade.deepend.object.ObjectProperty;
 import com.minecade.deepend.object.StringList;
 import com.minecade.deepend.request.*;
+import lombok.Getter;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -29,12 +30,15 @@ import java.util.List;
 
 public class GamePlayer extends DeependObject {
 
+    @Getter
     @ObjectProperty(name = "currentServer")
     protected String playerServer = "";
 
+    @Getter
     @ObjectProperty(name = "uuid")
     protected String playerID = "";
 
+    @Getter
     @ObjectProperty(name = "name")
     protected String playerName = "";
 
@@ -51,6 +55,11 @@ public class GamePlayer extends DeependObject {
     }
 
     @Override
+    public String toString() {
+        return playerName;
+    }
+
+    @Override
     public void write(DeependBuf buf) {
         writeValues(buf);
     }
@@ -61,23 +70,24 @@ public class GamePlayer extends DeependObject {
     }
 
     @Override
-    public void request(DeependBuf buf) {
-        buf.writeString("notch");
+    public void request(String key, DeependBuf buf) {
+        buf.writeString(key);
         sendKeys(buf);
     }
 
     public static GetRequest requestPlayers(List<String> names, UUIDProvider provider, PlayerCallback callback) {
+        StringBuilder name = new StringBuilder();
+        Iterator<String> i = names.iterator();
+        while (i.hasNext()) {
+            name.append(i.next());
+            if (i.hasNext()) {
+                name.append(",");
+            }
+        }
+
         DeependObject object = new GamePlayer() {
             @Override
-            public void request(DeependBuf buf) {
-                StringBuilder name = new StringBuilder();
-                Iterator<String> i = names.iterator();
-                while (i.hasNext()) {
-                    name.append(i.next());
-                    if (i.hasNext()) {
-                        name.append(",");
-                    }
-                }
+            public void request(String key, DeependBuf buf) {
                 buf.writeString(name.toString());
                 sendKeys(buf);
             }
@@ -99,7 +109,7 @@ public class GamePlayer extends DeependObject {
             }
         };
 
-        return new ObjectGetRequest(object, recipient, provider);
+        return new ObjectGetRequest(name.toString(), object, recipient, provider);
     }
 
     public static GetRequest requestPlayer(String name, UUIDProvider provider, PlayerCallback callback) {
@@ -107,18 +117,6 @@ public class GamePlayer extends DeependObject {
             return requestPlayers(new StringList(name.split(",")), provider, callback);
         }
         return requestPlayers(Collections.singletonList(name), provider, callback);
-    }
-
-    public String getServer() {
-        return playerServer;
-    }
-
-    public String getID() {
-        return playerID;
-    }
-
-    public String getName() {
-        return playerName;
     }
 
     public String get(String key) {

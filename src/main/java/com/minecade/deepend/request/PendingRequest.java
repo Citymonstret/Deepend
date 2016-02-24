@@ -19,6 +19,9 @@ package com.minecade.deepend.request;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.data.DeependBuf;
 import io.netty.channel.ChannelFuture;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.SneakyThrows;
 
 /**
  * This is a request which will be kept in the
@@ -26,9 +29,13 @@ import io.netty.channel.ChannelFuture;
  *
  * @author Citymonstret
  */
+@EqualsAndHashCode
 public abstract class PendingRequest implements Comparable {
 
+    @Getter
     private Channel requestedChannel;
+
+    @Getter
     private UUIDProvider provider;
 
     /**
@@ -48,6 +55,7 @@ public abstract class PendingRequest implements Comparable {
      *                         request will be sent to
      * @param provider UUID provider (used to authenticate the request)
      */
+    @SneakyThrows(IllegalArgumentException.class)
     public PendingRequest(Channel requestedChannel, UUIDProvider provider) {
         this.requestedChannel = requestedChannel;
         this.provider = provider;

@@ -20,12 +20,9 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.MirrorDataHolder;
 import com.minecade.deepend.game.GameCategory;
-import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ByteFactory;
 import com.minecade.deepend.server.DeependServer;
 import com.minecade.deepend.server.channels.impl.*;
-
-import java.util.ResourceBundle;
 
 /**
  * Created 2/23/2016 for Deepend
@@ -35,8 +32,6 @@ import java.util.ResourceBundle;
 public class TestGameServer implements DeependServer.DeependServerApplication {
 
     public static void main(String[] args) {
-        Logger.setup("DeependServer", ResourceBundle.getBundle("ServerStrings"));
-        Logger.get().info("bootstrap.starting");
         new DeependServer(8000, new TestGameServer()).run();
     }
 

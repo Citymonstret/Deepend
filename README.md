@@ -25,9 +25,24 @@ The protocol is very simple *TODO: Document protocol*
 Build the project using gradle
 ```gradle build```
 
+
+## Dependencies
+## lombok
+We use lombok to simplify our lives, as there is a lot of code
+needed to get this whole thing running. 
+You can find lombok on their website: [projectlombok.org](https://projectlombok.org/)
+
+## netty
+We're using netty to handle the raw networking. We decied to use
+netty, as we wouldn't be able to do anything better ourselves
+
+## guava
+Guava is very popular, and also very stable. It provides us with
+utility classes that would be rather stupid to re-create ourselves.
+
 ## Examples
 ### Client
-A client example can be found here: [TestGameClient.java](https://github.com/Minecade/Deepend/blob/master/Client/src/test/java/TestGameClient.java)
+A client example can be found here: [TestGameClient.java](https://github.com/Minecade/Deepend/blob/master/Client/src/test/java/com.minecade.deepend.client.TestGameClient.java)
 
 ### Server
 A server example can be found here: [TestGameServer.java](https://github.com/Minecade/Deepend/blob/master/Server/src/test/java/TestGameServer.java)

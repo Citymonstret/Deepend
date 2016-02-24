@@ -16,6 +16,10 @@
 
 package com.minecade.deepend.object;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,23 +38,25 @@ public class ByteFactory<E extends Enum<E>> {
 
     private static Map<FactoryType, ByteFactory> map = new HashMap<>();
 
-    public static void addByteFactory(FactoryType type, ByteFactory factory) {
+    @SneakyThrows(RuntimeException.class)
+    public static void addByteFactory(@NonNull FactoryType type, @NonNull ByteFactory factory) {
         if (locked) {
             throw new RuntimeException("Cannot add factory to locked manager");
         }
         map.put(type, factory);
     }
 
-    public static ByteFactory getFactory(FactoryType type) {
+    public static ByteFactory getFactory(@NonNull FactoryType type) {
         return map.get(type);
     }
 
-    private Map<String, Byte> cache;
-    private Map<Byte, String> rCache;
+    private final Map<String, Byte> cache;
+    private final Map<Byte, String> rCache;
 
+    @Getter
     private E unknown;
 
-    public ByteFactory(Class<E> enumClass, E unknown) {
+    public ByteFactory(@NonNull Class<E> enumClass, @NonNull E unknown) {
         this.cache = new HashMap<>();
         this.rCache = new HashMap<>();
 

@@ -20,6 +20,9 @@ import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +34,7 @@ import java.util.List;
  *
  * @author Citymonstret
  */
+@UtilityClass
 public class DataUtil {
 
     /**
@@ -48,7 +52,7 @@ public class DataUtil {
      *
      * @return List containing all appropriate data objects
      */
-    public static List<DataObject> getDataObject(DataHolder holder, String s, DeependBuf buf, List<DataObject> initialList, boolean wrapHolder) {
+    public static List<DataObject> getDataObject(@NonNull DataHolder holder, String s, @NonNull DeependBuf buf, List<DataObject> initialList, boolean wrapHolder) {
         String name;
 
         try {
@@ -142,6 +146,7 @@ public class DataUtil {
      */
     public static class HolderWrapper extends DataObject {
 
+        @Getter
         private final DataHolder holder;
 
         public HolderWrapper(final DataHolder holder) {

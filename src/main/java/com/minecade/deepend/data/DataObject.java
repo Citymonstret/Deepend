@@ -16,6 +16,8 @@
 
 package com.minecade.deepend.data;
 
+import lombok.*;
+
 /**
  * A simple data object
  *
@@ -23,9 +25,15 @@ package com.minecade.deepend.data;
  */
 public class DataObject {
 
+    @NonNull
+    @Getter
     private String name;
+
+    @NonNull
     private String value;
 
+    @Getter(AccessLevel.PRIVATE)
+    @Setter
     private DataHolder holder;
 
     /**
@@ -38,25 +46,9 @@ public class DataObject {
         this.value = value;
     }
 
-    /**
-     * Set the parent holder
-     * @param holder Parent Holder
-     */
-    protected void setHolder(DataHolder holder) {
-        this.holder = holder;
-    }
-
     @Override
     final public String toString() {
         return this.getName();
-    }
-
-    /**
-     * Get the name
-     * @return Data Key
-     */
-    final public String getName() {
-        return this.name;
     }
 
     /**
@@ -83,7 +75,7 @@ public class DataObject {
      * Delete the object
      */
     public void delete() {
-        holder.remove(name);
+        getHolder().remove(name);
     }
 
     /**

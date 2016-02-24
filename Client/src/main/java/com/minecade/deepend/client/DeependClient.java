@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.client;
 
+import com.google.common.base.Preconditions;
 import com.minecade.deepend.DeependApplication;
 import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.DeependMeta;
@@ -33,12 +34,16 @@ import com.minecade.deepend.object.ByteFactory;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.PendingRequest;
 import com.minecade.deepend.request.ShutdownRequest;
+import com.minecade.deepend.resources.DeependBundle;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.SneakyThrows;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -57,23 +62,39 @@ public class DeependClient {
 
     public static DeependConnection currentConnection;
 
-    public String echoTestString = "@Walrus is #lame!!";
+    @Getter
+    public String echoTestString;
 
     private Collection<PendingRequest> pendingRequests;
     private volatile boolean shutdown, sentAuthenticationRequest;
-    private ResourceBundle properties;
+    private DeependBundle properties;
 
-    public DeependClient(DeependClientApplication application, boolean useProvided, String host, int port) {
+    @SneakyThrows
+    public DeependClient(@NonNull DeependClientApplication application, boolean useProvided, String host, int port) {
         // Make sure the static instance is set
         instance = this;
 
         DeependMeta.setMeta("client", "true");
 
-        // Let's setup the Deepend logger
-        Logger.setup("DeependClient", ResourceBundle.getBundle("ClientStrings"));
+        DeependBundle bundle = null;
+        try {
+            bundle = new DeependBundle("ClientStrings");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        // TODO: remake this
-        this.properties = ResourceBundle.getBundle("client");
+        // Let's setup the Deepend logger
+        Logger.setup("DeependClient", new DeependBundle("ClientStrings", true));
+
+        // These are the default settings for the client
+        this.properties = new DeependBundle("client", false, DeependBundle.DefaultBuilder.create()
+                .add("echo.string", "Test")
+                .add("auth.user", "admin")
+                .add("auth.pass", "password")
+                .add("conn.host", "localhost")
+                .add("conn.port", "8000")
+                .build()
+        );
 
         // Let's load in some properties
         this.echoTestString = getProperty("echo.string");
@@ -86,6 +107,7 @@ public class DeependClient {
             host1 = getProperty("conn.host");
             port1 = Integer.parseInt(getProperty("conn.port"));
         } else {
+            Logger.get().info("Using provided values, this is not recommended.");
             host1 = host;
             port1 = port;
         }
@@ -260,12 +282,13 @@ public class DeependClient {
         this.shutdown = true;
     }
 
-    public void addPendingRequest(final PendingRequest r) {
+    public void addPendingRequest(@NonNull final PendingRequest r) {
         this.pendingRequests.add(r);
     }
 
     public String getProperty(String key) {
-        return this.properties.getString(key);
+        Preconditions.checkArgument(properties.containsKey(key), "Client property \"%s\" not found!", key);
+        return this.properties.get(key);
     }
 
     public void resetAuthenticationPendingStatus() {

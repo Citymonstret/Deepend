@@ -1,39 +1,4 @@
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'java'
-apply plugin: 'maven'
-
-compileJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
-}
-
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "gradle.plugin.net.minecrell:licenser:0.1.1"
-    }
-}
-
-apply plugin: "net.minecrell.licenser"
-
-license {
-    header = rootProject.file('LICENSE')
-    newLine = false
-    exclude '**/*.properties' // Apply license header NOT to properties files
-}
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
-    compile group: 'com.jcraft', name: 'jzlib', version: '1.1.2'
     compile rootProject
     compile project(':Server')
 }

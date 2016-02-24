@@ -16,6 +16,9 @@
 
 package com.minecade.deepend.connection;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.UUID;
 
 /**
@@ -23,27 +26,13 @@ import java.util.UUID;
  *
  * @author Citymonstret
  */
+@RequiredArgsConstructor
 public class SimpleAddress {
 
+    @Getter
     private final String host;
-    private UUID uuid;
-
-    /**
-     * Constructor
-     * @param host Host Address
-     */
-    public SimpleAddress(final String host) {
-        this.host = host;
-        this.uuid = UUID.randomUUID();
-    }
-
-    /**
-     * Get the host address
-     * @return Host Address
-     */
-    public String getHost() {
-        return this.host;
-    }
+    
+    private UUID uuid = UUID.randomUUID();
 
     @Override
     public String toString() {

@@ -17,10 +17,12 @@
 package com.minecade.deepend.logging;
 
 import com.minecade.deepend.data.DataObject;
-import sun.reflect.Reflection;
+import com.minecade.deepend.resources.DeependBundle;
+import lombok.NonNull;
+import lombok.SneakyThrows;
 
 import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Deepend logger
@@ -29,14 +31,29 @@ import java.util.ResourceBundle;
  */
 public class Logger {
 
-    private static Logger instance;
+    private static Logger unknownLoggerDefault = null;
+
+    private static Map<String, Logger> loggerMap;
+
+    static {
+        loggerMap = new ConcurrentHashMap<>();
+    }
 
     /**
      * Get the logger instance
      * @return Logger instance (there's only one)
      */
+    @SneakyThrows
     public static Logger get() {
-        return instance;
+        Logger logger = unknownLoggerDefault;
+        if (logger == null) {
+            throw new RuntimeException("Cannot access logger before creation");
+        }
+        return logger;
+    }
+
+    public static Logger get(String name) {
+        return loggerMap.get(name);
     }
 
     /**
@@ -44,25 +61,19 @@ public class Logger {
      * @param name Logger Name
      * @param resourceBundle Logger translation bundle
      */
-    public static void setup(String name, ResourceBundle resourceBundle) {
-        if (instance != null) {
-            throw new IllegalAccessError("Re-initialization of Logger");
+    public static void setup(String name, DeependBundle resourceBundle) {
+        loggerMap.put(name, new Logger(name, resourceBundle));
+        if (unknownLoggerDefault == null) {
+            unknownLoggerDefault = loggerMap.get(name);
         }
-        String callingClassPackage = Reflection.getCallerClass(1)
-                .getPackage().getName();
-        if (!callingClassPackage.startsWith("com.minecade.deepend")) {
-            throw new IllegalAccessError("Trying to initialize the logger outside of Deepend");
-        }
-        instance = new Logger(name, resourceBundle);
     }
 
     private final java.util.logging.Logger logger;
 
     private boolean debugMode;
 
-    protected Logger(String name, ResourceBundle resourceBundle) {
+    protected Logger(@NonNull String name, DeependBundle resourceBundle) {
         this.logger = java.util.logging.Logger.getLogger(name);
-        this.logger.setResourceBundle(resourceBundle);
         this.logger.setUseParentHandlers(false);
         this.logger.addHandler(new LogHandler(resourceBundle));
         this.debugMode = true;
@@ -121,10 +132,13 @@ public class Logger {
      * @param map Map to dump
      * @return this
      */
-    public Logger dump(Map<?,?> map) {
-        for (Map.Entry<?,?> entry : map.entrySet()) {
-            this.dump(new DataObject(entry.getKey().toString(), entry.getValue().toString()));
-        }
+    public Logger dump(@NonNull Map<?,?> map) {
+        map.forEach(this::dump);
+        return this;
+    }
+
+    public Logger dump(Object key, Object val) {
+        this.dump(new DataObject(key.toString(), val.toString()));
         return this;
     }
 

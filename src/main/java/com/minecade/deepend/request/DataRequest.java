@@ -18,6 +18,9 @@ package com.minecade.deepend.request;
 
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.data.DeependBuf;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
+@EqualsAndHashCode
 public abstract class DataRequest extends PendingRequest {
 
     private static Map<String, DataRequest> requestMap = new ConcurrentHashMap<>();
@@ -45,7 +49,10 @@ public abstract class DataRequest extends PendingRequest {
 
     private static volatile int currentIndex = 0;
 
+    @Getter
     private final int index;
+
+    @Getter
     private final DataRecipient recipient;
 
     /**
@@ -54,7 +61,7 @@ public abstract class DataRequest extends PendingRequest {
      * @param dataRecipient Recipient that will handle the data
      * @param provider UUIDProvider used for authentication
      */
-    public DataRequest(Channel channel, DataRecipient dataRecipient, UUIDProvider provider) {
+    public DataRequest(@NonNull Channel channel, @NonNull DataRecipient dataRecipient, UUIDProvider provider) {
         super(channel, provider);
         this.index = currentIndex++;
         this.recipient = dataRecipient;

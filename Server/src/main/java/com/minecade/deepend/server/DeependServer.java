@@ -22,6 +22,7 @@ import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ByteFactory;
+import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.channels.MainChannel;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -29,16 +30,26 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.ResourceLeakDetector;
+import lombok.NonNull;
+import lombok.SneakyThrows;
 
 /**
  * The main server implementation
  */
 public class DeependServer implements Runnable {
 
-    private int port;
+    private final int port;
+    private final DeependServerApplication application;
 
-    public DeependServer(final int port, DeependServerApplication application) {
+    @SneakyThrows
+    public DeependServer(final int port, @NonNull DeependServerApplication application) {
+        Logger.setup("DeependServer", /* ResourceBundle.getBundle("ServerStrings")*/ new DeependBundle("ServerStrings"));
+        Logger.get().info("bootstrap.starting");
+
         this.port = port;
+        this.application = application;
+
         // Register channels and
         // lock the manager
         application.registerChannels(ChannelManager.instance);
@@ -54,6 +65,10 @@ public class DeependServer implements Runnable {
     }
 
     final public void run() {
+        if (System.getProperty("io.netty.leakDetectionLevel") == null) {
+            ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
+        }
+
         // Let's use the simplest group
         // setup possible
         EventLoopGroup bossGroup = new NioEventLoopGroup();

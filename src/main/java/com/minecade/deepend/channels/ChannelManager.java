@@ -16,6 +16,9 @@
 
 package com.minecade.deepend.channels;
 
+import lombok.NonNull;
+import lombok.SneakyThrows;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,7 +47,8 @@ public class ChannelManager {
      *
      * @param channel Channel to add
      */
-    public void addChannel(DeependChannel channel) {
+    @SneakyThrows(RuntimeException.class)
+    public void addChannel(@NonNull DeependChannel channel) {
         if (locked) {
             throw new RuntimeException("Cannot add channels to locked manager");
         }
@@ -56,7 +60,7 @@ public class ChannelManager {
      * @param channel Channel Enum
      * @return Implementation of the requested channel
      */
-    public DeependChannel getChannel(Channel channel) {
+    public DeependChannel getChannel(@NonNull Channel channel) {
         return channelMap.get(channel);
     }
 

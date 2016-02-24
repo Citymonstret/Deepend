@@ -16,8 +16,12 @@
 
 package com.minecade.deepend.data;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 /**
@@ -25,8 +29,10 @@ import java.util.function.BiConsumer;
  *
  * @author Citymonstret
  */
+@RequiredArgsConstructor
 public class DataHolder implements Map<String, Object> {
 
+    @Setter
     private DataHolder parent;
 
     /**
@@ -62,40 +68,15 @@ public class DataHolder implements Map<String, Object> {
         void requestSync();
     }
 
-    private final Map<String, Object> data;
+    @NonNull private final Map<String, Object> data = new HashMap<>();
+
+    @Getter
+    @NonNull
     private final String identifier;
-    private final List<DataListener> listeners;
+    @NonNull private final List<DataListener> listeners = new ArrayList<>();
 
+    @Setter
     private String fallback;
-
-    /**
-     * Constructor
-     * @param identifier Internal name of data holder
-     */
-    public DataHolder(String identifier) {
-        this.data = new ConcurrentHashMap<>();
-        this.identifier = identifier;
-        this.listeners = new ArrayList<>();
-    }
-
-    /**
-     * Set the parent of the holder
-     * @param parent Parent Holder
-     */
-    public void setParent(final DataHolder parent) {
-        this.parent = parent;
-    }
-
-    /**
-     * Set the fallback value (which will
-     * be used whenever the requested value
-     * is unknown, but the identifier cannot be used)
-     *
-     * @param key Key of fallback value
-     */
-    public void setFallback(String key) {
-        this.fallback = key;
-    }
 
     /**
      * Get the fallback value, if
@@ -133,14 +114,6 @@ public class DataHolder implements Map<String, Object> {
     @Override
     final public String toString() {
         return this.getIdentifier();
-    }
-
-    /**
-     * Get the identifier
-     * @return Identifier
-     */
-    final public String getIdentifier() {
-        return this.identifier;
     }
 
     @Override

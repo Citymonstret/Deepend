@@ -17,7 +17,10 @@
 package com.minecade.deepend.game;
 
 import com.minecade.deepend.object.ByteProvider;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public enum GameCategory implements ByteProvider {
 
     UNKNOWN((byte) 0x00),               // Unknown category type
@@ -28,10 +31,6 @@ public enum GameCategory implements ByteProvider {
     PROXIES((byte) 0x06);               // Game proxies (such as bungee)
 
     private final byte categoryID;
-
-    GameCategory(final byte categoryID) {
-        this.categoryID = categoryID;
-    }
 
     @Override
     public byte getByte() {

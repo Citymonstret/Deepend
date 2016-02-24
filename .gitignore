@@ -14,6 +14,9 @@ local.properties
 .gradle
 build/
 
+# This auto-generates
+configs/client.deepend
+
 # Ignore Gradle GUI config
 gradle-app.setting
 

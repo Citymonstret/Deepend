@@ -18,7 +18,6 @@ package com.minecade.deepend;
 
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
-import com.minecade.deepend.logging.Logger;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -88,12 +87,9 @@ public class ConnectionFactory {
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
         SimpleAddress simpleAddress = new SimpleAddress(inetSocketAddress.getHostName());
         simpleAddress.setUUID(uuid.toString());
-        Logger.get().debug("Address: " + simpleAddress);
         if (!internalMap.containsKey(simpleAddress.toString())) {
-            Logger.get().info("Creating connection!");
             return createConnection(inetSocketAddress);
         }
-        Logger.get().info("Reused connection!");
         return getConnection(simpleAddress);
     }
 }

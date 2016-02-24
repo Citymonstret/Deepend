@@ -17,19 +17,18 @@
 package com.minecade.deepend.object;
 
 import com.minecade.deepend.logging.Logger;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public enum GenericResponse implements ByteProvider {
     SUCCESS(getByte(0x00)),
     FAILURE(getByte(0x01));
 
     private final byte b;
-
-    GenericResponse(byte b) {
-        this.b = b;
-    }
 
     public byte getByte() {
         return this.b;

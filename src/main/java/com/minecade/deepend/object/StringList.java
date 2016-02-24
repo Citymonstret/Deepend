@@ -16,6 +16,8 @@
 
 package com.minecade.deepend.object;
 
+import lombok.NonNull;
+
 import java.util.ArrayList;
 
 /**
@@ -26,7 +28,7 @@ import java.util.ArrayList;
  */
 public class StringList extends ArrayList<String> {
 
-    public StringList(String... strings) {
+    public StringList(@NonNull String... strings) {
         super(strings.length);
         for (String string : strings) {
             add(string);

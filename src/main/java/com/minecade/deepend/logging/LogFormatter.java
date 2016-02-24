@@ -16,9 +16,11 @@
 
 package com.minecade.deepend.logging;
 
+import com.minecade.deepend.object.ObjectGetter;
+import lombok.RequiredArgsConstructor;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.ResourceBundle;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -26,27 +28,20 @@ import java.util.logging.LogRecord;
 /**
  * A simple log formatter
  */
+@RequiredArgsConstructor
 public class LogFormatter extends Formatter {
 
     private static final String format = "[%s][%s][%s] %s> %s\n";
 
-    final ResourceBundle bundle;
-    final SimpleDateFormat dateFormat;
-
-    /**
-     * Constructor
-     * @param bundle Resource bundle used for translations
-     */
-    protected LogFormatter(final ResourceBundle bundle) {
-        this.bundle = bundle;
-        this.dateFormat = new SimpleDateFormat("HH:mm:ss.SS");
-    }
+    final ObjectGetter<String, String> bundle;
+    final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.S");
 
     @Override
     public String format(LogRecord record) {
         String message = record.getMessage();
-        if (bundle.containsKey(message)) {
-            message = bundle.getString(message);
+
+        if (bundle != null && bundle.containsKey(message)) {
+            message = bundle.get(message);
         }
 
         String type;

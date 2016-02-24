@@ -19,6 +19,9 @@ package com.minecade.deepend.connection;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.request.UUIDProvider;
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 import java.util.Map;
 import java.util.UUID;
@@ -28,8 +31,12 @@ public class DeependConnection implements UUIDProvider {
 
     private final Map<String, Object> metaMapping = new ConcurrentHashMap<>();
 
+    @NonNull
+    @Getter
     private final SimpleAddress remoteAddress;
 
+    @Getter
+    @Setter
     private boolean authenticated;
 
     public DeependConnection(SimpleAddress remoteAddress) {
@@ -49,18 +56,6 @@ public class DeependConnection implements UUIDProvider {
             return (DeependBuf) o;
         }
         return null;
-    }
-
-    public SimpleAddress getRemoteAddress() {
-        return this.remoteAddress;
-    }
-
-    public boolean isAuthenticated() {
-        return this.authenticated;
-    }
-
-    public boolean setAuthenticated(boolean authenticated) {
-        return (this.authenticated = authenticated);
     }
 
     public void addMeta(String key, Object meta) {

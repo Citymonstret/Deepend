@@ -18,6 +18,8 @@ package com.minecade.deepend.request;
 
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.object.DeependObject;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 /**
  * This is a wrapper for GetRequest
@@ -31,20 +33,24 @@ public class ObjectGetRequest extends GetRequest {
 
     private DeependObject object;
 
+    @Getter(AccessLevel.PROTECTED)
+    private String key;
+
     /**
      * Constructor
      * @param object DeependObject to use for the request
      * @param dataRecipient Recipient that will handle incoming data
      * @param provider UUIDProvider used for authentication
      */
-    public ObjectGetRequest(DeependObject object, DataRecipient dataRecipient, UUIDProvider provider) {
+    public ObjectGetRequest(String requestedKey, DeependObject object, DataRecipient dataRecipient, UUIDProvider provider) {
         super(dataRecipient, provider);
         this.object = object;
+        this.key = requestedKey;
     }
 
     @Override
     protected void buildRequest(DeependBuf buf) {
         buf.writeByte(this.object.getObjectType());
-        this.object.request(buf);
+        this.object.request(getKey(), buf);
     }
 }

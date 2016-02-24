@@ -19,6 +19,7 @@ package com.minecade.deepend.object;
 import com.minecade.deepend.data.DataType;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
+import lombok.*;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -35,8 +36,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
+@SuppressWarnings("unused")
 public abstract class DeependObject {
 
+    @Getter
     private ByteProvider objectType;
 
     protected Map<PropertyHolder, PropertyGetter> properties;
@@ -45,7 +48,7 @@ public abstract class DeependObject {
 
     protected volatile boolean isBuilt;
 
-    public DeependObject(ByteProvider objectType, boolean scan, Class<?> clazz) {
+    public DeependObject(@NonNull ByteProvider objectType, boolean scan, @NonNull Class<?> clazz) {
         this.objectType = objectType;
         this.properties = new ConcurrentHashMap<>();
         this.isBuilt = false;
@@ -55,7 +58,8 @@ public abstract class DeependObject {
         }
     }
 
-    protected void scan(Class<?> clazz) {
+    @Synchronized
+    protected void scan(@NonNull Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             for (ObjectProperty property : field.getDeclaredAnnotationsByType(ObjectProperty.class)) {
                 addValue(property.name(), property.type(), new FieldGetter(field, this));
@@ -64,17 +68,18 @@ public abstract class DeependObject {
         buildValues();
     }
 
-    protected void updateFieldValue(String name) {
+    @SneakyThrows
+    protected void updateFieldValue(@NonNull String name) {
         FieldGetter getter = (FieldGetter) properties.get(holderMap.get(name));
         this.cache.put(name, getter.getValue());
     }
 
-    protected void addValue(String name, DataType type, PropertyGetter getter) {
+    protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull PropertyGetter getter) {
         PropertyHolder holder = new PropertyHolder(name, type);
         properties.put(holder, getter);
     }
 
-    protected void convertAndRead(DeependBuf buf) {
+    protected void convertAndRead(@NonNull DeependBuf buf) {
         Map<String, String> _v = convert(buf, this.properties.size());
         for (Map.Entry<String, String> _k : _v.entrySet()) {
             try {
@@ -85,7 +90,7 @@ public abstract class DeependObject {
         }
     }
 
-    protected void sendKeys(DeependBuf buf) {
+    protected void sendKeys(@NonNull DeependBuf buf) {
         StringBuilder builder = new StringBuilder();
         Iterator<String> keys = cache.keySet().iterator();
         while (keys.hasNext()) {
@@ -98,7 +103,10 @@ public abstract class DeependObject {
         buf.writeString(builder.toString());
     }
 
-    protected void addValue(String name, DataType type, Object value) {
+    @Override
+    public abstract String toString();
+
+    protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull Object value) {
         PropertyGetter getter = new PropertyGetter() {
             @Override
             Object getValue() {
@@ -108,6 +116,7 @@ public abstract class DeependObject {
         addValue(name, type, getter);
     }
 
+    @Synchronized
     protected void buildValues() {
         this.isBuilt = false;
         this.cache = new HashMap<>();
@@ -119,7 +128,7 @@ public abstract class DeependObject {
         this.isBuilt = true;
     }
 
-    protected void updateField(String key, Object value) {
+    protected void updateField(@NonNull String key, @NonNull Object value) {
         FieldGetter getter = (FieldGetter) properties.get(holderMap.get(key));
         try {
             getter.field.set(getter.object, value);
@@ -128,7 +137,7 @@ public abstract class DeependObject {
         }
     }
 
-    protected void writeValues(DeependBuf buf) {
+    protected void writeValues(@NonNull DeependBuf buf) {
         buf.writeInt(cache.size());
         for (Map.Entry<String, Object> cacheEntry : cache.entrySet()) {
             String entryName = cacheEntry.getKey();
@@ -137,7 +146,7 @@ public abstract class DeependObject {
         }
     }
 
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         if (this.hasCache()) {
             this.buildValues();
         }
@@ -156,7 +165,7 @@ public abstract class DeependObject {
 
     public abstract void read(DeependBuf buf);
 
-    public abstract void request(DeependBuf buf);
+    public abstract void request(String requestedKey, DeependBuf buf);
 
     protected Map<String, String> convert(DeependBuf buf, int num) {
         DataType[] req = new DataType[num * 2];
@@ -171,14 +180,10 @@ public abstract class DeependObject {
         return map;
     }
 
-    public ByteProvider getObjectType() {
-        return this.objectType;
-    }
-
     private class FieldGetter extends PropertyGetter {
 
-        private final Field field;
-        private final Object object;
+        @NonNull private final Field field;
+        @NonNull private final Object object;
 
         public FieldGetter(Field field, Object object) {
             try {
@@ -206,13 +211,9 @@ public abstract class DeependObject {
         abstract Object getValue();
     }
 
+    @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
     private class PropertyHolder {
-        final String name;
-        final DataType type;
-
-        PropertyHolder(final String name, final DataType type) {
-            this.name = name;
-            this.type = type;
-        }
+        @NonNull final String name;
+        @NonNull final DataType type;
     }
 }

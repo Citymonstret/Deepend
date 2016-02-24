@@ -16,6 +16,8 @@
 
 package com.minecade.deepend.data;
 
+import lombok.NonNull;
+
 /**
  * The manager which handles
  * all data holders
@@ -37,7 +39,7 @@ public class DataManager {
      * Register a data holder
      * @param dataHolder Holder to register
      */
-    public void registerDataHolder(final DataHolder dataHolder) {
+    public void registerDataHolder(@NonNull final DataHolder dataHolder) {
         this.mainDataHolder.put(dataHolder.getIdentifier(), dataHolder);
     }
 
@@ -57,7 +59,7 @@ public class DataManager {
      * @param key Data holder key
      * @return Holder | New data holder if non-existent
      */
-    public DataHolder getDataHolder(final Object key) {
+    public DataHolder getDataHolder(@NonNull final Object key) {
         Object data = mainDataHolder.get(key.toString());
         if (data instanceof DataHolder) {
             return (DataHolder) data;

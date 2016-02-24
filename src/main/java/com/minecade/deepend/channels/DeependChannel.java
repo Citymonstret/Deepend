@@ -18,24 +18,21 @@ package com.minecade.deepend.channels;
 
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DeependBuf;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * A simple channel shell
  *
  * @author Citymonstret
  */
+@RequiredArgsConstructor
 public abstract class DeependChannel {
 
+    @NonNull
+    @Getter
     private final Channel channelType;
-
-    /**
-     * Constructor
-     * @param channel Channel that this is meant
-     *                to represent
-     */
-    public DeependChannel(Channel channel) {
-        this.channelType = channel;
-    }
 
     /**
      * This is where the channel does what it's supposed
@@ -45,13 +42,5 @@ public abstract class DeependChannel {
      * @param buf Output buffer. This is
      *            NOT the input buf
      */
-    public abstract void act(DeependConnection connection, DeependBuf buf);
-
-    /**
-     * Get the channel this is an implementation of
-     * @return Channel Enum
-     */
-    public Channel getChannelType() {
-        return this.channelType;
-    }
+    public abstract void act(@NonNull DeependConnection connection, @NonNull DeependBuf buf);
 }

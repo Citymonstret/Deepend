@@ -18,6 +18,7 @@ package com.minecade.deepend.object;
 
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
+import lombok.NonNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,8 +38,8 @@ public class ObjectManager {
         this.objectMapping.put(instance.getObjectType().getByte(), clazz);
     }
 
-    public DeependObject getInstance(Class<? extends DeependObject> clazz) {
-        DeependObject instance = null;
+    public <T extends DeependObject> T getInstance(@NonNull Class<T> clazz) {
+        T instance = null;
         try {
             instance = clazz.newInstance();
         } catch(final Exception e) {
@@ -61,7 +62,7 @@ public class ObjectManager {
         return this.objectMapping.containsKey(provider);
     }
 
-    public DeependObject construct(ByteProvider provider, DeependBuf buf) {
+    public DeependObject construct(@NonNull ByteProvider provider, @NonNull DeependBuf buf) {
         DeependObject instance = getInstance(provider);
         instance.read(buf);
         return instance;

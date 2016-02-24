@@ -25,6 +25,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.compression.ZlibCodecFactory;
 import io.netty.handler.codec.compression.ZlibWrapper;
 import io.netty.handler.ipfilter.AbstractRemoteAddressFilter;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.net.InetSocketAddress;
 
@@ -35,16 +38,14 @@ import java.net.InetSocketAddress;
  *
  * @author Citymonstret
  */
+@RequiredArgsConstructor
 public class DeependChannelInitializer extends ChannelInitializer<SocketChannel> {
 
+    @Getter
     private final Class<? extends ChannelHandlerAdapter> channelHandlerAdapter;
 
-    public DeependChannelInitializer(final Class<? extends ChannelHandlerAdapter> channelHandlerAdapter) {
-        this.channelHandlerAdapter = channelHandlerAdapter;
-    }
-
     @Override
-    protected void initChannel(SocketChannel socketChannel) throws Exception {
+    protected void initChannel(@NonNull SocketChannel socketChannel) throws Exception {
         ChannelPipeline pipeline = socketChannel.pipeline();
 
         // Add GZIP Encryption
@@ -73,6 +74,6 @@ public class DeependChannelInitializer extends ChannelInitializer<SocketChannel>
         // This is the main channel; we're using our
         // own wrappers, because netty is too complex
         // for what we need
-        pipeline.addLast(channelHandlerAdapter.newInstance());
+        pipeline.addLast(getChannelHandlerAdapter().newInstance());
     }
 }
