@@ -42,7 +42,7 @@ utility classes that would be rather stupid to re-create ourselves.
 
 ## Examples
 ### Client
-A client example can be found here: [TestGameClient.java](https://github.com/Minecade/Deepend/blob/master/Client/src/test/java/com.minecade.deepend.client.TestGameClient.java)
+A client example can be found here: [TestGameClient.java](https://github.com/Minecade/Deepend/blob/master/Client/src/test/java/TestGameClient.java)
 
 ### Server
 A server example can be found here: [TestGameServer.java](https://github.com/Minecade/Deepend/blob/master/Server/src/test/java/TestGameServer.java)
