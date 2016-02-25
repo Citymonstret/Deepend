@@ -29,7 +29,7 @@ import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.object.ByteFactory;
+import com.minecade.deepend.bytes.ByteFactory;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.PendingRequest;
 import com.minecade.deepend.request.ShutdownRequest;

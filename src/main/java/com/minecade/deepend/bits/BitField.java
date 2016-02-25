@@ -15,7 +15,7 @@
  */
 package com.minecade.deepend.bits;
 
-import com.minecade.deepend.object.ByteProvider;
+import com.minecade.deepend.bytes.ByteProvider;
 import lombok.NonNull;
 
 import java.util.*;
@@ -28,6 +28,11 @@ import java.util.stream.Collectors;
  */
 public class BitField<E extends Enum<E> & ByteProvider> {
 
+    /**
+     * Just for caching of bytes, to make this
+     * a little faster. Memory usage is too
+     * minimal to even care about.
+     */
     private final Map<Byte, E> internalMap;
 
     /**

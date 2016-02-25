@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.object;
 
+import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.logging.Logger;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

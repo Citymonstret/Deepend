@@ -20,7 +20,7 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.MirrorDataHolder;
 import com.minecade.deepend.game.GameCategory;
-import com.minecade.deepend.object.ByteFactory;
+import com.minecade.deepend.bytes.ByteFactory;
 import com.minecade.deepend.server.DeependServer;
 import com.minecade.deepend.server.channels.impl.*;
 

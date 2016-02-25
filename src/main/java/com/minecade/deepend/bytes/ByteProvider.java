@@ -14,12 +14,31 @@
  * limitations under the License.
  */
 
-package com.minecade.deepend.object;
+package com.minecade.deepend.bytes;
 
+/**
+ * This is used to return bytes, as
+ * easy as that
+ *
+ * @author Citymonstret
+ */
 public interface ByteProvider {
 
+    /**
+     * Get the byte value of the object
+     *
+     * @return Byte value of the object
+     */
     byte getByte();
 
+    /**
+     * Get the identifier for this provider
+     *
+     * @return The identifier of this provider,
+     *         if it hasn't been overridden then
+     *         a combination of the class name
+     *         and the byte value will be returned
+     */
     default String getIdentifier() {
         return getClass().getName() + ":" + getByte();
     }

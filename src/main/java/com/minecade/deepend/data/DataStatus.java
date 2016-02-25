@@ -15,7 +15,7 @@
  */
 package com.minecade.deepend.data;
 
-import com.minecade.deepend.object.ByteProvider;
+import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.object.Status;
 
 /**

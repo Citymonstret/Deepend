@@ -21,7 +21,7 @@ import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.object.ByteFactory;
+import com.minecade.deepend.bytes.ByteFactory;
 import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.channels.MainChannel;
 import io.netty.bootstrap.ServerBootstrap;

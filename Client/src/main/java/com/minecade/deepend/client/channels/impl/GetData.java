@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.client.channels.impl;
 
+import com.minecade.deepend.bytes.ByteFactory;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.DeependChannel;
 import com.minecade.deepend.connection.DeependConnection;

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.game.GameCategory;
 import com.minecade.deepend.game.GamePlayer;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.object.ByteFactory;
+import com.minecade.deepend.bytes.ByteFactory;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.StringList;
 import com.minecade.deepend.request.ShutdownRequest;

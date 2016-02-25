@@ -16,7 +16,7 @@
 package com.minecade.deepend.client.channels.data;
 
 import com.minecade.deepend.client.DeependClient;
-import com.minecade.deepend.object.ByteProvider;
+import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.object.DeependObject;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.ObjectCallback;

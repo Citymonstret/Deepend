@@ -23,7 +23,7 @@ import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
-import com.minecade.deepend.object.ByteFactory;
+import com.minecade.deepend.bytes.ByteFactory;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.util.DataUtil;
 

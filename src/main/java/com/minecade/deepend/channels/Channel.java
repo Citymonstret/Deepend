@@ -16,7 +16,7 @@
 
 package com.minecade.deepend.channels;
 
-import com.minecade.deepend.object.ByteProvider;
+import com.minecade.deepend.bytes.ByteProvider;
 
 import java.util.HashMap;
 import java.util.Map;

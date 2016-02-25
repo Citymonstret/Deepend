@@ -16,7 +16,7 @@
 
 package com.minecade.deepend.data;
 
-import com.minecade.deepend.object.ByteProvider;
+import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.object.GenericResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;

@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.object;
 
+import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import lombok.NonNull;

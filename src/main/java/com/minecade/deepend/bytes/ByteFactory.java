@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.minecade.deepend.object;
+package com.minecade.deepend.bytes;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -24,29 +24,67 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ByteFactory<E extends Enum<E>> {
+/**
+ * This is a link between ByteProvider enums
+ * and their byte values.
+ *
+ * @author Citymonstret
+ *
+ * @param <E> Enum implementing ByteProvider
+ */
+public class ByteFactory<E extends Enum<E> & ByteProvider> {
 
     static boolean locked = false;
 
+    /**
+     * Lock the byte factory factorization process
+     */
     public static void lock() {
         locked = true;
     }
 
+    /**
+     * Factory Types
+     */
     public enum FactoryType {
+
+        /**
+         * Categories used for
+         * data management
+         */
         DATA_TYPE
     }
 
     private static Map<FactoryType, ByteFactory> map = new HashMap<>();
 
+    /**
+     * This will add a byte factory for the
+     * given factory type
+     *
+     * @param type What should this factory be used for
+     * @param factory Factory for the given type
+     *
+     * @param <B> Enum implementing ByteProvider
+     */
     @SneakyThrows(RuntimeException.class)
-    public static <B extends Enum<B>> void addByteFactory(@NonNull FactoryType type, @NonNull ByteFactory<B> factory) {
+    public static <B extends Enum<B> & ByteProvider> void addByteFactory(@NonNull FactoryType type, @NonNull ByteFactory<B> factory) {
         if (locked) {
             throw new RuntimeException("Cannot add factory to locked manager");
         }
         map.put(type, factory);
     }
 
+    /**
+     * Get the factory for the given type
+     *
+     * @param type Factory Type
+     * @return Factory for the specified type
+     */
+    @SneakyThrows(RuntimeException.class)
     public static ByteFactory getFactory(@NonNull FactoryType type) {
+        if (!map.containsKey(type)) {
+            throw new RuntimeException("No byte factory registered for: " + type.name());
+        }
         return map.get(type);
     }
 
@@ -56,6 +94,12 @@ public class ByteFactory<E extends Enum<E>> {
     @Getter
     private E unknown;
 
+    /**
+     * @param enumClass The class of the enumerator
+     *                  used to construct this factory
+     * @param unknown The enum value that should be
+     *                used for unknown values
+     */
     public ByteFactory(@NonNull Class<E> enumClass, @NonNull E unknown) {
         this.cache = new HashMap<>();
         this.rCache = new HashMap<>();
@@ -64,13 +108,21 @@ public class ByteFactory<E extends Enum<E>> {
 
         EnumSet.allOf(enumClass).forEach(
                 e -> {
-                    ByteProvider temp = (ByteProvider) e;
-                    cache.put(e.name(), temp.getByte());
-                    rCache.put(temp.getByte(), e.name());
+                    cache.put(e.name(), e.getByte());
+                    rCache.put(e.getByte(), e.name());
                 }
         );
     }
 
+    /**
+     * Get the name of the enum
+     * value for the specified bye
+     *
+     * @param b Byte
+     *
+     * @return Name if registered, else
+     *         the default value {@see #getUnknown()}
+     */
     public String getName(byte b) {
         if (!rCache.containsKey(b)) {
             return unknown.name();
@@ -78,9 +130,17 @@ public class ByteFactory<E extends Enum<E>> {
         return rCache.get(b);
     }
 
+    /**
+     * Get the byte for the enum name
+     *
+     * @param key Enum name
+     *
+     * @return Byte if registered, else
+     *         the default value (@see #getUnknown()}
+     */
     public byte getByte(String key) {
         if (!cache.containsKey(key)) {
-            return ((ByteProvider) unknown).getByte();
+            return unknown.getByte();
         }
         return cache.get(key);
     }
