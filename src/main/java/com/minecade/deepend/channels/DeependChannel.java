@@ -43,4 +43,8 @@ public abstract class DeependChannel {
      *            NOT the input buf
      */
     public abstract void act(@NonNull DeependConnection connection, @NonNull DeependBuf buf);
+
+    protected void resetStatus() {
+        ChannelManager.instance.getChannelStatus(getChannelType()).resetStatus();
+    }
 }

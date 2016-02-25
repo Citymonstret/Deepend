@@ -16,10 +16,8 @@
 
 package com.minecade.deepend.data;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import com.minecade.deepend.object.ByteProvider;
+import lombok.*;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -47,6 +45,11 @@ public class DataHolder implements Map<String, Object> {
         if (parent != null) {
             parent.remove(this.getIdentifier());
         }
+    }
+
+    public void register(ByteProvider provider) {
+        DataManager.instance.getDataHolder(provider)
+                .put(this.getIdentifier(), this);
     }
 
     /**
@@ -128,11 +131,10 @@ public class DataHolder implements Map<String, Object> {
 
     @Override
     public Object get(Object key) {
-        if (!this.data.containsKey(key)) {
+        if (!this.data.containsKey(key.toString())) {
             return null;
         }
-        Object o = this.data.get(key);
-        return o;
+        return this.data.get(key);
     }
 
     @Override
@@ -185,8 +187,10 @@ public class DataHolder implements Map<String, Object> {
 
     @Override
     public void putAll(Map<? extends String, ?> m) {
-        this.data.putAll(m);
-
+        // Make sure that it goes
+        // through all filters
+        m.forEach(this::put);
+        // this.data.putAll(m);
         this.pushSync();
     }
 
@@ -284,5 +288,30 @@ public class DataHolder implements Map<String, Object> {
                     action.accept(key, value);
                 }
         );
+    }
+
+    @Builder
+    public static class DataHolderInitalizer {
+
+        final private String name;
+        private String fallback;
+        private DataHolder parent;
+        @Singular("object") private Map<String, Object> objects;
+
+        public DataHolder getDataHolder() {
+            DataHolder holder = new DataHolder(name);
+            if (fallback != null) {
+                holder.setFallback(fallback);
+            }
+            if (parent != null) {
+                holder.setParent(parent);
+            }
+            holder.putAll(objects);
+            return holder;
+        }
+
+        public void register(ByteProvider provider) {
+            getDataHolder().register(provider);
+        }
     }
 }

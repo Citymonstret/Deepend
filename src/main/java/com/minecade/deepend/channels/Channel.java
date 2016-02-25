@@ -30,43 +30,38 @@ public enum Channel implements ByteProvider {
     /**
      * Authentication channel
      */
-    AUTHENTICATE((byte) 0x03),
+    AUTHENTICATE((byte) (1)),
 
     /**
      * Used to check listen for
      * quality
      */
-    ECHO((byte) 0x04),
+    CHECK_DATA((byte) (1 << 1)),
 
     /**
      * Add data to the server
      */
-    ADD_DATA((byte) 0x05),
+    ADD_DATA((byte) (1 << 2)),
 
     /**
      * Get data from the server
      */
-    GET_DATA((byte) 0x06),
+    GET_DATA((byte) (1 << 3)),
 
     /**
      * Update data on the server
      */
-    UPDATE_DATA((byte) 0x07),
+    UPDATE_DATA((byte) (1 << 4)),
 
     /**
      * Remove data from the server
      */
-    REMOVE_DATA((byte) 0x08),
+    REMOVE_DATA((byte) (1 << 5)),
 
     /**
-     * Subscribe to server updates
+     * Unknown
      */
-    SUBSCRIBE((byte) 0x09),
-
-    /**
-     * Unknown = Error, sort of
-     */
-    UNKNOWN((byte) -1);
+    UNKNOWN((byte) (1 << 6));
 
     private final byte id;
 
@@ -77,6 +72,11 @@ public enum Channel implements ByteProvider {
     @Override
     public byte getByte() {
         return this.id;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return this.name();
     }
 
     private static Map<Byte, Channel> cache = new HashMap<>();

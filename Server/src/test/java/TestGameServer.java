@@ -24,6 +24,8 @@ import com.minecade.deepend.object.ByteFactory;
 import com.minecade.deepend.server.DeependServer;
 import com.minecade.deepend.server.channels.impl.*;
 
+import static com.minecade.deepend.game.GameCategory.*;
+
 /**
  * Created 2/23/2016 for Deepend
  *
@@ -37,8 +39,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
 
     @Override
     public void registerDataHolders(DataManager dataManager) {
-        DataManager.instance.registerDataHolder(new DataHolder(GameCategory.PLAYERS.name()));
-        DataManager.instance.registerDataHolder(new DataHolder(GameCategory.SERVERS.name()));
+        DataManager.createDataHolders(PLAYERS, PLAYER_SERVERS, PROXIES);
         DataManager.instance.registerDataHolder(new MirrorDataHolder(
                 GameCategory.PLAYER_SERVERS.name(),
                 DataManager.instance.getDataHolder(GameCategory.PLAYERS.name()),
@@ -50,7 +51,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
                     }
                     return null;
                 }
-        ));
+        ), GameCategory.PLAYER_SERVERS);
         DataManager.instance.registerDataHolder(new MirrorDataHolder(
                 GameCategory.SERVER_PLAYERS.name(),
                 DataManager.instance.getDataHolder(GameCategory.PLAYERS.name()),
@@ -63,8 +64,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
                     }
                     return null;
                 }
-        ));
-        DataManager.instance.registerDataHolder(new DataHolder(GameCategory.PROXIES.name()));
+        ), GameCategory.SERVER_PLAYERS);
     }
 
     @Override
@@ -75,7 +75,6 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
     @Override
     public void registerChannels(ChannelManager channelManager) {
         channelManager.addChannel(new Authentication());
-        channelManager.addChannel(new EchoChannel());
         channelManager.addChannel(new GetData());
         channelManager.addChannel(new DeleteData());
         channelManager.addChannel(new AddData());
@@ -83,19 +82,22 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
 
     @Override
     public void after() {
-        DataHolder notch = new DataHolder("notch");
-        notch.put("currentServer", "lobby1");
-        notch.put("name", null);
-        notch.put("uuid", "1-3-3-7");
-        notch.setFallback("uuid");
-
-        DataHolder jeb_ = new DataHolder("jeb_");
-        jeb_.put("currentServer", "lobby1");
-        jeb_.put("uuid", "1-9-9-3");
-        jeb_.put("name", null);
-        jeb_.setFallback("uuid");
-
-        DataManager.instance.getDataHolder(GameCategory.PLAYERS).put("notch", notch);
-        DataManager.instance.getDataHolder(GameCategory.PLAYERS).put("jeb_", jeb_);
+        { // Register data holders using a builder pattern
+            DataHolder.DataHolderInitalizer.builder()
+                    .name("notch")
+                    .object("currentServer", "lobby1")
+                    .object("name", null)
+                    .object("uuid", "1-3-3-7")
+                    .fallback("uuid")
+                    .build().register(PLAYERS);
+        }
+        { // This is another way to do it
+            DataHolder jeb_ = new DataHolder("jeb_");
+            jeb_.put("currentServer", "lobby1");
+            jeb_.put("uuid", "1-9-9-3");
+            jeb_.put("name", null);
+            jeb_.setFallback("uuid");
+            DataManager.instance.getDataHolder(GameCategory.PLAYERS).put("jeb_", jeb_);
+        }
     }
 }

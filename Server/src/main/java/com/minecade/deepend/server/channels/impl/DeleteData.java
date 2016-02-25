@@ -78,6 +78,8 @@ public class DeleteData extends DeependChannel {
                 // how sad
                 o.delete();
             }
+
+            resetStatus();
         }
     }
 }

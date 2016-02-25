@@ -32,6 +32,7 @@ public class ChannelManager {
     private boolean locked = false;
 
     private final Map<Channel, DeependChannel> channelMap = new ConcurrentHashMap<>();
+    private final Map<Channel, ChannelStatus> channelStatusMap = new ConcurrentHashMap<>();
 
     /**
      * The global instance
@@ -53,6 +54,7 @@ public class ChannelManager {
             throw new RuntimeException("Cannot add channels to locked manager");
         }
         channelMap.put(channel.getChannelType(), channel);
+        channelStatusMap.put(channel.getChannelType(), new ChannelStatus(channel.getChannelType()));
     }
 
     /**
@@ -62,6 +64,10 @@ public class ChannelManager {
      */
     public DeependChannel getChannel(@NonNull Channel channel) {
         return channelMap.get(channel);
+    }
+
+    public ChannelStatus getChannelStatus(@NonNull Channel channel) {
+        return channelStatusMap.get(channel);
     }
 
     /**

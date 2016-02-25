@@ -39,7 +39,7 @@ public class ByteFactory<E extends Enum<E>> {
     private static Map<FactoryType, ByteFactory> map = new HashMap<>();
 
     @SneakyThrows(RuntimeException.class)
-    public static void addByteFactory(@NonNull FactoryType type, @NonNull ByteFactory factory) {
+    public static <B extends Enum<B>> void addByteFactory(@NonNull FactoryType type, @NonNull ByteFactory<B> factory) {
         if (locked) {
             throw new RuntimeException("Cannot add factory to locked manager");
         }

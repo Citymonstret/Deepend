@@ -54,4 +54,11 @@ public class SimpleAddress {
     public void setUUID(String uuid) {
         this.uuid = UUID.fromString(uuid);
     }
+
+    public static SimpleAddress fromString(String i) {
+        String[] parts = i.split(":");
+        SimpleAddress address = new SimpleAddress(parts[0]);
+        address.setUUID(parts[1]);
+        return address;
+    }
 }

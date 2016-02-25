@@ -36,4 +36,9 @@ public enum GameCategory implements ByteProvider {
     public byte getByte() {
         return this.categoryID;
     }
+
+    @Override
+    public String getIdentifier() {
+        return this.name();
+    }
 }

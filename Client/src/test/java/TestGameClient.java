@@ -46,7 +46,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
     @Override
     public void registerByteFactories() {
         ByteFactory.addByteFactory(ByteFactory.FactoryType.DATA_TYPE,
-                new ByteFactory(GameCategory.class,
+                new ByteFactory<>(GameCategory.class,
                         GameCategory.UNKNOWN));
     }
 }

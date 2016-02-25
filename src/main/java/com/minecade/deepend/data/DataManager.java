@@ -16,7 +16,11 @@
 
 package com.minecade.deepend.data;
 
+import com.minecade.deepend.object.ByteProvider;
 import lombok.NonNull;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The manager which handles
@@ -33,14 +37,37 @@ public class DataManager {
 
     private final DataHolder mainDataHolder = new DataHolder("data");
 
-    DataManager() {}
+    private final Map<ByteProvider, DataStatus> dataStatusMap;
+
+    DataManager() {
+        this.dataStatusMap = new ConcurrentHashMap<>();
+    }
+
+    public static void createDataHolder(ByteProvider provider) {
+        instance.registerDataHolder(new DataHolder(provider.getIdentifier()), provider);
+    }
+
+    public static void createDataHolders(ByteProvider ... providers) {
+        for (ByteProvider provider : providers) {
+            createDataHolder(provider);
+        }
+    }
 
     /**
      * Register a data holder
      * @param dataHolder Holder to register
      */
-    public void registerDataHolder(@NonNull final DataHolder dataHolder) {
+    public void registerDataHolder(@NonNull final DataHolder dataHolder, @NonNull ByteProvider category) {
         this.mainDataHolder.put(dataHolder.getIdentifier(), dataHolder);
+        this.registerDataStatus(category);
+    }
+
+    private void registerDataStatus(ByteProvider category) {
+        this.dataStatusMap.put(category, new DataStatus(category));
+    }
+
+    public DataStatus getDataStatus(ByteProvider category) {
+        return this.dataStatusMap.get(category);
     }
 
     /**

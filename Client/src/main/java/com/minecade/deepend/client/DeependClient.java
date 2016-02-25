@@ -24,7 +24,6 @@ import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.client.channels.MainChannel;
 import com.minecade.deepend.client.channels.impl.DeleteData;
-import com.minecade.deepend.client.channels.impl.EchoChannel;
 import com.minecade.deepend.client.channels.impl.GetData;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
@@ -125,7 +124,6 @@ public class DeependClient {
         this.pendingRequests = Collections.synchronizedSet(new LinkedHashSet<>());
 
         // Register default channels
-        ChannelManager.instance.addChannel(new EchoChannel());
         ChannelManager.instance.addChannel(new GetData());
         ChannelManager.instance.addChannel(new DeleteData());
 

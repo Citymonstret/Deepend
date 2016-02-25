@@ -90,6 +90,8 @@ public class AddData extends DeependChannel {
             buf.writeInt(object.size());
 
             object.forEach(Logger.get()::dump);
+
+            resetStatus();
         }
     }
 }
