@@ -1,5 +1,10 @@
 # Deepend
 
+## Minecade
+This project is run and maintained by [Minecade](http://minecade.com)
+
+![](http://files.enjin.com/265719/images/topMenu/logo_minecade.png)
+
 ## Description
 A custom Server/Client protcol, lightly based off of Netty. Deepend aims to 
 create a very lightweight, and straight forward system for data synchronisation.
