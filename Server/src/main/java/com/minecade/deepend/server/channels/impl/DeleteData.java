@@ -62,8 +62,10 @@ public class DeleteData extends DeependChannel {
                 break scope;
             }
 
+            DataManager.instance.getDataStatus(category).resetStatus();
+
             // Write the response
-            buf.writeByte(GenericResponse.FAILURE);
+            buf.writeByte(GenericResponse.SUCCESS);
 
             // Write some response info
             buf.writeByte(categoryByte);

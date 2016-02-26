@@ -37,7 +37,7 @@ public class DataManager {
 
     private final DataHolder mainDataHolder = new DataHolder("data");
 
-    private final Map<ByteProvider, DataStatus> dataStatusMap;
+    private final Map<String, DataStatus> dataStatusMap;
 
     DataManager() {
         this.dataStatusMap = new ConcurrentHashMap<>();
@@ -63,11 +63,15 @@ public class DataManager {
     }
 
     private void registerDataStatus(ByteProvider category) {
-        this.dataStatusMap.put(category, new DataStatus(category));
+        this.dataStatusMap.put(category.getIdentifier(), new DataStatus(category));
     }
 
     public DataStatus getDataStatus(ByteProvider category) {
-        return this.dataStatusMap.get(category);
+        return getDataStatus(category.getIdentifier());
+    }
+
+    public DataStatus getDataStatus(String name) {
+        return dataStatusMap.get(name);
     }
 
     /**

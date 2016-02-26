@@ -23,9 +23,7 @@ import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.minecade.deepend.resources.DeependBundle;
 
 public class Authentication extends DeependChannel {
 
@@ -33,9 +31,9 @@ public class Authentication extends DeependChannel {
         super(Channel.AUTHENTICATE);
     }
 
-    private static Map<String, String> temporaryUserManager = new HashMap<>();
+    private static DeependBundle accountBundle;
     static {
-        temporaryUserManager.put("admin", "password");
+        accountBundle = new DeependBundle("accounts", false, DeependBundle.DefaultBuilder.create().add("admin.password", "password").build());
     }
 
     @Override
@@ -47,12 +45,11 @@ public class Authentication extends DeependChannel {
 
         GenericResponse response = GenericResponse.FAILURE;
 
-        if (temporaryUserManager.containsKey(username)) {
-            if (temporaryUserManager.get(username).equals(password)) {
+        if (accountBundle.containsKey(username + ".password")) {
+            if (accountBundle.get(username + ".password").equals(password)) {
                 Logger.get().info("Authenticated: " + connection.getRemoteAddress().toString());
                 connection.setAuthenticated(true);
                 response = GenericResponse.SUCCESS;
-
                 ConnectionFactory.instance.addConnection(connection);
             }
         }

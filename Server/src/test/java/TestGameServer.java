@@ -89,7 +89,6 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
         channelManager.addChannel(new GetData());
         channelManager.addChannel(new DeleteData());
         channelManager.addChannel(new AddData());
-        channelManager.addChannel(new UpdateData());
         channelManager.addChannel(new CheckData());
     }
 

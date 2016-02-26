@@ -58,6 +58,9 @@ public class AddData extends DeependChannel {
 
             DataHolder holder = DataManager.instance.getDataHolder(category);
 
+            // Reset main holder status
+            DataManager.instance.getDataStatus(category).resetStatus();
+
             String[] pathParts = in.getString().split(".");
             for (String part : pathParts) {
                 if (holder.containsKey(part)) {
@@ -91,6 +94,8 @@ public class AddData extends DeependChannel {
 
             object.forEach(Logger.get()::dump);
 
+            // This will reset the
+            // channel status
             resetStatus();
         }
     }
