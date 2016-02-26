@@ -19,7 +19,7 @@ package com.minecade.deepend.util;
 import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
-import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.lib.Beta;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
@@ -52,7 +52,8 @@ public class DataUtil {
      *
      * @return List containing all appropriate data objects
      */
-    public static List<DataObject> getDataObject(@NonNull DataHolder holder, String s, @NonNull DeependBuf buf, List<DataObject> initialList, boolean wrapHolder) {
+    @Beta
+    public static List<DataObject> getDataObject(@NonNull final DataHolder holder, final String s, @NonNull final DeependBuf buf, final List<DataObject> initialList, final boolean wrapHolder) {
         String name;
 
         try {
@@ -64,7 +65,6 @@ public class DataUtil {
             // Oh no! Something went wrong. Don't worry, though;
             // this will spit out everything in the initial
             // holder, and return that instead
-            Logger.get().debug("Name is null => Returning holder contents");
             holder.forEach((key, value) -> {
                 if (value instanceof DataObject) {
                     initialList.add((DataObject) value);
@@ -90,14 +90,12 @@ public class DataUtil {
                     newName.append(",");
                 }
             }
-            Logger.get().debug("Found *; New name: " + newName.toString());
             name = newName.toString();
         }
 
         // This means that a list has been sent
         // and that multiple items should be returned
         if (name.contains(",")) {
-            Logger.get().debug("Found list");
             for (String p : name.split(",")) {
                 List<DataObject> r = getDataObject(holder, p, buf, new ArrayList<>(), false);
                 if (r == null) {
@@ -106,17 +104,13 @@ public class DataUtil {
                 initialList.addAll(r);
             }
         } else {
-            Logger.get().debug("Name: " + name);
             Object o = holder.get(name);
             if (o == null) {
-                Logger.get().debug("Was null :(");
                 return null;
             }
             if (o instanceof DataObject) {
-                Logger.get().debug("Was found");
                 initialList.add((DataObject) o);
             } else if (o instanceof DataHolder) {
-                Logger.get().debug("Was data holder");
                 if (!wrapHolder) {
                     List<DataObject> newList;
                     try {
@@ -151,13 +145,11 @@ public class DataUtil {
 
         public HolderWrapper(final DataHolder holder) {
             super(holder.getIdentifier(), "");
-
             this.holder = holder;
         }
 
         @Override
         public void delete() {
-            Logger.get().debug("Deleting holder wrapper; " + getName());
             this.holder.delete();
         }
     }

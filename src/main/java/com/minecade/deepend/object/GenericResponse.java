@@ -24,29 +24,50 @@ import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Response class that can be re-used for
+ * plenty different purposes
+ *
+ * @author Citymonstret
+ */
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public enum GenericResponse implements ByteProvider {
+
+    /**
+     * Something succeeded
+     */
     SUCCESS(getByte(0x00)),
+
+    /**
+     * Something failed
+     */
     FAILURE(getByte(0x01));
 
     private final byte b;
 
+    @Override
     public Byte getValue() {
         return this.b;
     }
 
-    protected static byte getByte(int i) {
+    private static byte getByte(final int i) {
         return new Integer(i).byteValue();
     }
 
-    private static Map<Byte, GenericResponse> cache = new HashMap<>();
+    private static final Map<Byte, GenericResponse> cache = new HashMap<>();
 
     static {
-        for (GenericResponse genericResponse : values()) {
+        for (final GenericResponse genericResponse : values()) {
             cache.put(genericResponse.getValue(), genericResponse);
         }
     }
 
+    /**
+     * Get a GenericResponse from a byte value
+     *
+     * @param b Byte to parse
+     * @return value
+     */
     public static GenericResponse getGenericResponse(byte b) {
         if (!cache.containsKey(b)) {
             Logger.get().error("Reading invalid GenericResponse value, spoofing ;/");

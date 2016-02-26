@@ -16,35 +16,32 @@
 package com.minecade.deepend.object;
 
 import com.minecade.deepend.connection.SimpleAddress;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 
 /**
- * Created 2/25/2016 for Deepend
+ * Used to retrieve and set the status of
+ * an object
  *
  * @author Citymonstret
  */
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Status<T> {
 
-    private List<String> receivedUpdate;
-
-    {
-        receivedUpdate = Collections.synchronizedList(new ArrayList<>());
-    }
+    private final List<String> receivedUpdate = Collections.synchronizedList(new ArrayList<>());
 
     @Getter
     private final T t;
 
-    protected Status(T t) {
-        this.t = t;
-    }
-
-    final public boolean needsUpdate(SimpleAddress address) {
+    final public boolean needsUpdate(@NonNull final SimpleAddress address) {
         return !receivedUpdate.contains(address.toString());
     }
 
-    final public boolean fetchUpdate(SimpleAddress address) {
+    final public boolean fetchUpdate(@NonNull final SimpleAddress address) {
         if (needsUpdate(address)) {
             setUpdated(address);
             return true;
@@ -56,7 +53,7 @@ public abstract class Status<T> {
         receivedUpdate.clear();
     }
 
-    final public void setUpdated(SimpleAddress address) {
+    final public void setUpdated(@NonNull final SimpleAddress address) {
         if (needsUpdate(address)) {
             receivedUpdate.add(address.toString());
         }

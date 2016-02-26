@@ -15,30 +15,67 @@
  */
 package com.minecade.deepend;
 
+import com.minecade.deepend.lib.Stable;
+import lombok.experimental.UtilityClass;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * A very simple globalized meta system
+ *
  * @author Citymonstret
  */
-public class DeependMeta {
+@Stable
+@UtilityClass
+public final class DeependMeta {
 
+    /**
+     * The storage for the meta system
+     *
+     * It's using ConcurrentHashMap as it will be used by loads of
+     * different threads
+     */
     private static final Map<String, String> map = new ConcurrentHashMap<>();
 
+    /**
+     * Check if a key value exists
+     *
+     * @param key Key to check for
+     * @return True if exists | False if it doesn't
+     */
     public static boolean hasMeta(String key) {
         return map.containsKey(key);
     }
 
+    /**
+     * Get a meta value
+     *
+     * @see #hasMeta(String) To see if exists
+     *
+     * @param key Value key
+     * @return Value
+     */
     public static String getMeta(String key) {
         return map.get(key);
     }
 
+    /**
+     * Set a meta value (add | update)
+     *
+     * @param key Key to (add | update)
+     * @param val Meta value
+     */
     public static void setMeta(String key, String val) {
         map.put(key, val);
     }
 
+    /**
+     * Remove a data value
+     *
+     * @param key Value to remove
+     */
     public static void removeMeta(String key) {
         map.remove(key);
     }
-
 }

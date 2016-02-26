@@ -16,6 +16,7 @@
 
 package com.minecade.deepend;
 
+import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.logging.Logger;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
@@ -39,14 +40,15 @@ import java.net.InetSocketAddress;
  * @author Citymonstret
  */
 @RequiredArgsConstructor
-public class DeependChannelInitializer extends ChannelInitializer<SocketChannel> {
+public final class DeependChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Getter
     private final Class<? extends ChannelHandlerAdapter> channelHandlerAdapter;
 
+    @Beta
     @Override
-    protected void initChannel(@NonNull SocketChannel socketChannel) throws Exception {
-        ChannelPipeline pipeline = socketChannel.pipeline();
+    protected void initChannel(@NonNull final SocketChannel socketChannel) throws Exception {
+        final ChannelPipeline pipeline = socketChannel.pipeline();
 
         // Add GZIP Encryption
         pipeline.addLast(ZlibCodecFactory.newZlibEncoder(ZlibWrapper.GZIP));
@@ -59,8 +61,8 @@ public class DeependChannelInitializer extends ChannelInitializer<SocketChannel>
                 @Override
                 protected boolean accept(ChannelHandlerContext ctx, InetSocketAddress remoteAddress) throws Exception {
                     Logger.get().debug("Remote addr: " + remoteAddress.getHostName());
-                    boolean allowed = remoteAddress.getHostName().equals(DeependMeta.getMeta("serverAddr"));
-                            // && ("" + remoteAddress.getPort()).equals(DeependMeta.getMeta("serverPort"));
+                    boolean allowed = remoteAddress.getHostName().equals(DeependMeta.getMeta("serverAddr"))
+                                && ("" + remoteAddress.getPort()).equals(DeependMeta.getMeta("serverPort"));
                     if (!allowed) {
                         Logger.get().debug("Dropping");
                     } else {

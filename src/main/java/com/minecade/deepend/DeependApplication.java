@@ -17,6 +17,7 @@
 package com.minecade.deepend;
 
 import com.minecade.deepend.channels.ChannelManager;
+import com.minecade.deepend.lib.Stable;
 
 /**
  * This is the universal application
@@ -24,6 +25,7 @@ import com.minecade.deepend.channels.ChannelManager;
  *
  * @author Citymonstret
  */
+@Stable
 public interface DeependApplication {
 
     /**

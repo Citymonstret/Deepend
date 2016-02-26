@@ -24,27 +24,30 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Wiki: <a>https://github.com/Minecade/Deepend/wiki/Bit-fields</a>
+ * Allows you to store flags inside of numbers
  *
- * @author Citymonstret
+ * @param <DataType> Number implementation
+ * @param <Provider> ValueProvider returning the
+ *                  specified DataType
  */
 public class BitField<DataType extends Number, Provider extends ValueProvider<DataType>> {
 
     @Getter
     private final ProviderGroup<DataType, Provider> providerGroup;
 
+    /**
+     * @param providerGroup ProvidierGroup containing the values
+     *                      that will be used in this BitField
+     */
     public BitField(ProviderGroup<DataType, Provider> providerGroup) {
         this.providerGroup = providerGroup;
     }
 
     /**
-     * Extract the values from a constructed field
+     * Extract all values from the bit field
      *
-     * @see #construct(Collection) To construct a field from a collection
-     *
-     * @param field BitField to extract from
-     *
-     * @return Collection containing the extracted objects
+     * @param field Bit Field
+     * @return Extracted objects (will never be null)
      */
     public final Collection<Provider> extract(int field) {
         if (field == 0) {

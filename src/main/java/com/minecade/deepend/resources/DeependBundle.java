@@ -15,6 +15,7 @@
  */
 package com.minecade.deepend.resources;
 
+import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.object.ObjectGetter;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,6 +25,19 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A simple configuration/storage file implementation
+ * based on individual lines
+ *
+ * The format is really simple:
+ * <pre>
+ * key1: value\n
+ * key2: value\n
+ * </pre>
+ *
+ * @author Citymonstret
+ */
+@Beta
 public class DeependBundle implements ObjectGetter<String, String> {
 
     @Getter(AccessLevel.PRIVATE)

@@ -23,9 +23,26 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * A property that can be applied
+ * to a {@link DeependObject}
+ *
+ * @author Citymonstret
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface ObjectProperty {
+
+    /**
+     * Get the property name
+     * @return Property name
+     */
     String name();
+
+    /**
+     * Get the property type,
+     * defaults to {@link DataType#STRING}
+     * @return Property type
+     */
     DataType type() default DataType.STRING;
 }

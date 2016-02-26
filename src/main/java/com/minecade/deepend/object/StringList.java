@@ -16,9 +16,11 @@
 
 package com.minecade.deepend.object;
 
+import com.minecade.deepend.lib.Stable;
 import lombok.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This is quite stupid, but it'll be used more
@@ -26,13 +28,12 @@ import java.util.ArrayList;
  *
  * @author Citymonstret
  */
-public class StringList extends ArrayList<String> {
+@Stable
+public final class StringList extends ArrayList<String> {
 
-    public StringList(@NonNull String... strings) {
+    public StringList(@NonNull final String... strings) {
         super(strings.length);
-        for (String string : strings) {
-            add(string);
-        }
+        super.addAll(Arrays.asList(strings));
     }
 
 }

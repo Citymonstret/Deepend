@@ -21,6 +21,7 @@ package com.minecade.deepend.object;
  * @author Citymonstret
  */
 public interface ObjectGetter<K, V> {
+    
     V get(K k);
     boolean containsKey(K k);
 }

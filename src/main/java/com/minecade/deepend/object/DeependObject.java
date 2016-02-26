@@ -49,6 +49,12 @@ public abstract class DeependObject {
 
     protected volatile boolean isBuilt;
 
+    /**
+     * @param objectType Object byte ID, through a ByteProvider
+     * @param scan Whether or not to scan the member
+     *             type for @ObjectProperty properties
+     * @param clazz Class that is implementing this
+     */
     public DeependObject(@NonNull ByteProvider objectType, boolean scan, @NonNull Class<?> clazz) {
         this.objectType = objectType;
         this.properties = new ConcurrentHashMap<>();

@@ -74,10 +74,10 @@ public enum Channel implements NumberProvider<Integer> {
         return this.name();
     }
 
-    private static Map<Integer, Channel> cache = new HashMap<>();
+    private static final Map<Integer, Channel> cache = new HashMap<>();
 
     static {
-        for (Channel channel : values()) {
+        for (final Channel channel : values()) {
             cache.put(channel.getValue(), channel);
         }
     }
@@ -87,7 +87,7 @@ public enum Channel implements NumberProvider<Integer> {
      * @param id ID
      * @return Channel | UNKNOWN
      */
-    public static Channel getChannel(int id) {
+    public static Channel getChannel(final int id) {
         if (!cache.containsKey(id)) {
             return UNKNOWN;
         }

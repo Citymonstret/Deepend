@@ -18,6 +18,9 @@ package com.minecade.deepend;
 
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
+import com.minecade.deepend.lib.Beta;
+import com.minecade.deepend.lib.Stable;
+import lombok.NonNull;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -48,7 +51,8 @@ public class ConnectionFactory {
      * @param socketAddress Simple Address
      * @return Connection | Null
      */
-    public DeependConnection getConnection(final SimpleAddress socketAddress) {
+    @Stable
+    final public DeependConnection getConnection(final @NonNull SimpleAddress socketAddress) {
         if (!internalMap.containsKey(socketAddress.toString())) {
             return null;
         }
@@ -59,7 +63,8 @@ public class ConnectionFactory {
      * Add a connection
      * @param connection Connection
      */
-    public void addConnection(final DeependConnection connection) {
+    @Stable
+    final public void addConnection(final @NonNull DeependConnection connection) {
         this.internalMap.put(connection.getRemoteAddress().toString(), connection);
     }
 
@@ -68,7 +73,8 @@ public class ConnectionFactory {
      * @param remoteAddress Socket Address
      * @return Registered connection
      */
-    public DeependConnection createConnection(final InetSocketAddress remoteAddress) {
+    @Stable
+    final public DeependConnection createConnection(final @NonNull InetSocketAddress remoteAddress) {
         DeependConnection connection = new DeependConnection(new SimpleAddress(remoteAddress.getHostName()));
         addConnection(connection);
         return connection;
@@ -83,7 +89,8 @@ public class ConnectionFactory {
      *
      * @return Created, or re-used connection
      */
-    public DeependConnection getOrCreate(SocketAddress socketAddress, UUID uuid) {
+    @Beta
+    final public DeependConnection getOrCreate(final @NonNull SocketAddress socketAddress, UUID uuid) {
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
         SimpleAddress simpleAddress = new SimpleAddress(inetSocketAddress.getHostName());
         simpleAddress.setUUID(uuid.toString());

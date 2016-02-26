@@ -1,11 +1,14 @@
 package com.minecade.deepend.values;
 
+import com.minecade.deepend.lib.Stable;
+
 /**
- * This is used to return value, as
- * easy as that
+ * This simply returns a value
  *
  * @author Citymonstret
+ * @param <T> Value return type
  */
+@Stable
 public interface ValueProvider<T> {
 
     /**

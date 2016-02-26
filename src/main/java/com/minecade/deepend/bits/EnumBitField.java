@@ -13,6 +13,7 @@ import java.util.EnumSet;
  *
  * @author Citymonstret
  */
+@SuppressWarnings("ALL")
 public class EnumBitField<DataType extends Number, E extends Enum<E> & ValueProvider<DataType>> {
 
     private BitField bitField;

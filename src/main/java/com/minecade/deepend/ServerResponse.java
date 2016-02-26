@@ -95,11 +95,11 @@ public enum ServerResponse implements ByteProvider {
         return b++;
     }
 
-    private static Map<Byte, ServerResponse> cache;
+    private static final Map<Byte, ServerResponse> cache;
 
     static {
         cache = new HashMap<>();
-        for (ServerResponse response : values()) {
+        for (final ServerResponse response : values()) {
             cache.put(response.getValue(), response);
         }
     }
@@ -109,7 +109,7 @@ public enum ServerResponse implements ByteProvider {
      * @param b Byte
      * @return Response | UNKNOWN if not found
      */
-    public static ServerResponse getServerResponse(byte b) {
+    public static ServerResponse getServerResponse(final byte b) {
         if (!cache.containsKey(b)) {
             return UNKNOWN;
         }

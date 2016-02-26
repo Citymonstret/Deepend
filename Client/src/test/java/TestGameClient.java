@@ -24,10 +24,7 @@ import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.object.StringList;
-import com.minecade.deepend.request.AddRequest;
-import com.minecade.deepend.request.GetRequest;
-import com.minecade.deepend.request.ShutdownRequest;
-import com.minecade.deepend.request.StatusRequest;
+import com.minecade.deepend.request.*;
 import com.minecade.deepend.values.ValueFactory;
 
 /**
@@ -43,14 +40,35 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
 
     @Override
     public void registerInitialRequests(DeependClient client) {
-        // Let's re-use this lambda ;))
+        // This is defined outside of the connection itself, as this
+        // shouldn't be re-created
+        EnumBitField<Byte, GameCategory> categoryEnumBitField = new EnumBitField<>(GameCategory.class);
+        int field = categoryEnumBitField.construct(GameCategory.PLAYERS, GameCategory.PROXIES, GameCategory.SERVERS);
+
+        //
+        //  RE-USABLE LAMBDAS
+        //
         GamePlayer.PlayerCallback serverAnnouncement = player ->
                 Logger.get().info(player.getPlayerName() + " is on server " + player.getPlayerServer());
 
-        EnumBitField<Byte, GameCategory> categoryEnumBitField = new EnumBitField<>(GameCategory.class);
-        int field = categoryEnumBitField.construct(GameCategory.PLAYERS, GameCategory.PROXIES, GameCategory.SERVERS);
-        Logger.get().debug("Sending field: " + field);
-        client.addPendingRequest(new StatusRequest(field, f -> categoryEnumBitField.extract(f).forEach(c -> Logger.get().info("Updated Category: " + c.name())), DeependClient.currentConnection));
+        DataRequest.DataRecipient debugRecipient = o -> o.forEach(oo -> {
+            if (oo instanceof DataObject) {
+                Logger.get().debug("Found object:");
+                Logger.get().dump(((DataObject) oo));
+            }
+        });
+
+        // Just a simple debug statement for categories, should
+        // be used to add new requests
+        StatusRequest.StatusRecipient statusRecipient = f -> categoryEnumBitField.extract(f)
+                .forEach(category -> Logger.get().info("Updated category: " + category.name()));
+
+        //
+        //  END OF RE-USABLE LAMBDAS
+        //
+
+        // This will simply fetch the updated categories
+        client.addPendingRequest(new StatusRequest(field, statusRecipient, DeependClient.currentConnection));
 
         // These three requests does the same thing, it just
         // shows that the syntax can be adapted to many different
@@ -59,12 +77,8 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         client.addPendingRequest(GamePlayer.requestPlayer("*", currentConnection(), serverAnnouncement));
         client.addPendingRequest(GamePlayer.requestPlayers(new StringList("jeb_", "notch"), currentConnection(), serverAnnouncement));
 
-        client.addPendingRequest(new AddRequest(o -> o.forEach(oo -> {
-            if (oo instanceof DataObject) {
-                Logger.get().debug("Found object:");
-                Logger.get().dump(((DataObject) oo));
-            }
-        }), currentConnection()) {
+        // Let's add some data to the PROXIES holder
+        client.addPendingRequest(new AddRequest(debugRecipient, currentConnection()) {
             @Override
             protected void buildRequest(DeependBuf buf) {
                 buf.writeByte(GameCategory.PROXIES);
@@ -74,12 +88,8 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
             }
         });
 
-        client.addPendingRequest(new GetRequest(o -> o.forEach(oo -> {
-            if (oo instanceof DataObject) {
-                Logger.get().debug("Found object:");
-                Logger.get().dump(((DataObject) oo));
-            }
-        }), currentConnection()) {
+        // Now let's read it, to make sure it's there
+        client.addPendingRequest(new GetRequest(debugRecipient, currentConnection()) {
             @Override
             protected void buildRequest(DeependBuf buf) {
                 buf.writeByte(GameCategory.PROXIES);

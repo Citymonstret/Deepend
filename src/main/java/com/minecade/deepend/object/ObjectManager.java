@@ -24,21 +24,39 @@ import lombok.NonNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * This is used to map {@link DeependObject} to
+ * data management channels, and alike
+ *
+ * @author Citymonstret
+ */
 public class ObjectManager {
 
+    /**
+     * THE instance
+     */
     public static final ObjectManager instance = new ObjectManager();
 
     private final Map<Byte, Class<? extends DeependObject>> objectMapping;
 
-    public ObjectManager() {
+    ObjectManager() {
         this.objectMapping = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Register the DeependObject mapping
+     * @param clazz Class to register
+     */
     public void registerMapping(Class<? extends DeependObject> clazz) {
-        DeependObject instance = getInstance(clazz);
-        this.objectMapping.put(instance.getObjectType().getValue(), clazz);
+        this.objectMapping.put(getInstance(clazz).getObjectType().getValue(), clazz);
     }
 
+    /**
+     * Get the instance of a class
+     * @param clazz Class
+     * @param <T> Object type extending DeependObject
+     * @return instance | null
+     */
     public <T extends DeependObject> T getInstance(@NonNull Class<T> clazz) {
         T instance = null;
         try {
