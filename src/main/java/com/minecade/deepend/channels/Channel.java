@@ -49,19 +49,14 @@ public enum Channel implements NumberProvider<Integer> {
     GET_DATA(1 << 3),
 
     /**
-     * Update data on the server
-     */
-    UPDATE_DATA(1 << 4),
-
-    /**
      * Remove data from the server
      */
-    REMOVE_DATA(1 << 5),
+    REMOVE_DATA(1 << 4),
 
     /**
      * Unknown
      */
-    UNKNOWN(1 << 6);
+    UNKNOWN(1 << 5);
 
     private final Integer id;
 
