@@ -61,7 +61,13 @@ public class AddData extends DeependChannel {
             // Reset main holder status
             DataManager.instance.getDataStatus(category).resetStatus();
 
-            String[] pathParts = in.getString().split(".");
+            String providerPath = in.getString();
+            String[] pathParts = providerPath.split(".");
+
+            if (pathParts.length < 1) {
+                pathParts = new String[] {providerPath};
+            }
+
             for (String part : pathParts) {
                 if (holder.containsKey(part)) {
                     holder = (DataHolder) holder.get(part);
@@ -83,6 +89,9 @@ public class AddData extends DeependChannel {
                 }
                 DataObject o = new DataObject(pieces[0], pieces[1]);
                 holder.put(pieces[0], o);
+
+                Logger.get().debug("Added " + pieces[0] + " to " + category + "@" + providerPath);
+
                 object.add(o);
             }
 
@@ -93,6 +102,10 @@ public class AddData extends DeependChannel {
             buf.writeInt(object.size());
 
             object.forEach(Logger.get()::dump);
+            object.forEach(o -> {
+                buf.writeString(o.getName());
+                buf.writeString(o.getValue());
+            });
 
             // This will reset the
             // channel status

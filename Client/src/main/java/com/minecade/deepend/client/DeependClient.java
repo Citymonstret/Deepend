@@ -23,17 +23,19 @@ import com.minecade.deepend.DeependMeta;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.client.channels.MainChannel;
+import com.minecade.deepend.client.channels.impl.AddData;
+import com.minecade.deepend.client.channels.impl.CheckData;
 import com.minecade.deepend.client.channels.impl.DeleteData;
 import com.minecade.deepend.client.channels.impl.GetData;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.PendingRequest;
 import com.minecade.deepend.request.ShutdownRequest;
 import com.minecade.deepend.resources.DeependBundle;
+import com.minecade.deepend.values.ValueFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -126,6 +128,8 @@ public class DeependClient {
         // Register default channels
         ChannelManager.instance.addChannel(new GetData());
         ChannelManager.instance.addChannel(new DeleteData());
+        ChannelManager.instance.addChannel(new AddData());
+        ChannelManager.instance.addChannel(new CheckData());
 
         // Register custom channels
         application.registerChannels(ChannelManager.instance);
