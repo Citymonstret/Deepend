@@ -28,7 +28,7 @@ The protocol is very simple *TODO: Document protocol*
 
 ## Building
 Build the project using gradle
-```gradle build```
+```gradlew build```
 
 
 ## Dependencies
@@ -47,10 +47,10 @@ utility classes that would be rather stupid to re-create ourselves.
 
 ## Examples
 ### Client
-A client example can be found here: [com.minecade.deepend.client.test.TestGameClient.java](https://github.com/Minecade/Deepend/blob/master/Client/src/test/java/com.minecade.deepend.client.test.TestGameClient.java)
+A client example can be found here: [TestGameClient.java](https://github.com/DeependProject/Deepend/blob/master/Client/src/main/java/com/minecade/deepend/client/test/TestGameClient.java)
 
 ### Server
-A server example can be found here: [com.minecade.deepend.server.test.TestGameServer.java](https://github.com/Minecade/Deepend/blob/master/Server/src/test/java/com.minecade.deepend.server.test.TestGameServer.java)
+A server example can be found here: [TestGameServer.java](https://github.com/DeependProject/Deepend/blob/master/Server/src/main/java/com/minecade/deepend/server/test/TestGameServer.java)
 
 ## Use this as a dependency
 ### Repo
