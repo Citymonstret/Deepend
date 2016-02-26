@@ -7,4 +7,5 @@ public interface NumberProvider<T extends Number> extends ValueProvider<T> {
 
     @Override
     T getValue();
+
 }

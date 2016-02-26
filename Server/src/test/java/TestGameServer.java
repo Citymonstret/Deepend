@@ -20,9 +20,12 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.MirrorDataHolder;
 import com.minecade.deepend.game.GameCategory;
-import com.minecade.deepend.values.ValueFactory;
+import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.server.DeependServer;
 import com.minecade.deepend.server.channels.impl.*;
+import com.minecade.deepend.values.ValueFactory;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import static com.minecade.deepend.game.GameCategory.*;
 
@@ -31,10 +34,18 @@ import static com.minecade.deepend.game.GameCategory.*;
  *
  * @author Citymonstret
  */
+@RequiredArgsConstructor
 public class TestGameServer implements DeependServer.DeependServerApplication {
 
     public static void main(String[] args) {
-        new DeependServer(8000, new TestGameServer()).run();
+        new TestGameServer(8000).start();
+    }
+
+    @Getter
+    private final int port;
+
+    void start() {
+        new DeependServer(getPort(), this).run();
     }
 
     @Override
@@ -68,8 +79,8 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
     }
 
     @Override
-    public void registerByteFactories() {
-        ValueFactory.addValueFactory(ValueFactory.FactoryType.DATA_TYPE, new ValueFactory(GameCategory.class, GameCategory.UNKNOWN));
+    public void registerFactories() {
+        ValueFactory.addValueFactory(ValueFactory.FactoryType.DATA_TYPE, new ValueFactory<>(ProviderGroup.fromEnumClass(GameCategory.class), GameCategory.UNKNOWN));
     }
 
     @Override
@@ -78,6 +89,8 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
         channelManager.addChannel(new GetData());
         channelManager.addChannel(new DeleteData());
         channelManager.addChannel(new AddData());
+        channelManager.addChannel(new UpdateData());
+        channelManager.addChannel(new CheckData());
     }
 
     @Override

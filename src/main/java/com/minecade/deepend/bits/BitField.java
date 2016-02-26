@@ -15,8 +15,11 @@
  */
 package com.minecade.deepend.bits;
 
-import com.minecade.deepend.values.NumberProvider;
+import com.minecade.deepend.object.ProviderGroup;
+import com.minecade.deepend.values.ValueProvider;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,41 +29,26 @@ import java.util.stream.Collectors;
  *
  * @author Citymonstret
  */
-public class BitField<E extends Enum<E> & NumberProvider> {
+@RequiredArgsConstructor
+public class BitField<DataType extends Number, T extends ProviderGroup<DataType, ValueProvider<DataType>>> {
 
-    /**
-     * Just for caching of bytes, to make this
-     * a little faster. Memory usage is too
-     * minimal to even care about.
-     */
-    private final Map<Number, E> internalMap;
-
-    /**
-     * @param values Values to be used in this BitField
-     */
-    public BitField(@NonNull E[] values) {
-        internalMap = new HashMap<>();
-
-        for (E value : values) {
-            internalMap.put(value.getValue(), value);
-        }
-    }
+    @Getter
+    private final T providerGroup;
 
     /**
      * Extract the values from a constructed field
      *
      * @see #construct(Collection) To construct a field from a collection
-     * @see #construct(Enum[]) To construct a field from an array (vararg)
      *
      * @param field BitField to extract from
      *
      * @return Collection containing the extracted objects
      */
-    public final Collection<E> extract(int field) {
+    public final Collection<ValueProvider<? extends DataType>> extract(int field) {
         if (field == 0) {
             return Collections.emptySet();
         }
-        return internalMap.keySet().stream().filter(b -> (field & b.intValue()) == b.intValue()).map(internalMap::get).collect(Collectors.toCollection(HashSet::new));
+        return providerGroup.getInternalMap().keySet().stream().filter(b -> (field & b.intValue()) == b.intValue()).map(providerGroup.getInternalMap()::get).collect(Collectors.toCollection(HashSet::new));
     }
 
 
@@ -68,7 +56,7 @@ public class BitField<E extends Enum<E> & NumberProvider> {
      * @see #construct(Collection) For super method
      */
     @SafeVarargs
-    public final int construct(E... objects) {
+    public final int construct(ValueProvider<DataType> ... objects) {
         return construct(Arrays.asList(objects));
     }
 
@@ -79,8 +67,8 @@ public class BitField<E extends Enum<E> & NumberProvider> {
      *
      * @return Constructed BitField
      */
-    public final int construct(@NonNull Collection<E> objects) {
-        Iterator<E> iterator = objects.iterator();
+    public final int construct(@NonNull Collection<ValueProvider<DataType>> objects) {
+        Iterator<ValueProvider<DataType>> iterator = objects.iterator();
         if (!iterator.hasNext()) {
             return 0;
         }

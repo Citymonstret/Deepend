@@ -16,11 +16,12 @@
 
 package com.minecade.deepend.values;
 
+import com.minecade.deepend.bits.BitField;
+import com.minecade.deepend.object.ProviderGroup;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,10 +30,8 @@ import java.util.Map;
  * and their byte values.
  *
  * @author Citymonstret
- *
- * @param <E> Enum implementing ByteProvider
  */
-public class ValueFactory<E extends Enum<E> & NumberProvider> {
+public class ValueFactory<DataType extends Number, Group extends ProviderGroup<DataType, ValueProvider<DataType>>> {
 
     static boolean locked = false;
 
@@ -67,7 +66,7 @@ public class ValueFactory<E extends Enum<E> & NumberProvider> {
      * @param <B> Enum implementing ByteProvider
      */
     @SneakyThrows(RuntimeException.class)
-    public static <B extends Enum<B> & NumberProvider> void addValueFactory(@NonNull FactoryType type, @NonNull ValueFactory<B> factory) {
+    public static <DataType extends Number, B extends ProviderGroup<DataType, ValueProvider<DataType>>> void addValueFactory(@NonNull FactoryType type, @NonNull ValueFactory<DataType, B> factory) {
         if (locked) {
             throw new RuntimeException("Cannot add factory to locked manager");
         }
@@ -90,28 +89,22 @@ public class ValueFactory<E extends Enum<E> & NumberProvider> {
 
     private final Map<String, Number> cache;
     private final Map<Number, String> rCache;
+    private final Group group;
 
     @Getter
-    private E unknown;
+    private NumberProvider unknown;
 
-    /**
-     * @param enumClass The class of the enumerator
-     *                  used to construct this factory
-     * @param unknown The enum value that should be
-     *                used for unknown values
-     */
-    public ValueFactory(@NonNull Class<E> enumClass, @NonNull E unknown) {
+    public ValueFactory(@NonNull Group group, @NonNull NumberProvider unknown) {
         this.cache = new HashMap<>();
         this.rCache = new HashMap<>();
+        this.group = group;
 
         this.unknown = unknown;
 
-        EnumSet.allOf(enumClass).forEach(
-                e -> {
-                    cache.put(e.name(), e.getValue());
-                    rCache.put(e.getValue(), e.name());
-                }
-        );
+        group.values().forEach(e -> {
+            cache.put(e.getIdentifier(), e.getValue());
+            rCache.put(e.getValue(), e.getIdentifier());
+        });
     }
 
     /**
@@ -125,7 +118,7 @@ public class ValueFactory<E extends Enum<E> & NumberProvider> {
      */
     public String getName(Number b) {
         if (!rCache.containsKey(b)) {
-            return unknown.name();
+            return unknown.getIdentifier();
         }
         return rCache.get(b);
     }
@@ -143,5 +136,9 @@ public class ValueFactory<E extends Enum<E> & NumberProvider> {
             return unknown.getValue();
         }
         return cache.get(key);
+    }
+
+    public BitField<? extends Number, ? extends ProviderGroup<? extends Number, ? extends ValueProvider<? extends Number>>> constructBitField() {
+        return new BitField<>(group);
     }
 }

@@ -135,7 +135,7 @@ public class DeependClient {
 
         // Register byte factories, before everything
         // is loaded
-        application.registerByteFactories();
+        application.registerFactories();
 
         // Lock byte factory registration
         ValueFactory.lock();

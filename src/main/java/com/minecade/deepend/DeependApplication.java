@@ -29,7 +29,7 @@ public interface DeependApplication {
     /**
      * Register all byte factories
      */
-    void registerByteFactories();
+    void registerFactories();
 
     /**
      * Register all channels

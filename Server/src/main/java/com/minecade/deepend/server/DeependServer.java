@@ -56,7 +56,7 @@ public class DeependServer implements Runnable {
         ChannelManager.instance.lock();
         // Register byte factories
         // and lock the factory manager
-        application.registerByteFactories();
+        application.registerFactories();
         ValueFactory.lock();
         // This shouldn't be locked
         application.registerDataHolders(DataManager.instance);
