@@ -36,7 +36,7 @@ public class ObjectManager {
 
     public void registerMapping(Class<? extends DeependObject> clazz) {
         DeependObject instance = getInstance(clazz);
-        this.objectMapping.put(instance.getObjectType().getByte(), clazz);
+        this.objectMapping.put(instance.getObjectType().getValue(), clazz);
     }
 
     public <T extends DeependObject> T getInstance(@NonNull Class<T> clazz) {
@@ -55,7 +55,7 @@ public class ObjectManager {
     }
 
     public DeependObject getInstance(ByteProvider provider) {
-        Class<? extends DeependObject> clazz = this.objectMapping.get(provider.getByte());
+        Class<? extends DeependObject> clazz = this.objectMapping.get(provider.getValue());
         return getInstance(clazz);
     }
 

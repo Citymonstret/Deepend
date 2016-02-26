@@ -16,7 +16,7 @@
 
 package com.minecade.deepend.channels;
 
-import com.minecade.deepend.bytes.ByteProvider;
+import com.minecade.deepend.values.NumberProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,52 +25,52 @@ import java.util.Map;
  * These are the channels that
  * are supported by the default protocol
  */
-public enum Channel implements ByteProvider {
+public enum Channel implements NumberProvider<Integer> {
 
     /**
      * Authentication channel
      */
-    AUTHENTICATE((byte) (1)),
+    AUTHENTICATE(1),
 
     /**
      * Used to check listen for
      * quality
      */
-    CHECK_DATA((byte) (1 << 1)),
+    CHECK_DATA(1 << 1),
 
     /**
      * Add data to the server
      */
-    ADD_DATA((byte) (1 << 2)),
+    ADD_DATA(1 << 2),
 
     /**
      * Get data from the server
      */
-    GET_DATA((byte) (1 << 3)),
+    GET_DATA(1 << 3),
 
     /**
      * Update data on the server
      */
-    UPDATE_DATA((byte) (1 << 4)),
+    UPDATE_DATA(1 << 4),
 
     /**
      * Remove data from the server
      */
-    REMOVE_DATA((byte) (1 << 5)),
+    REMOVE_DATA(1 << 5),
 
     /**
      * Unknown
      */
-    UNKNOWN((byte) (1 << 6));
+    UNKNOWN(1 << 6);
 
-    private final byte id;
+    private final Integer id;
 
-    Channel(final byte id) {
+    Channel(final Integer id) {
         this.id = id;
     }
 
     @Override
-    public byte getByte() {
+    public Integer getValue() {
         return this.id;
     }
 
@@ -79,11 +79,11 @@ public enum Channel implements ByteProvider {
         return this.name();
     }
 
-    private static Map<Byte, Channel> cache = new HashMap<>();
+    private static Map<Integer, Channel> cache = new HashMap<>();
 
     static {
         for (Channel channel : values()) {
-            cache.put(channel.getByte(), channel);
+            cache.put(channel.getValue(), channel);
         }
     }
 
@@ -92,7 +92,7 @@ public enum Channel implements ByteProvider {
      * @param id ID
      * @return Channel | UNKNOWN
      */
-    public static Channel getChannel(byte id) {
+    public static Channel getChannel(int id) {
         if (!cache.containsKey(id)) {
             return UNKNOWN;
         }

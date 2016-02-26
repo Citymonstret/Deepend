@@ -23,7 +23,7 @@ import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DataType;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.bytes.ByteFactory;
+import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.request.DataRequest;
 
@@ -56,7 +56,7 @@ public class DeleteData extends DeependChannel {
         if (response == GenericResponse.SUCCESS) {
             byte categoryByte = in.getByte();
 
-            String category = ByteFactory.getFactory(ByteFactory.FactoryType.DATA_TYPE)
+            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE)
                     .getName(categoryByte);
 
             Logger.get().debug("Type: " + category);

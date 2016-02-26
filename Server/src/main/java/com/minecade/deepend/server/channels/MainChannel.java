@@ -47,7 +47,7 @@ public class MainChannel extends ChannelHandlerAdapter {
         in.lock();
 
         try {
-            byte channelID = in.getByte();
+            int channelID = in.getInt();
             final ByteBuf response = context.alloc().buffer();
 
             ServerResponse serverResponse = ServerResponse.UNKNOWN;
@@ -121,10 +121,10 @@ public class MainChannel extends ChannelHandlerAdapter {
                 }
             }
             // Write the response code
-            response.writeByte(serverResponse.getByte());
+            response.writeByte(serverResponse.getValue());
             // Write the channel ID
             assert channel != null; // Ugh, java sux :(
-            response.writeByte(channel.getByte());
+            response.writeInt(channel.getValue());
             // Copy channel response
             //response.writeBytes(written);
             written.copyTo(response);

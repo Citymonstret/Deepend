@@ -16,30 +16,18 @@
 
 package com.minecade.deepend.bytes;
 
+import com.minecade.deepend.values.NumberProvider;
+
 /**
  * This is used to return bytes, as
  * easy as that
  *
  * @author Citymonstret
  */
-public interface ByteProvider {
+@FunctionalInterface
+public interface ByteProvider extends NumberProvider<Byte> {
 
-    /**
-     * Get the byte value of the object
-     *
-     * @return Byte value of the object
-     */
-    byte getByte();
+    @Override
+    Byte getValue();
 
-    /**
-     * Get the identifier for this provider
-     *
-     * @return The identifier of this provider,
-     *         if it hasn't been overridden then
-     *         a combination of the class name
-     *         and the byte value will be returned
-     */
-    default String getIdentifier() {
-        return getClass().getName() + ":" + getByte();
-    }
 }

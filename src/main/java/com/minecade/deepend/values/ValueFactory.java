@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.minecade.deepend.bytes;
+package com.minecade.deepend.values;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * @param <E> Enum implementing ByteProvider
  */
-public class ByteFactory<E extends Enum<E> & ByteProvider> {
+public class ValueFactory<E extends Enum<E> & NumberProvider> {
 
     static boolean locked = false;
 
@@ -55,7 +55,7 @@ public class ByteFactory<E extends Enum<E> & ByteProvider> {
         DATA_TYPE
     }
 
-    private static Map<FactoryType, ByteFactory> map = new HashMap<>();
+    private static Map<FactoryType, ValueFactory> map = new HashMap<>();
 
     /**
      * This will add a byte factory for the
@@ -67,7 +67,7 @@ public class ByteFactory<E extends Enum<E> & ByteProvider> {
      * @param <B> Enum implementing ByteProvider
      */
     @SneakyThrows(RuntimeException.class)
-    public static <B extends Enum<B> & ByteProvider> void addByteFactory(@NonNull FactoryType type, @NonNull ByteFactory<B> factory) {
+    public static <B extends Enum<B> & NumberProvider> void addValueFactory(@NonNull FactoryType type, @NonNull ValueFactory<B> factory) {
         if (locked) {
             throw new RuntimeException("Cannot add factory to locked manager");
         }
@@ -81,15 +81,15 @@ public class ByteFactory<E extends Enum<E> & ByteProvider> {
      * @return Factory for the specified type
      */
     @SneakyThrows(RuntimeException.class)
-    public static ByteFactory getFactory(@NonNull FactoryType type) {
+    public static ValueFactory getFactory(@NonNull FactoryType type) {
         if (!map.containsKey(type)) {
             throw new RuntimeException("No byte factory registered for: " + type.name());
         }
         return map.get(type);
     }
 
-    private final Map<String, Byte> cache;
-    private final Map<Byte, String> rCache;
+    private final Map<String, Number> cache;
+    private final Map<Number, String> rCache;
 
     @Getter
     private E unknown;
@@ -100,7 +100,7 @@ public class ByteFactory<E extends Enum<E> & ByteProvider> {
      * @param unknown The enum value that should be
      *                used for unknown values
      */
-    public ByteFactory(@NonNull Class<E> enumClass, @NonNull E unknown) {
+    public ValueFactory(@NonNull Class<E> enumClass, @NonNull E unknown) {
         this.cache = new HashMap<>();
         this.rCache = new HashMap<>();
 
@@ -108,8 +108,8 @@ public class ByteFactory<E extends Enum<E> & ByteProvider> {
 
         EnumSet.allOf(enumClass).forEach(
                 e -> {
-                    cache.put(e.name(), e.getByte());
-                    rCache.put(e.getByte(), e.name());
+                    cache.put(e.name(), e.getValue());
+                    rCache.put(e.getValue(), e.name());
                 }
         );
     }
@@ -123,7 +123,7 @@ public class ByteFactory<E extends Enum<E> & ByteProvider> {
      * @return Name if registered, else
      *         the default value {@see #getUnknown()}
      */
-    public String getName(byte b) {
+    public String getName(Number b) {
         if (!rCache.containsKey(b)) {
             return unknown.name();
         }
@@ -138,9 +138,9 @@ public class ByteFactory<E extends Enum<E> & ByteProvider> {
      * @return Byte if registered, else
      *         the default value (@see #getUnknown()}
      */
-    public byte getByte(String key) {
+    public Number getNumberValue(String key) {
         if (!cache.containsKey(key)) {
-            return unknown.getByte();
+            return unknown.getValue();
         }
         return cache.get(key);
     }

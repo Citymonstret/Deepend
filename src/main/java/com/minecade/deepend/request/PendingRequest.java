@@ -80,7 +80,7 @@ public abstract class PendingRequest implements Comparable {
      */
     final public void send(ChannelFuture future) {
         DeependBuf out = new DeependBuf(future.channel().alloc().buffer());
-        out.writeByte(requestedChannel.getByte());
+        out.writeInt(requestedChannel.getValue());
         // Will send the UUID if it is specified
         if (provider.getUUID() != null) {
             out.writeString(provider.getUUID().toString());

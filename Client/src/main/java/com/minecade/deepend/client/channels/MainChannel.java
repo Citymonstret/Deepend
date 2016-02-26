@@ -44,7 +44,7 @@ public class MainChannel extends ChannelHandlerAdapter {
 
         try {
             ServerResponse serverResponse = ServerResponse.getServerResponse(in.getByte());
-            Channel channel = Channel.getChannel(in.getByte());
+            Channel channel = Channel.getChannel(in.getInt());
             Logger.get().info("Server Responded With: " + serverResponse.name());
             Logger.get().info("Server Channel: " + channel.name());
 

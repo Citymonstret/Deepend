@@ -33,7 +33,7 @@ public enum GameCategory implements ByteProvider {
     private final byte categoryID;
 
     @Override
-    public byte getByte() {
+    public Byte getValue() {
         return this.categoryID;
     }
 

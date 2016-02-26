@@ -21,7 +21,7 @@ import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.bytes.ByteFactory;
+import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.channels.MainChannel;
 import io.netty.bootstrap.ServerBootstrap;
@@ -57,7 +57,7 @@ public class DeependServer implements Runnable {
         // Register byte factories
         // and lock the factory manager
         application.registerByteFactories();
-        ByteFactory.lock();
+        ValueFactory.lock();
         // This shouldn't be locked
         application.registerDataHolders(DataManager.instance);
         // Run stuff after initial managers and whatnot

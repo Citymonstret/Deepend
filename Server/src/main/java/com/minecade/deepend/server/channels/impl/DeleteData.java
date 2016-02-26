@@ -23,7 +23,7 @@ import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
-import com.minecade.deepend.bytes.ByteFactory;
+import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.util.DataUtil;
 
@@ -46,7 +46,7 @@ public class DeleteData extends DeependChannel {
         scope: {
             // String category = readString(in);
             byte categoryByte = in.getByte();
-            String category = ByteFactory.getFactory(ByteFactory.FactoryType.DATA_TYPE).getName(categoryByte);
+            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
 
             if (!DataManager.instance.hasDataHolder(category)) {
                 buf.writeByte(GenericResponse.FAILURE);

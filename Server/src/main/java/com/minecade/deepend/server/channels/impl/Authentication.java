@@ -57,7 +57,7 @@ public class Authentication extends DeependChannel {
             }
         }
 
-        buf.writeByte(response.getByte());
+        buf.writeByte(response.getValue());
 
         if (response == GenericResponse.SUCCESS) {
             buf.writeString(connection.getRemoteAddress().getUUID());

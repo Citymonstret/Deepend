@@ -18,7 +18,7 @@ import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.game.GameCategory;
 import com.minecade.deepend.game.GamePlayer;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.bytes.ByteFactory;
+import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.StringList;
 import com.minecade.deepend.request.ShutdownRequest;
@@ -61,8 +61,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
 
     @Override
     public void registerByteFactories() {
-        ByteFactory.addByteFactory(ByteFactory.FactoryType.DATA_TYPE,
-                new ByteFactory<>(GameCategory.class,
-                        GameCategory.UNKNOWN));
+        ValueFactory.addValueFactory(ValueFactory.FactoryType.DATA_TYPE,
+                new ValueFactory<>(GameCategory.class, GameCategory.UNKNOWN));
     }
 }

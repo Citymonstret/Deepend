@@ -15,7 +15,7 @@
  */
 package com.minecade.deepend.bits;
 
-import com.minecade.deepend.bytes.ByteProvider;
+import com.minecade.deepend.values.NumberProvider;
 import lombok.NonNull;
 
 import java.util.*;
@@ -26,14 +26,14 @@ import java.util.stream.Collectors;
  *
  * @author Citymonstret
  */
-public class BitField<E extends Enum<E> & ByteProvider> {
+public class BitField<E extends Enum<E> & NumberProvider> {
 
     /**
      * Just for caching of bytes, to make this
      * a little faster. Memory usage is too
      * minimal to even care about.
      */
-    private final Map<Byte, E> internalMap;
+    private final Map<Number, E> internalMap;
 
     /**
      * @param values Values to be used in this BitField
@@ -42,7 +42,7 @@ public class BitField<E extends Enum<E> & ByteProvider> {
         internalMap = new HashMap<>();
 
         for (E value : values) {
-            internalMap.put(value.getByte(), value);
+            internalMap.put(value.getValue(), value);
         }
     }
 
@@ -60,7 +60,7 @@ public class BitField<E extends Enum<E> & ByteProvider> {
         if (field == 0) {
             return Collections.emptySet();
         }
-        return internalMap.keySet().stream().filter(b -> (field & b) == b).map(internalMap::get).collect(Collectors.toCollection(HashSet::new));
+        return internalMap.keySet().stream().filter(b -> (field & b.intValue()) == b.intValue()).map(internalMap::get).collect(Collectors.toCollection(HashSet::new));
     }
 
 
@@ -84,9 +84,9 @@ public class BitField<E extends Enum<E> & ByteProvider> {
         if (!iterator.hasNext()) {
             return 0;
         }
-        byte i = iterator.next().getByte();
+        int i = iterator.next().getValue().intValue();
         while (iterator.hasNext()) {
-            i |= iterator.next().getByte();
+            i |= iterator.next().getValue().intValue();
         }
         return i;
     }

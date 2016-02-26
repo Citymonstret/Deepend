@@ -29,7 +29,7 @@ import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.bytes.ByteFactory;
+import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.PendingRequest;
 import com.minecade.deepend.request.ShutdownRequest;
@@ -138,7 +138,7 @@ public class DeependClient {
         application.registerByteFactories();
 
         // Lock byte factory registration
-        ByteFactory.lock();
+        ValueFactory.lock();
 
         // Will register all object
         // mappings

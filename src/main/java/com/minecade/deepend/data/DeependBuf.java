@@ -119,7 +119,7 @@ public class DeependBuf {
     public void writeByte(ByteProvider response) {
         checkLock();
 
-        writeByte(response.getByte());
+        writeByte(response.getValue());
     }
 
     public void writeByte(byte b) {

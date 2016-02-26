@@ -20,7 +20,7 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.MirrorDataHolder;
 import com.minecade.deepend.game.GameCategory;
-import com.minecade.deepend.bytes.ByteFactory;
+import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.server.DeependServer;
 import com.minecade.deepend.server.channels.impl.*;
 
@@ -69,7 +69,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
 
     @Override
     public void registerByteFactories() {
-        ByteFactory.addByteFactory(ByteFactory.FactoryType.DATA_TYPE, new ByteFactory(GameCategory.class, GameCategory.UNKNOWN));
+        ValueFactory.addValueFactory(ValueFactory.FactoryType.DATA_TYPE, new ValueFactory(GameCategory.class, GameCategory.UNKNOWN));
     }
 
     @Override

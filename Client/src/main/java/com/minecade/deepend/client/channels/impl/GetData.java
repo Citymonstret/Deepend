@@ -16,7 +16,7 @@
 
 package com.minecade.deepend.client.channels.impl;
 
-import com.minecade.deepend.bytes.ByteFactory;
+import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.DeependChannel;
 import com.minecade.deepend.connection.DeependConnection;
@@ -53,7 +53,7 @@ public class GetData extends DeependChannel {
         if (response == GenericResponse.SUCCESS) {
             byte categoryByte = in.getByte();
 
-            String category = ByteFactory.getFactory(ByteFactory.FactoryType.DATA_TYPE)
+            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE)
                     .getName(categoryByte);
 
             Logger.get().debug("Type: " + category);

@@ -31,7 +31,7 @@ public enum GenericResponse implements ByteProvider {
 
     private final byte b;
 
-    public byte getByte() {
+    public Byte getValue() {
         return this.b;
     }
 
@@ -43,7 +43,7 @@ public enum GenericResponse implements ByteProvider {
 
     static {
         for (GenericResponse genericResponse : values()) {
-            cache.put(genericResponse.getByte(), genericResponse);
+            cache.put(genericResponse.getValue(), genericResponse);
         }
     }
 

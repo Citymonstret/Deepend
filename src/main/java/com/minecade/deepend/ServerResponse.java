@@ -85,7 +85,7 @@ public enum ServerResponse implements ByteProvider {
     private final byte responseCode;
 
     @Override
-    public byte getByte() {
+    public Byte getValue() {
         return this.responseCode;
     }
 
@@ -100,7 +100,7 @@ public enum ServerResponse implements ByteProvider {
     static {
         cache = new HashMap<>();
         for (ServerResponse response : values()) {
-            cache.put(response.getByte(), response);
+            cache.put(response.getValue(), response);
         }
     }
 
