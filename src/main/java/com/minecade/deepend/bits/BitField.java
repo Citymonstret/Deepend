@@ -19,7 +19,6 @@ import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.values.ValueProvider;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,11 +28,14 @@ import java.util.stream.Collectors;
  *
  * @author Citymonstret
  */
-@RequiredArgsConstructor
-public class BitField<DataType extends Number, T extends ProviderGroup<DataType, ValueProvider<DataType>>> {
+public class BitField<DataType extends Number, Provider extends ValueProvider<DataType>> {
 
     @Getter
-    private final T providerGroup;
+    private final ProviderGroup<DataType, Provider> providerGroup;
+
+    public BitField(ProviderGroup<DataType, Provider> providerGroup) {
+        this.providerGroup = providerGroup;
+    }
 
     /**
      * Extract the values from a constructed field
@@ -44,7 +46,7 @@ public class BitField<DataType extends Number, T extends ProviderGroup<DataType,
      *
      * @return Collection containing the extracted objects
      */
-    public final Collection<ValueProvider<? extends DataType>> extract(int field) {
+    public final Collection<Provider> extract(int field) {
         if (field == 0) {
             return Collections.emptySet();
         }
@@ -56,7 +58,7 @@ public class BitField<DataType extends Number, T extends ProviderGroup<DataType,
      * @see #construct(Collection) For super method
      */
     @SafeVarargs
-    public final int construct(ValueProvider<DataType> ... objects) {
+    public final int construct(Provider ... objects) {
         return construct(Arrays.asList(objects));
     }
 
@@ -67,8 +69,8 @@ public class BitField<DataType extends Number, T extends ProviderGroup<DataType,
      *
      * @return Constructed BitField
      */
-    public final int construct(@NonNull Collection<ValueProvider<DataType>> objects) {
-        Iterator<ValueProvider<DataType>> iterator = objects.iterator();
+    public final int construct(@NonNull Collection<Provider> objects) {
+        Iterator<Provider> iterator = objects.iterator();
         if (!iterator.hasNext()) {
             return 0;
         }

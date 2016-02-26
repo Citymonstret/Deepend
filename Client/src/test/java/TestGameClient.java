@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-import com.minecade.deepend.bits.BitField;
-import com.minecade.deepend.bits.EnumBitField;
-import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.game.GameCategory;
 import com.minecade.deepend.game.GamePlayer;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.object.ProviderGroup;
-import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.ObjectManager;
+import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.object.StringList;
 import com.minecade.deepend.request.ShutdownRequest;
-import com.minecade.deepend.values.ValueProvider;
+import com.minecade.deepend.values.ValueFactory;
 
 /**
  * Created 2/23/2016 for Deepend
@@ -36,12 +32,7 @@ import com.minecade.deepend.values.ValueProvider;
 public class TestGameClient implements DeependClient.DeependClientApplication {
 
     public static void main(String[] args) {
-        BitField<Integer, ProviderGroup<Integer, ValueProvider<Integer>>> bitField = new BitField<>(ProviderGroup.fromEnumClass(Channel.class));
-        int i = bitField.construct(Channel.ADD_DATA, Channel.GET_DATA);
-        System.out.println(i);
-        // bitField.extract(i).forEach(System.out::println);
-        new EnumBitField<>(Channel.class, bitField).extract(i).forEach(System.out::println);
-        // new DeependClient(new TestGameClient());
+        new DeependClient(new TestGameClient());
     }
 
     @Override

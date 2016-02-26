@@ -138,7 +138,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
         return cache.get(key);
     }
 
-    public BitField<? extends Number, ? extends ProviderGroup<? extends Number, ? extends ValueProvider<? extends Number>>> constructBitField() {
+    public BitField<? extends Number, ? extends ValueProvider<? extends Number>> constructBitField() {
         return new BitField<>(group);
     }
 }
