@@ -271,6 +271,18 @@ public class DeependClient {
 
         thread.setDaemon(false);
         thread.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try {
+                    workerGroup.shutdownGracefully();
+                } catch(final Exception e) {
+                    e.printStackTrace();
+                }
+                Logger.get().info("shutdown.completed");
+            }
+        });
     }
 
     public DeependClient(DeependClientApplication application) {

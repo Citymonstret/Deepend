@@ -1,3 +1,4 @@
+package com.minecade.deepend.client.test;
 /*
  * Copyright 2016 Minecade
  *
