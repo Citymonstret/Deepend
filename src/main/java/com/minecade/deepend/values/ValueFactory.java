@@ -138,7 +138,13 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
         return cache.get(key);
     }
 
+    // This will prevent it from being generated when not used
+    private BitField<? extends Number, ? extends ValueProvider<? extends Number>> bitField;
+
     public BitField<? extends Number, ? extends ValueProvider<? extends Number>> constructBitField() {
-        return new BitField<>(group);
+        if (bitField == null) { // Added caching to this
+            bitField = new BitField<>(group);
+        }
+        return bitField;
     }
 }

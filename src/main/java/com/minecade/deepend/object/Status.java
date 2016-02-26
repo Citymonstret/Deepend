@@ -44,6 +44,14 @@ public abstract class Status<T> {
         return !receivedUpdate.contains(address.toString());
     }
 
+    final public boolean fetchUpdate(SimpleAddress address) {
+        if (needsUpdate(address)) {
+            setUpdated(address);
+            return true;
+        }
+        return false;
+    }
+
     final public void resetStatus() {
         receivedUpdate.clear();
     }
