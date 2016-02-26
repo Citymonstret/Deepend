@@ -1,6 +1,8 @@
 # Deepend
 
 ## What is this?
+This project is meant to offer a fresh take on data backend management, and cross-instance sychronization. It does this in a neat and mobile manner. 
+
 Deepend is a project consisting of a custom protocol, a core API, a server module and a client implementation. All of this is written to allow for extreme customization, and is meant to provide the ability to implement Deepend into any pre-existing applications. Deepend aims to have a really easy to follow protocol, and is using netty for the networking backend. It's currently far from finished, but it already includes working modules for everything. The document is very vague, but is coming soon.
 
 Deepend includes a lot of cool stuff. For example: You're able to map objects to the protocol (by wrapping them) and the core will automatically convert the objects for you. The protocol includes a CHECK_DATA method which allows you to only poll information that has been updated. The system has native callback support and much, much, more. 
