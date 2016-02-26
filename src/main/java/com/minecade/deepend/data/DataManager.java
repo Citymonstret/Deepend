@@ -53,10 +53,6 @@ public class DataManager {
         }
     }
 
-    /**
-     * Register a data holder
-     * @param dataHolder Holder to register
-     */
     public void registerDataHolder(@NonNull final DataHolder dataHolder, @NonNull ByteProvider category) {
         this.mainDataHolder.put(dataHolder.getIdentifier(), dataHolder);
         this.registerDataStatus(category);

@@ -56,10 +56,6 @@ public class BitField<DataType extends Number, Provider extends ValueProvider<Da
         return providerGroup.getInternalMap().keySet().stream().filter(b -> (field & b.intValue()) == b.intValue()).map(providerGroup.getInternalMap()::get).collect(Collectors.toCollection(HashSet::new));
     }
 
-
-    /**
-     * @see #construct(Collection) For super method
-     */
     @SafeVarargs
     public final int construct(Provider ... objects) {
         return construct(Arrays.asList(objects));

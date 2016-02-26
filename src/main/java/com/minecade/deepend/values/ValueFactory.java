@@ -64,6 +64,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * @param factory Factory for the given type
      *
      * @param <B> Enum implementing ByteProvider
+     * @param <DataType> Number implementation
      */
     @SneakyThrows(RuntimeException.class)
     public static <DataType extends Number, B extends ProviderGroup<DataType, ValueProvider<DataType>>> void addValueFactory(@NonNull FactoryType type, @NonNull ValueFactory<DataType, B> factory) {
@@ -114,7 +115,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * @param b Byte
      *
      * @return Name if registered, else
-     *         the default value {@see #getUnknown()}
+     *         the default value {@link #getUnknown()}
      */
     public String getName(Number b) {
         if (!rCache.containsKey(b)) {
