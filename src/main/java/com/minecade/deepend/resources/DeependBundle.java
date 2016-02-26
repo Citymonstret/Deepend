@@ -49,7 +49,7 @@ public class DeependBundle implements ObjectGetter<String, String> {
 
     final static File folder;
     static {
-        folder = new File("./configs");
+        folder = new File("./.deepend");
         if (!folder.exists()) {
             if (!folder.mkdirs()) {
                 throw new RuntimeException("Couldn't create ./configs, please do it manually!");
@@ -58,7 +58,7 @@ public class DeependBundle implements ObjectGetter<String, String> {
     }
 
     public DeependBundle(@NonNull String propertyFile, boolean hasToExist, DefaultBuilder builder) {
-        File file = new File("./configs/" + propertyFile + ".deepend");
+        File file = new File(folder, propertyFile + ".deepend");
         this.properties = new HashMap<>();
         this.properties.putAll(builder.compiled);
         if (!file.exists()) {

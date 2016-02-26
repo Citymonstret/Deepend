@@ -15,8 +15,8 @@ local.properties
 build/
 
 # This auto-generates
-configs/client.deepend
-configs/accounts.deepend
+.deepend/client.deepend
+.deepend/accounts.deepend
 
 # Ignore Gradle GUI config
 gradle-app.setting
