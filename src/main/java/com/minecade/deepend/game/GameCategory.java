@@ -16,24 +16,24 @@
 
 package com.minecade.deepend.game;
 
-import com.minecade.deepend.values.NumberProvider;
+import com.minecade.deepend.bytes.ByteProvider;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public enum GameCategory implements NumberProvider<Integer> {
+public enum GameCategory implements ByteProvider {
 
-    UNKNOWN(1),                    // Unknown category type
-    PLAYERS(1 << 1),               // Game players
-    SERVERS(1 << 2),               // Game servers
-    PLAYER_SERVERS(1 << 3),        // Player -> Server relations
-    SERVER_PLAYERS(1 << 4),        // Players on a server
-    PROXIES(1 << 5);               // Game proxies (such as bungee)
+    UNKNOWN((byte) 1),                      // Unknown category type
+    PLAYERS((byte) (1 << 1)),               // Game players
+    SERVERS((byte) (1 << 2)),               // Game servers
+    PLAYER_SERVERS((byte) (1 << 3)),        // Player -> Server relations
+    SERVER_PLAYERS((byte) (1 << 4)),        // Players on a server
+    PROXIES((byte) (1 << 5));               // Game proxies (such as bungee)
 
-    private final int categoryID;
+    private final byte categoryID;
 
     @Override
-    public Integer getValue() {
+    public Byte getValue() {
         return this.categoryID;
     }
 
