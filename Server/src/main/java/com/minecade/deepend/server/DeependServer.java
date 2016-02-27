@@ -85,7 +85,7 @@ public class DeependServer implements Runnable {
 
         if (settings.getHelp()) {
             Logger.get().info(StringUtils.joinLines(
-                    "\nDeependServer Help:|@",
+                    "\nDeependServer Help:",
                     "\t--help | --h : Display this help message",
                     "\t--port | -p <port> : Set the server port"
             ));

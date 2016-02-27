@@ -38,7 +38,6 @@ allprojects {
     }
 
     dependencies {
-        compile 'org.fusesource.jansi:jansi:1.11'
         compile 'org.yaml:snakeyaml:1.17'
         compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.5'
         compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.5'

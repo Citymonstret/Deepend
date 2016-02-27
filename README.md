@@ -44,6 +44,9 @@ Build the project using gradle: ```gradlew build```
 | --- | --- | --- |
 | lombok | [projectlombok.org](https://projectlombok.org/) | Makes code prettier |
 | netty | [netty.io](http://netty.io) | Networking backend |
+| snakeyaml | [snakeyaml.org](http://www.snakeyaml.org/) | YAML Processing |
+| log4j 2| [logging.apache.org](http://logging.apache.org/log4j/2.x/) | Proper logging |
+| jewelcli | [jewelcli.lexicalscope.com](http://jewelcli.lexicalscope.com) | Command line arguments |
 
 ## Examples
 ### Client
