@@ -15,6 +15,7 @@
  */
 package com.minecade.deepend.bits;
 
+import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.values.ValueProvider;
 import lombok.Getter;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * @param <Provider> ValueProvider returning the
  *                  specified DataType
  */
+@Stable
 public class BitField<DataType extends Number, Provider extends ValueProvider<DataType>> {
 
     @Getter

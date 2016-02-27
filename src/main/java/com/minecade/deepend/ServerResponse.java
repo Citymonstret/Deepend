@@ -17,6 +17,7 @@
 package com.minecade.deepend;
 
 import com.minecade.deepend.bytes.ByteProvider;
+import com.minecade.deepend.lib.Beta;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,7 @@ import java.util.Map;
  *
  * @author Citymonstret
  */
+@Beta
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public enum ServerResponse implements ByteProvider {
 

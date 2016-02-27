@@ -16,6 +16,7 @@
 package com.minecade.deepend.object;
 
 import com.minecade.deepend.connection.SimpleAddress;
+import com.minecade.deepend.lib.Stable;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,6 +30,7 @@ import java.util.*;
  *
  * @author Citymonstret
  */
+@Stable
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Status<T> {
 

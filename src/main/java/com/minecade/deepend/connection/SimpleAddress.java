@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.connection;
 
+import com.minecade.deepend.lib.Stable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,7 @@ import java.util.UUID;
  *
  * @author Citymonstret
  */
+@Stable
 @RequiredArgsConstructor
 public class SimpleAddress {
 

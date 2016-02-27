@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.request;
 
+import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.values.ValueProvider;
 
 import java.util.UUID;
@@ -26,6 +27,7 @@ import java.util.UUID;
  *
  * @author Citymonstret
  */
+@Stable
 public interface UUIDProvider extends ValueProvider<UUID> {
 
     /**

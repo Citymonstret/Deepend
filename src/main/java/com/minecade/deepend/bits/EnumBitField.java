@@ -15,6 +15,7 @@
  */
 package com.minecade.deepend.bits;
 
+import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.values.ValueProvider;
 import lombok.NonNull;
@@ -28,6 +29,7 @@ import java.util.EnumSet;
  *
  * @author Citymonstret
  */
+@Beta
 @SuppressWarnings("ALL")
 public class EnumBitField<DataType extends Number, E extends Enum<E> & ValueProvider<DataType>> {
 

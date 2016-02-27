@@ -44,7 +44,6 @@ Build the project using gradle: ```gradlew build```
 | --- | --- | --- |
 | lombok | [projectlombok.org](https://projectlombok.org/) | Makes code prettier |
 | netty | [netty.io](http://netty.io) | Networking backend |
-| guava | [github.com/google/guava](https://github.com/google/guava) | Nice Utilities |
 
 ## Examples
 ### Client

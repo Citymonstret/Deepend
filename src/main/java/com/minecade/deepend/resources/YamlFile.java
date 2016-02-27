@@ -1,5 +1,8 @@
 package com.minecade.deepend.resources;
 
+import com.minecade.deepend.lib.Stable;
+import com.minecade.deepend.object.ObjectGetter;
+import com.minecade.deepend.util.Assert;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -13,14 +16,15 @@ import java.util.Map;
  *
  * @author Citymonstret
  */
-public abstract class YamlFile implements DataFile {
+@Stable
+public abstract class YamlFile implements DataFile, ObjectGetter<String, Object> {
 
     private final File file;
     private Map<String, Object> map;
     private Yaml yaml;
 
-    public YamlFile(String name, File file) throws Exception {
-        this.file = file;
+    public YamlFile(File file) throws Exception {
+        this.file = Assert.notNull(file);
         if (!file.getParentFile().exists()) {
             if (!file.getParentFile().mkdirs()) {
                 throw new RuntimeException("Couldn't create parents for " + file.getAbsolutePath());
@@ -80,6 +84,9 @@ public abstract class YamlFile implements DataFile {
 
     @Override
     public <T> void set(String key, T value) {
+        key = Assert.notEmpty(key);
+        value = Assert.notNull(value);
+
         if (key.contains(".")) {
             convertToMap(key, value);
         } else {
@@ -88,6 +95,9 @@ public abstract class YamlFile implements DataFile {
     }
 
     private void convertToMap(String in, Object value) {
+        in = Assert.notEmpty(in);
+        value = Assert.notNull(value);
+
         if (in.contains(".")) {
             Map<String, Object> lastMap = this.map;
             while (in.contains(".")) {

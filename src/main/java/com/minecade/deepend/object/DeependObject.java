@@ -19,6 +19,7 @@ package com.minecade.deepend.object;
 import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.data.DataType;
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.logging.Logger;
 import lombok.*;
 
@@ -37,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
+@Beta
 @SuppressWarnings("unused")
 public abstract class DeependObject {
 

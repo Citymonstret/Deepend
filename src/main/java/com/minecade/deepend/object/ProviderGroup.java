@@ -15,6 +15,7 @@
  */
 package com.minecade.deepend.object;
 
+import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.values.NumberProvider;
 import com.minecade.deepend.values.ValueProvider;
 import lombok.Getter;
@@ -31,6 +32,7 @@ import java.util.function.BiConsumer;
  * @param <DataType> Type that this ProviderGroup will handle
  * @param <T> Value provider returning the specified DataType
  */
+@Stable
 public class ProviderGroup<DataType, T extends ValueProvider<? extends DataType>>  {
 
     @Getter

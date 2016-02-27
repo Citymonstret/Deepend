@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.bytes;
 
+import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.values.NumberProvider;
 
 /**
@@ -24,6 +25,7 @@ import com.minecade.deepend.values.NumberProvider;
  *
  * @author Citymonstret
  */
+@Stable
 @FunctionalInterface
 public interface ByteProvider extends NumberProvider<Byte> {
 

@@ -18,6 +18,7 @@ package com.minecade.deepend.request;
 
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.lib.Stable;
 import io.netty.channel.ChannelFuture;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,6 +30,7 @@ import lombok.SneakyThrows;
  *
  * @author Citymonstret
  */
+@Stable
 @EqualsAndHashCode
 public abstract class PendingRequest implements Comparable {
 

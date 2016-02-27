@@ -21,4 +21,7 @@
  *
  * @author Citymonstret
  */
+@Beta
 package com.minecade.deepend.data;
+
+import com.minecade.deepend.lib.Beta;

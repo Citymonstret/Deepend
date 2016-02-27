@@ -17,6 +17,7 @@
 package com.minecade.deepend.connection;
 
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.request.UUIDProvider;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Stable
 public class DeependConnection implements UUIDProvider {
 
     private final Map<String, Object> metaMapping = new ConcurrentHashMap<>();

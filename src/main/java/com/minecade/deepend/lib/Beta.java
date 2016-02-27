@@ -21,7 +21,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created 2/26/2016 for Deepend
+ * Marks portions of the API that might
+ * be unstable / untested
  *
  * @author Citymonstret
  */

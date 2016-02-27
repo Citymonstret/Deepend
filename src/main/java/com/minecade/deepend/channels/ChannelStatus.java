@@ -15,11 +15,13 @@
  */
 package com.minecade.deepend.channels;
 
+import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.object.Status;
 
 /**
  * @author Citymonstret
  */
+@Stable
 public class ChannelStatus extends Status<Channel> {
 
     public ChannelStatus(Channel channel) {

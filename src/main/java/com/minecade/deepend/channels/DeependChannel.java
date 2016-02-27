@@ -18,6 +18,7 @@ package com.minecade.deepend.channels;
 
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.lib.Stable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
  *
  * @author Citymonstret
  */
+@Stable
 @RequiredArgsConstructor
 public abstract class DeependChannel {
 

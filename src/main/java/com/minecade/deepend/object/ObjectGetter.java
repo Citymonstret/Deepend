@@ -15,11 +15,14 @@
  */
 package com.minecade.deepend.object;
 
+import com.minecade.deepend.lib.Stable;
+
 /**
  * Created 2/24/2016 for Deepend
  *
  * @author Citymonstret
  */
+@Stable
 public interface ObjectGetter<K, V> {
     
     V get(K k);

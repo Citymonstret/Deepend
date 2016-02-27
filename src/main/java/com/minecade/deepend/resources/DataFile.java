@@ -1,6 +1,8 @@
 package com.minecade.deepend.resources;
 
 
+import com.minecade.deepend.lib.Stable;
+
 /**
  * The "official" configuration file
  * interface
@@ -11,6 +13,7 @@ package com.minecade.deepend.resources;
  * @author Citymonstret
  */
 @SuppressWarnings("unused")
+@Stable
 public interface DataFile {
 
     /**

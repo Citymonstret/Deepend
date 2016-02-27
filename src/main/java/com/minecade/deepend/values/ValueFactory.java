@@ -17,6 +17,7 @@
 package com.minecade.deepend.values;
 
 import com.minecade.deepend.bits.BitField;
+import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.object.ProviderGroup;
 import lombok.Getter;
 import lombok.NonNull;
@@ -31,6 +32,7 @@ import java.util.Map;
  *
  * @author Citymonstret
  */
+@Beta
 public class ValueFactory<DataType extends Number, Group extends ProviderGroup<DataType, ValueProvider<DataType>>> {
 
     static boolean locked = false;

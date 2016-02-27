@@ -17,6 +17,7 @@
 package com.minecade.deepend.object;
 
 import com.minecade.deepend.data.DataType;
+import com.minecade.deepend.lib.Stable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,6 +30,7 @@ import java.lang.annotation.Target;
  *
  * @author Citymonstret
  */
+@Stable
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface ObjectProperty {
