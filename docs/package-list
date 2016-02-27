@@ -1,4 +1,3 @@
-
 com.minecade.deepend
 com.minecade.deepend.bits
 com.minecade.deepend.bytes
@@ -7,8 +6,10 @@ com.minecade.deepend.client
 com.minecade.deepend.client.channels
 com.minecade.deepend.client.channels.data
 com.minecade.deepend.client.channels.impl
+com.minecade.deepend.client.test
 com.minecade.deepend.connection
 com.minecade.deepend.data
+com.minecade.deepend.exceptions
 com.minecade.deepend.game
 com.minecade.deepend.lib
 com.minecade.deepend.logging
@@ -18,5 +19,10 @@ com.minecade.deepend.resources
 com.minecade.deepend.server
 com.minecade.deepend.server.channels
 com.minecade.deepend.server.channels.impl
+com.minecade.deepend.server.channels.storage
+com.minecade.deepend.server.exceptions
+com.minecade.deepend.server.test
+com.minecade.deepend.storage
+com.minecade.deepend.storage.transactions
 com.minecade.deepend.util
 com.minecade.deepend.values
