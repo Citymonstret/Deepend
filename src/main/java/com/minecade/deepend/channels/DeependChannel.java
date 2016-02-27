@@ -44,7 +44,7 @@ public abstract class DeependChannel {
      * @param buf Output buffer. This is
      *            NOT the input buf
      */
-    public abstract void act(@NonNull final DeependConnection connection, @NonNull final DeependBuf buf);
+    public abstract void act(final DeependConnection connection, final DeependBuf buf);
 
     /**
      * Reset the status of this channel

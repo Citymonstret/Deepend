@@ -17,6 +17,7 @@ build/
 # This auto-generates
 .deepend/client.deepend
 .deepend/accounts.deepend
+.deepend/*.db
 
 # Ignore Gradle GUI config
 gradle-app.setting

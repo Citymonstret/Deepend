@@ -18,7 +18,6 @@ package com.minecade.deepend.request;
 
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.data.DeependBuf;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -33,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-@EqualsAndHashCode
 public abstract class DataRequest extends PendingRequest {
 
     private static Map<String, DataRequest> requestMap = new ConcurrentHashMap<>();
