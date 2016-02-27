@@ -1,3 +1,18 @@
+dependencies {
+    compile group: 'org.tmatesoft.sqljet', name: 'sqljet', version: '1.1.10'
+    compile rootProject
+}
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+    }
+}
+
 repositories {
     maven {
         url 'http://maven.tmatesoft.com/content/repositories/releases'
@@ -7,4 +22,20 @@ repositories {
 dependencies {
     compile group: 'org.tmatesoft.sqljet', name: 'sqljet', version: '1.1.10'
     compile rootProject
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+mainClassName = 'com.minecade.deepend.server.test.TestGameServer'
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+shadowJar {
+    append('LICENSE')
 }
