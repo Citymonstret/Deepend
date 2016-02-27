@@ -55,6 +55,9 @@ A client example can be found here: [TestGameClient.java](https://github.com/Dee
 ### Server
 A server example can be found here: [TestGameServer.java](https://github.com/DeependProject/Deepend/blob/master/Server/src/main/java/com/minecade/deepend/server/test/TestGameServer.java)
 
+## CI
+We have a CI build for this: <http://ci.intellectualsites.com/job/Deepend/>
+
 ## Use this as a dependency
 ### Repo
 Gradle
