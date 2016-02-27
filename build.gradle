@@ -35,12 +35,13 @@ allprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 
     dependencies {
+        compile 'org.yaml:snakeyaml:1.17'
         compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
         compile group: 'com.jcraft', name: 'jzlib', version: '1.1.2'
         compile "org.projectlombok:lombok:1.16.6"
-        compile 'com.google.guava:guava:19.0'
     }
 }
