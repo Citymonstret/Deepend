@@ -30,11 +30,11 @@ The protocol is very simple: [Read more here...](https://github.com/DeependProje
 
 | Channel | Wiki | Description |
 | --- | --- | --- |
-| ADD_DATA | ~~link~~ | Add/Update data to the server |
-| GET_DATA | ~~link~~ | Retrieve data from the server |
-| REMOVE_DATA | ~~link~~ | Delete data from the server |
-| CHECK_DATA | ~~link~~ | Used to check if data has been updated |
-| AUTHENTICATE | ~~link~~ | Used to authenticate the client and generate a UUID |
+| ADD_DATA | [link](https://github.com/DeependProject/Deepend/wiki/ADD_DATA) | Add/Update data to the server |
+| GET_DATA | [link](https://github.com/DeependProject/Deepend/wiki/GET_DATA) | Retrieve data from the server |
+| REMOVE_DATA | [link](https://github.com/DeependProject/Deepend/wiki/REMOVE_DATA) | Delete data from the server |
+| CHECK_DATA | [link](https://github.com/DeependProject/Deepend/wiki/CHECK_DATA) | Used to check if data has been updated |
+| AUTHENTICATE | [link](https://github.com/DeependProject/Deepend/wiki/AUTHENTICATE) | Used to authenticate the client and generate a UUID |
 
 ## Building
 Build the project using gradle: ```gradlew build```
