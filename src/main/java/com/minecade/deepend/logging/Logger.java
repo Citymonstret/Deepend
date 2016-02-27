@@ -20,6 +20,8 @@ import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.resources.DeependBundle;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.ConfigurationFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,15 +70,24 @@ public class Logger {
         }
     }
 
-    private final java.util.logging.Logger logger;
+    // private final java.util.logging.Logger logger;
+    private final org.apache.logging.log4j.Logger logger;
+
+    private final DeependBundle resourceBundle;
 
     private boolean debugMode;
 
     protected Logger(@NonNull String name, DeependBundle resourceBundle) {
-        this.logger = java.util.logging.Logger.getLogger(name);
-        this.logger.setUseParentHandlers(false);
-        this.logger.addHandler(new LogHandler(resourceBundle));
+        // this.logger = java.util.logging.Logger.getLogger(name);
+        // this.logger.setUseParentHandlers(false);
+        // this.logger.addHandler(new LogHandler(resourceBundle));
+
+        ConfigurationFactory.setConfigurationFactory(new LogFactory());
+
+        this.resourceBundle = resourceBundle;
         this.debugMode = true;
+
+        this.logger = LogManager.getLogger(name);
     }
 
     /**
@@ -86,8 +97,25 @@ public class Logger {
      * @return The instance
      */
     public Logger info(String message) {
-        logger.info(message);
+        logger.info(getMessage(message));
         return this;
+    }
+
+    public Logger info(String message, Object ... replacements) {
+        String[] transformed = new String[replacements.length];
+        for (int i = 0; i < replacements.length; i++) {
+            transformed[i] = replacements[i].toString();
+        }
+        logger.info(String.format(getMessage(message), transformed));
+        return this;
+    }
+
+    private String getMessage(String message) {
+        String m = message;
+        if (this.resourceBundle != null && this.resourceBundle.containsKey(message)) {
+            m = this.resourceBundle.get(message);
+        }
+        return m;
     }
 
     /**
@@ -122,7 +150,8 @@ public class Logger {
      * @return this
      */
     public Logger debug(String message) {
-        logger.warning(message);
+        // logger.warning(message);
+        logger.debug(getMessage(message));
         return this;
     }
 
@@ -149,7 +178,8 @@ public class Logger {
      * @return this
      */
     public Logger error(String message, Throwable cause) {
-        logger.severe(message);
+        // logger.severe(message);
+        logger.error(getMessage(message));
         if (debugMode && cause != null) {
             cause.printStackTrace();
         }

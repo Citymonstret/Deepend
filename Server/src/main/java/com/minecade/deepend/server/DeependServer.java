@@ -16,6 +16,8 @@
 
 package com.minecade.deepend.server;
 
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.Option;
 import com.minecade.deepend.DeependApplication;
 import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.channels.ChannelManager;
@@ -23,7 +25,10 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.channels.MainChannel;
+import com.minecade.deepend.server.exceptions.ServerException;
 import com.minecade.deepend.storage.StorageBase;
+import com.minecade.deepend.util.JavaConstants;
+import com.minecade.deepend.util.StringUtils;
 import com.minecade.deepend.values.ValueFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -41,6 +46,25 @@ import lombok.SneakyThrows;
  */
 public class DeependServer implements Runnable {
 
+    private interface ServerSettings {
+
+        @Option(
+                longName = "port",
+                shortName = "p",
+                pattern = "[0-9]+",
+                defaultValue = "8000",
+                description = "The port the server will run on"
+        )
+        int getPort();
+
+        @Option(
+                description = "Display the help menu",
+                longName = "help",
+                shortName = "h"
+        )
+        boolean getHelp();
+    }
+
     private final int port;
     private final DeependServerApplication application;
 
@@ -48,12 +72,30 @@ public class DeependServer implements Runnable {
     private final StorageBase storageBase;
 
     @SneakyThrows
-    public DeependServer(final int port, @NonNull DeependServerApplication application) {
+    public DeependServer(String[] iargs, @NonNull DeependServerApplication application) {
         Logger.setup("DeependServer", /* ResourceBundle.getBundle("ServerStrings")*/ new DeependBundle("ServerStrings"));
-        Logger.get().info("bootstrap.starting");
 
-        this.port = port;
+        ServerSettings settings;
+        try {
+            settings = CliFactory.parseArguments(ServerSettings.class, iargs);
+        } catch(final Exception e) {
+            throw new ServerException("Failed to parse server arguments", e);
+        }
+
+
+        if (settings.getHelp()) {
+            Logger.get().info(StringUtils.joinLines(
+                    "\nDeependServer Help:|@",
+                    "\t--help | --h : Display this help message",
+                    "\t--port | -p <port> : Set the server port"
+            ));
+            System.exit(JavaConstants.EXIT_STATUS_SUCCESS);
+        }
+
+        this.port = settings.getPort();
         this.application = application;
+
+        Logger.get().info("bootstrap.starting", this.port);
 
         // This isn't fully implemented, feel free to uncomment this
         // if you wish, though

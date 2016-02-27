@@ -38,16 +38,16 @@ import static com.minecade.deepend.game.GameCategory.*;
 public class TestGameServer implements DeependServer.DeependServerApplication {
 
     public static void main(String[] args) {
-        new TestGameServer(8000).start();
+        new TestGameServer(args).start();
     }
 
     @Getter
-    private final int port;
+    private final String[] args;
 
     private DeependServer server;
 
     void start() {
-        server = new DeependServer(getPort(), this);
+        server = new DeependServer(getArgs(), this);
         server.run();
     }
 
