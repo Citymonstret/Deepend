@@ -1,11 +1,13 @@
 # Deepend
 
-## Minecade
-This project is run and maintained by [Minecade](http://minecade.com)
+## What is this?
+This project is meant to offer a fresh take on data backend management, and cross-instance sychronization. It does this in a neat and mobile manner. 
 
-![](http://files.enjin.com/265719/images/topMenu/logo_minecade.png)
+Deepend is a project consisting of a custom protocol, a core API, a server module and a client implementation. All of this is written to allow for extreme customization, and is meant to provide the ability to implement Deepend into any pre-existing applications. Deepend aims to have a really easy to follow protocol, and is using netty for the networking backend. It's currently far from finished, but it already includes working modules for everything. The document is very vague, but is coming soon.
 
-## Description
+Deepend includes a lot of cool stuff. For example: You're able to map objects to the protocol (by wrapping them) and the core will automatically convert the objects for you. The protocol includes a CHECK_DATA method which allows you to only poll information that has been updated. The system has native callback support and much, much, more. 
+
+## Technical Description
 A custom Server/Client protcol, lightly based off of Netty. Deepend aims to 
 create a very lightweight, and straight forward system for data synchronisation.
 The server holds data. The server will send out, update or add data, based on
@@ -26,24 +28,23 @@ The core project consists of three parts:
 ## Protocol
 The protocol is very simple *TODO: Document protocol*
 
-## Building
-Build the project using gradle
-```gradlew build```
+| Channel | Wiki | Description |
+| --- | --- | --- |
+| ADD_DATA | ~~link~~ | Add/Update data to the server |
+| GET_DATA | ~~link~~ | Retrieve data from the server |
+| REMOVE_DATA | ~~link~~ | Delete data from the server |
+| CHECK_DATA | ~~link~~ | Used to check if data has been updated |
+| AUTHENTICATE | ~~link~~ | Used to authenticate the client and generate a UUID |
 
+## Building
+Build the project using gradle: ```gradlew build```
 
 ## Dependencies
-## lombok
-We use lombok to simplify our lives, as there is a lot of code
-needed to get this whole thing running. 
-You can find lombok on their website: [projectlombok.org](https://projectlombok.org/)
-
-## netty
-We're using netty to handle the raw networking. We decied to use
-netty, as we wouldn't be able to do anything better ourselves
-
-## guava
-Guava is very popular, and also very stable. It provides us with
-utility classes that would be rather stupid to re-create ourselves.
+| Dependency | Link | Why? |
+| --- | --- | --- |
+| lombok | [projectlombok.org](https://projectlombok.org/) | Makes code prettier |
+| netty | [netty.io](http://netty.io) | Networking backend |
+| guava | [github.com/google/guava](https://github.com/google/guava) | Nice Utilities |
 
 ## Examples
 ### Client
@@ -87,3 +88,8 @@ Maven
 	<version>-SNAPSHOT</version>
 </dependency>
 ```
+
+## Minecade
+This project is run and maintained by [Minecade](http://minecade.com)
+
+![](http://files.enjin.com/265719/images/topMenu/logo_minecade.png)
