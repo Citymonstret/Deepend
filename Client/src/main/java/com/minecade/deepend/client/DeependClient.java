@@ -52,7 +52,7 @@ import java.util.*;
 /**
  * This is the client, as simple as that
  */
-public class DeependClient {
+public final class DeependClient {
 
     private static DeependClient instance;
 
@@ -138,7 +138,7 @@ public class DeependClient {
 
         // Will register all object
         // mappings
-        application.registerObjectMapping(ObjectManager.instance);
+        application.registerObjectMappings(ObjectManager.instance);
 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -308,7 +308,7 @@ public class DeependClient {
 
         void registerInitialRequests(DeependClient client);
 
-        void registerObjectMapping(ObjectManager objectManager);
+        void registerObjectMappings(ObjectManager objectManager);
 
         @Override
         default void registerChannels(ChannelManager channelManager) {}

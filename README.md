@@ -26,7 +26,7 @@ The core project consists of three parts:
 * Server - This is the server
 
 ## Protocol
-The protocol is very simple *TODO: Document protocol*
+The protocol is very simple: [Read more here...](https://github.com/DeependProject/Deepend/wiki/Protocol)
 
 | Channel | Wiki | Description |
 | --- | --- | --- |

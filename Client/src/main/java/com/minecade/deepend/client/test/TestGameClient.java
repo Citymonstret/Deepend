@@ -104,7 +104,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
     }
 
     @Override
-    public void registerObjectMapping(ObjectManager objectManager) {
+    public void registerObjectMappings(ObjectManager objectManager) {
         // Will make sure that all requests using the category PLAYERS
         // returns a GamePlayer instance, rather than returning
         // raw data
