@@ -44,8 +44,11 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
     @Getter
     private final int port;
 
+    private DeependServer server;
+
     void start() {
-        new DeependServer(getPort(), this).run();
+        server = new DeependServer(getPort(), this);
+        server.run();
     }
 
     @Override
@@ -93,7 +96,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
     }
 
     @Override
-    public void after() {
+    public void after(Object context) {
         { // Register data holders using a builder pattern
             DataHolder.DataHolderInitalizer.builder()
                     .name("notch")
@@ -110,6 +113,9 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
             jeb_.put("name", null);
             jeb_.setFallback("uuid");
             DataManager.instance.getDataHolder(GameCategory.PLAYERS).put("jeb_", jeb_);
+
+            // DeependServer server = (DeependServer) context;
+            // server.getStorageBase().saveDataHolder("players", jeb_);
         }
     }
 }

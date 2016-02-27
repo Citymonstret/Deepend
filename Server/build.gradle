@@ -1,3 +1,10 @@
+repositories {
+    maven {
+        url 'http://maven.tmatesoft.com/content/repositories/releases'
+    }
+}
+
 dependencies {
+    compile group: 'org.tmatesoft.sqljet', name: 'sqljet', version: '1.1.10'
     compile rootProject
 }

@@ -47,7 +47,7 @@ public class DeependBundle implements ObjectGetter<String, String> {
         this(propertyFile, false, DefaultBuilder.create());
     }
 
-    final static File folder;
+    public final static File folder;
     static {
         folder = new File("./.deepend");
         if (!folder.exists()) {

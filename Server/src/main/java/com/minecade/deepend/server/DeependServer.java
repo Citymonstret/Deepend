@@ -21,9 +21,10 @@ import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.channels.MainChannel;
+import com.minecade.deepend.storage.StorageBase;
+import com.minecade.deepend.values.ValueFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -31,6 +32,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
@@ -42,6 +44,9 @@ public class DeependServer implements Runnable {
     private final int port;
     private final DeependServerApplication application;
 
+    @Getter
+    private final StorageBase storageBase;
+
     @SneakyThrows
     public DeependServer(final int port, @NonNull DeependServerApplication application) {
         Logger.setup("DeependServer", /* ResourceBundle.getBundle("ServerStrings")*/ new DeependBundle("ServerStrings"));
@@ -49,6 +54,12 @@ public class DeependServer implements Runnable {
 
         this.port = port;
         this.application = application;
+
+        // This isn't fully implemented, feel free to uncomment this
+        // if you wish, though
+        // this.storageBase = new SQLite("server_persistent_storage");
+        // this.storageBase.setup();
+        this.storageBase = null;
 
         // Register channels and
         // lock the manager
@@ -61,7 +72,7 @@ public class DeependServer implements Runnable {
         // This shouldn't be locked
         application.registerDataHolders(DataManager.instance);
         // Run stuff after initial managers and whatnot
-        application.after();
+        application.after(this);
     }
 
     final public void run() {
@@ -69,42 +80,65 @@ public class DeependServer implements Runnable {
             ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
         }
 
-        // Let's use the simplest group
-        // setup possible
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        Thread thread = new Thread("ServerThread") {
+            @Override
+            public void run() {
+                // Let's use the simplest group
+                // setup possible
+                EventLoopGroup bossGroup = new NioEventLoopGroup();
+                EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        // Exceptions aren't fun kids. Stay away from them!
-        try {
-            // This should be clear enough
-            ServerBootstrap bootstrap = new ServerBootstrap();
+                // Exceptions aren't fun kids. Stay away from them!
+                try {
+                    // This should be clear enough
+                    ServerBootstrap bootstrap = new ServerBootstrap();
 
-            // Setup the bootstrap
-            bootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new DeependChannelInitializer(MainChannel.class))
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                    // Setup the bootstrap
+                    bootstrap.group(bossGroup, workerGroup)
+                            .channel(NioServerSocketChannel.class)
+                            .childHandler(new DeependChannelInitializer(MainChannel.class))
+                            .option(ChannelOption.SO_BACKLOG, 128)
+                            .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            // Yay for logging
-            Logger.get().info("bootstrap.started");
+                    // Yay for logging
+                    Logger.get().info("bootstrap.started");
 
-            // At least they've got a future :o
-            ChannelFuture future;
+                    // At least they've got a future :o
+                    ChannelFuture future;
 
-            // Yay for nested try statements
-            try {
-                // start the server
-                future = bootstrap.bind(port).sync();
-            } catch(final Exception e) { // Nuh! This shouldn't happen :(
-                Logger.get().error("bootstrap.failed.bind");
-                return;
+                    // Yay for nested try statements
+                    try {
+                        // start the server
+                        future = bootstrap.bind(port).sync();
+                    } catch(final Exception e) { // Nuh! This shouldn't happen :(
+                        Logger.get().error("bootstrap.failed.bind");
+                        return;
+                    }
+                    // Wait until the socket is closed
+                    future.channel().closeFuture().sync();
+
+                    if (storageBase != null) {
+                        storageBase.close();
+                    }
+                } catch(final Exception e) { // Why do you have to hurt me?
+                    e.printStackTrace();
+                }
             }
-            // Wait until the socket is closed
-            future.channel().closeFuture().sync();
-        } catch(final Exception e) { // Why do you have to hurt me?
-            e.printStackTrace();
-        }
+        };
+
+        thread.setDaemon(false);
+        thread.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                Logger.get().info("Shutdown requested");
+
+                if (storageBase != null) {
+                    storageBase.close();
+                }
+            }
+        });
     }
 
     /**

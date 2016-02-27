@@ -43,5 +43,5 @@ public interface DeependApplication {
     /**
      * Actions done after initialization
      */
-    default void after() {}
+    default void after(Object context) {}
 }

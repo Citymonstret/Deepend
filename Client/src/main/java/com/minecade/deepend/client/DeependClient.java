@@ -16,7 +16,6 @@
 
 package com.minecade.deepend.client;
 
-import com.google.common.base.Preconditions;
 import com.minecade.deepend.DeependApplication;
 import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.DeependMeta;
@@ -76,13 +75,6 @@ public class DeependClient {
         instance = this;
 
         DeependMeta.setMeta("client", "true");
-
-        DeependBundle bundle = null;
-        try {
-            bundle = new DeependBundle("ClientStrings");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         // Let's setup the Deepend logger
         Logger.setup("DeependClient", new DeependBundle("ClientStrings", true));
@@ -170,6 +162,18 @@ public class DeependClient {
         application.registerInitialRequests(this);
 
         Logger.get().info("thread.starting");
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try {
+                    workerGroup.shutdownGracefully();
+                } catch(final Exception e) {
+                    e.printStackTrace();
+                }
+                Logger.get().info("shutdown.completed");
+            }
+        });
 
         final Thread thread = new Thread() {
             {
@@ -271,18 +275,6 @@ public class DeependClient {
 
         thread.setDaemon(false);
         thread.start();
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    workerGroup.shutdownGracefully();
-                } catch(final Exception e) {
-                    e.printStackTrace();
-                }
-                Logger.get().info("shutdown.completed");
-            }
-        });
     }
 
     public DeependClient(DeependClientApplication application) {
@@ -301,7 +293,6 @@ public class DeependClient {
     }
 
     public String getProperty(String key) {
-        Preconditions.checkArgument(properties.containsKey(key), "Client property \"%s\" not found!", key);
         return this.properties.get(key);
     }
 
