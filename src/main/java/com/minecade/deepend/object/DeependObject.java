@@ -67,11 +67,24 @@ public abstract class DeependObject {
         }
     }
 
-    @Synchronized
     protected void scan(@NonNull Class<?> clazz) {
-        for (Field field : clazz.getDeclaredFields()) {
-            for (ObjectProperty property : field.getDeclaredAnnotationsByType(ObjectProperty.class)) {
-                addValue(property.name(), property.type(), new FieldGetter(field, this));
+        for (final Field field : clazz.getDeclaredFields()) {
+            for (final ObjectProperty property : field.getDeclaredAnnotationsByType(ObjectProperty.class)) {
+                DataType type = property.type();
+                if (type == DataType.DEFAULT) {
+                    Class<?> fieldType = field.getType();
+                    if (fieldType == int.class) {
+                        type = DataType.INT;
+                    } else if (fieldType == String.class) {
+                        type = DataType.STRING;
+                    } else if (fieldType == byte.class) {
+                        type = DataType.BYTE;
+                    } else {
+                        Logger.get().error("Unknown type set when DEFAULT for field " + field.getDeclaringClass().getSimpleName() + "#" + field.getName());
+                        continue;
+                    }
+                }
+                addValue(property.name(), type, new FieldGetter(field, this));
             }
         }
         buildValues();
@@ -108,7 +121,6 @@ public abstract class DeependObject {
                 builder.append(",");
             }
         }
-        Logger.get().debug("Sending keys: " + builder.toString());
         buf.writeString(builder.toString());
     }
 
@@ -137,10 +149,28 @@ public abstract class DeependObject {
         this.isBuilt = true;
     }
 
-    protected void updateField(@NonNull String key, @NonNull Object value) {
-        FieldGetter getter = (FieldGetter) properties.get(holderMap.get(key));
+    protected void updateField(@NonNull String key, @NonNull String value) {
+        PropertyHolder holder = holderMap.get(key);
+        FieldGetter getter = (FieldGetter) properties.get(holder);
         try {
-            getter.field.set(getter.object, value);
+            Object val = null;
+
+            switch (holder.type) {
+                case STRING:
+                    val = value;
+                    break;
+                case INT:
+                    val = Integer.parseInt(value);
+                    break;
+                case BYTE:
+                    val = Byte.parseByte(value);
+                    break;
+                default:
+                    break;
+            }
+            assert val != null;
+
+            getter.field.set(getter.object, val);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

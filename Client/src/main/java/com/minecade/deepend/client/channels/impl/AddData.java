@@ -23,7 +23,6 @@ import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.request.DataRequest;
-import com.minecade.deepend.values.ValueFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,6 @@ public class AddData extends DeependChannel {
         // ByteBuf in = connection.getObject("in", ByteBuf.class);
 
         String getID = in.getString();
-        Logger.get().debug("Getting response for: " + getID);
         DataRequest request = DataRequest.getRequest(getID);
 
         if (request == null) {
@@ -56,20 +54,13 @@ public class AddData extends DeependChannel {
         if (response == GenericResponse.SUCCESS) {
             byte categoryByte = in.getByte();
 
-            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE)
-                    .getName(categoryByte);
-
-            Logger.get().debug("Type: " + category);
-
             int num = in.getInt();
-            Logger.get().debug("Found " + num + " objects");
 
             List<Object> objects = new ArrayList<>();
 
             for (int i = 0; i < num; i++) {
                 String identifier = in.getString();
                 String data = in.getString();
-                Logger.get().info("Data added: \"" + identifier + "\":\"" + data + "\"");
                 objects.add(new DataObject(identifier, data));
             }
 

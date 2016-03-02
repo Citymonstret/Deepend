@@ -28,6 +28,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * @author Citymonstret
+ */
 public class GamePlayer extends DeependObject {
 
     @Getter

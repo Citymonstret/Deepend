@@ -43,7 +43,7 @@ public class LogFactory extends ConfigurationFactory {
         builder.setConfigurationName(name);
         builder.setStatusLevel(Level.ERROR);
 
-        String pattern = "[" + style("%d{HH:mm:ss.SSS}", "white") +
+        String pattern = "[" + style("%d{HH:mm:ss}", "white") +
                 "][%highlight{%level}" + COLOR_STYLES + "][" +
                 style("%logger{36}", "white") + "][" + style("%t", "cyan") + "]: " +
                 style("%msg", "bright") + "%n";

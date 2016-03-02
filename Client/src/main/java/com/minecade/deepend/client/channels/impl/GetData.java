@@ -16,14 +16,15 @@
 
 package com.minecade.deepend.client.channels.impl;
 
-import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.DeependChannel;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.object.*;
+import com.minecade.deepend.object.DeependObject;
+import com.minecade.deepend.object.GenericResponse;
+import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.DataRequest;
 
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ public class GetData extends DeependChannel {
         DeependBuf in = connection.getBuf("in");
 
         String getID = in.getString();
-        Logger.get().debug("Getting response for: " + getID);
         DataRequest request = DataRequest.getRequest(getID);
 
         if (request == null) {
@@ -53,13 +53,7 @@ public class GetData extends DeependChannel {
         if (response == GenericResponse.SUCCESS) {
             byte categoryByte = in.getByte();
 
-            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE)
-                    .getName(categoryByte);
-
-            Logger.get().debug("Type: " + category);
-
             int num = in.getInt();
-            Logger.get().debug("Found " + num + " objects");
 
             List<Object> objects = new ArrayList<>();
 
@@ -67,7 +61,6 @@ public class GetData extends DeependChannel {
                 for (int i = 0; i < num; i++) {
                     String identifier = in.getString();
                     String data = in.getString();
-                    Logger.get().info("Data received: \"" + identifier + "\":\"" + data + "\"");
                     objects.add(new DataObject(identifier, data));
                 }
             } else {

@@ -22,5 +22,7 @@ package com.minecade.deepend.data;
 public enum DataType {
     INT,
     BYTE,
-    STRING
+    STRING,
+
+    DEFAULT
 }

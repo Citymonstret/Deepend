@@ -40,17 +40,14 @@ public class MainChannel extends ChannelHandlerAdapter {
         // Make sure no one tries to write to this
         in.lock();
 
-        Logger.get().debug("Received message");
-
         try {
             ServerResponse serverResponse = ServerResponse.getServerResponse(in.getByte());
             Channel channel = Channel.getChannel(in.getInt());
-            Logger.get().info("Server Responded With: " + serverResponse.name());
-            Logger.get().info("Server Channel: " + channel.name());
+
+            Logger.get().info("Received message. Response: " + serverResponse.name() + " | Channel: " + channel.name());
 
             if (serverResponse == ServerResponse.AUTHENTICATION_ATTEMPTED) {
                 GenericResponse authenticationResponse = GenericResponse.getGenericResponse(in.getByte());
-                Logger.get().info("Status: " + authenticationResponse);
 
                 if (authenticationResponse == GenericResponse.SUCCESS) {
                     int uuidLenght = in.getInt();
@@ -59,11 +56,13 @@ public class MainChannel extends ChannelHandlerAdapter {
                         bytes[i] = in.getByte();
                     }
 
-                    Logger.get().debug("Received UUID: " + new String(bytes));
-
                     DeependClient.currentConnection.getRemoteAddress().setUUID(new String(bytes));
                     DeependClient.currentConnection.setAuthenticated(true);
                     DeependClient.getInstance().resetAuthenticationPendingStatus();
+
+                    Logger.get().info("Authentication succeeded | Authentication UUID: " + DeependClient.currentConnection.getRemoteAddress().getUUID());
+                } else {
+                    Logger.get().error("Authentication failed | Was the login details correct?");
                 }
             } else if (serverResponse == ServerResponse.ALREADY_AUTHENTICATED) {
                 DeependClient.currentConnection.setAuthenticated(true);

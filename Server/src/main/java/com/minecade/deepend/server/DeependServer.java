@@ -194,5 +194,10 @@ public class DeependServer implements Runnable {
          */
         void registerDataHolders(DataManager dataManager);
 
+        default void after(Object context) {
+            after((DeependServer) context);
+        }
+
+        void after(DeependServer server);
     }
 }

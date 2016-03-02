@@ -46,5 +46,5 @@ public @interface ObjectProperty {
      * defaults to {@link DataType#STRING}
      * @return Property type
      */
-    DataType type() default DataType.STRING;
+    DataType type() default DataType.DEFAULT;
 }

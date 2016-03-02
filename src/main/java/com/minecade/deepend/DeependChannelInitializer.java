@@ -60,13 +60,10 @@ public final class DeependChannelInitializer extends ChannelInitializer<SocketCh
             pipeline.addLast(new AbstractRemoteAddressFilter<InetSocketAddress>() {
                 @Override
                 protected boolean accept(ChannelHandlerContext ctx, InetSocketAddress remoteAddress) throws Exception {
-                    Logger.get().debug("Remote addr: " + remoteAddress.getHostName());
                     boolean allowed = remoteAddress.getHostName().equals(DeependMeta.getMeta("serverAddr"))
                                 && ("" + remoteAddress.getPort()).equals(DeependMeta.getMeta("serverPort"));
                     if (!allowed) {
-                        Logger.get().debug("Dropping");
-                    } else {
-                        Logger.get().debug("Allowed");
+                        Logger.get().debug("Dropping channel attempt from: " + remoteAddress.getHostName());
                     }
                     return allowed;
                 }

@@ -68,7 +68,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
 
     @Override
     public void registerDataHolders(DataManager dataManager) {
-        DataManager.createDataHolders(PLAYERS, PLAYER_SERVERS, PROXIES);
+        DataManager.createDataHolders(PLAYERS, PLAYER_SERVERS, PROXIES, SERVERS);
         DataManager.instance.registerDataHolder(new MirrorDataHolder(
                 GameCategory.PLAYER_SERVERS.name(),
                 DataManager.instance.getDataHolder(GameCategory.PLAYERS.name()),
@@ -111,7 +111,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
     }
 
     @Override
-    public void after(Object context) {
+    public void after(DeependServer context) {
         { // Register data holders using a builder pattern
             DataHolder.DataHolderInitalizer.builder()
                     .name("notch")

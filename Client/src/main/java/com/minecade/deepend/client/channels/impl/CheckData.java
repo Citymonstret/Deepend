@@ -38,7 +38,6 @@ public class CheckData extends DeependChannel {
     public void act(@NonNull DeependConnection connection, DeependBuf buf) {
         DeependBuf in = connection.getBuf("in");
         String getID = in.getString();
-        Logger.get().debug("Getting response for: " + getID);
         StatusRequest request = StatusRequest.getRequest(getID);
         if (request == null) {
             Logger.get().error("Got response for unregistered request, throwing!");

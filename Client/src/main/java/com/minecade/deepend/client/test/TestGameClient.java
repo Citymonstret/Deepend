@@ -36,10 +36,10 @@ import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.game.GameCategory;
 import com.minecade.deepend.game.GamePlayer;
+import com.minecade.deepend.game.GameServer;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.ProviderGroup;
-import com.minecade.deepend.object.StringList;
 import com.minecade.deepend.request.*;
 import com.minecade.deepend.values.ValueFactory;
 
@@ -74,6 +74,8 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
             }
         });
 
+        DataRequest.DataRecipient nullRecipient = o -> {};
+
         // Just a simple debug statement for categories, should
         // be used to add new requests
         StatusRequest.StatusRecipient statusRecipient = f -> categoryEnumBitField.extract(f)
@@ -89,30 +91,26 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         // These three requests does the same thing, it just
         // shows that the syntax can be adapted to many different
         // usage scenarios
-        client.addPendingRequest(GamePlayer.requestPlayer("jeb_,notch", currentConnection(), serverAnnouncement));
-        client.addPendingRequest(GamePlayer.requestPlayer("*", currentConnection(), serverAnnouncement));
-        client.addPendingRequest(GamePlayer.requestPlayers(new StringList("jeb_", "notch"), currentConnection(), serverAnnouncement));
+        // client.addPendingRequest(GamePlayer.requestPlayer("jeb_,notch", currentConnection(), serverAnnouncement));
+        // client.addPendingRequest(GamePlayer.requestPlayer("*", currentConnection(), serverAnnouncement));
+        // client.addPendingRequest(GamePlayer.requestPlayers(new StringList("jeb_", "notch"), currentConnection(), serverAnnouncement));
 
-        // Let's add some data to the PROXIES holder
-        client.addPendingRequest(new AddRequest(debugRecipient, currentConnection()) {
+        client.addPendingRequest(new AddRequest(nullRecipient, currentConnection()) {
             @Override
             protected void buildRequest(DeependBuf buf) {
-                buf.writeByte(GameCategory.PROXIES);
-                buf.writeString("lobby1");
-                buf.writeInt(1);
-                buf.writeString("players:10");
+                buf.writeByte(GameCategory.SERVERS);
+                buf.writeString("server1");
+                buf.writeInt(4);
+                buf.writeString("serverName:server1");
+                buf.writeString("gameType:minigame");
+                buf.writeString("playerCount:10");
+                buf.writeString("maxCount:999");
             }
         });
 
-        // Now let's read it, to make sure it's there
-        client.addPendingRequest(new GetRequest(debugRecipient, currentConnection()) {
-            @Override
-            protected void buildRequest(DeependBuf buf) {
-                buf.writeByte(GameCategory.PROXIES);
-                buf.writeString("lobby1");
-                buf.writeString("*");
-            }
-        });
+        client.addPendingRequest(GameServer.requestServer("*", currentConnection(),
+                c -> Logger.get().debug(
+                        "Found server: " + c.getServerName() + ", players: " + c.getPlayerCountCurrent() + "/" + c.getPlayerCountMax())));
 
         // This makes the client shut down, quite handy
         client.addPendingRequest(new ShutdownRequest());
@@ -124,6 +122,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         // returns a GamePlayer instance, rather than returning
         // raw data
         ObjectManager.instance.registerMapping(GamePlayer.class);
+        ObjectManager.instance.registerMapping(GameServer.class);
     }
 
     @Override
