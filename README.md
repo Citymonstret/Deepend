@@ -81,7 +81,7 @@ Maven
 Gradle
 ```
 dependencies {
-    compile 'com.github.Minecade:Deepend:-SNAPSHOT'
+    compile 'com.github.Minecade:Deepend:v0.2'
 }
 ```
 
@@ -90,7 +90,7 @@ Maven
 <dependency>
     <groupId>com.github.Minecade</groupId>
 	<artifactId>Deepend</artifactId>
-	<version>-SNAPSHOT</version>
+	<version>v0.2</version>
 </dependency>
 ```
 
