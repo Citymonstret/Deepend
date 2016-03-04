@@ -16,6 +16,7 @@
 package com.minecade.deepend;
 
 import com.minecade.deepend.lib.Stable;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 import java.util.Map;
@@ -44,7 +45,7 @@ public final class DeependMeta {
      * @param key Key to check for
      * @return True if exists | False if it doesn't
      */
-    public static boolean hasMeta(String key) {
+    public static boolean hasMeta(@NonNull String key) {
         return map.containsKey(key);
     }
 
@@ -56,7 +57,7 @@ public final class DeependMeta {
      * @param key Value key
      * @return Value
      */
-    public static String getMeta(String key) {
+    public static String getMeta(@NonNull String key) {
         return map.get(key);
     }
 
@@ -66,7 +67,7 @@ public final class DeependMeta {
      * @param key Key to (add | update)
      * @param val Meta value
      */
-    public static void setMeta(String key, String val) {
+    public static void setMeta(@NonNull String key, @NonNull String val) {
         map.put(key, val);
     }
 
@@ -75,7 +76,7 @@ public final class DeependMeta {
      *
      * @param key Value to remove
      */
-    public static void removeMeta(String key) {
+    public static void removeMeta(@NonNull String key) {
         map.remove(key);
     }
 }

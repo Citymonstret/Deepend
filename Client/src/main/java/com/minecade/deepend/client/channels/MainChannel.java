@@ -56,16 +56,16 @@ public class MainChannel extends ChannelHandlerAdapter {
                         bytes[i] = in.getByte();
                     }
 
-                    DeependClient.currentConnection.getRemoteAddress().setUUID(new String(bytes));
-                    DeependClient.currentConnection.setAuthenticated(true);
+                    DeependClient.getCurrentConnection().getRemoteAddress().setUUID(new String(bytes));
+                    DeependClient.getCurrentConnection().setAuthenticated(true);
                     DeependClient.getInstance().resetAuthenticationPendingStatus();
 
-                    Logger.get().info("Authentication succeeded | Authentication UUID: " + DeependClient.currentConnection.getRemoteAddress().getUUID());
+                    Logger.get().info("Authentication succeeded | Authentication UUID: " + DeependClient.getCurrentConnection().getRemoteAddress().getUUID());
                 } else {
                     Logger.get().error("Authentication failed | Was the login details correct?");
                 }
             } else if (serverResponse == ServerResponse.ALREADY_AUTHENTICATED) {
-                DeependClient.currentConnection.setAuthenticated(true);
+                DeependClient.getCurrentConnection().setAuthenticated(true);
             }
 
             if (serverResponse == ServerResponse.REQUIRES_AUTHENTICATION) {
@@ -76,8 +76,8 @@ public class MainChannel extends ChannelHandlerAdapter {
                 Logger.get().error("Server channel failed to return data");
             } else {
                 if (channel != Channel.UNKNOWN && channel != Channel.AUTHENTICATE) {
-                    DeependClient.currentConnection.addMeta("in", in);
-                    ChannelManager.instance.getChannel(channel).act(DeependClient.currentConnection, null);
+                    DeependClient.getCurrentConnection().addMeta("in", in);
+                    ChannelManager.instance.getChannel(channel).act(DeependClient.getCurrentConnection(), null);
                 }
             }
         } finally {

@@ -17,6 +17,8 @@
 package com.minecade.deepend.channels;
 
 import com.minecade.deepend.values.NumberProvider;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,32 +26,45 @@ import java.util.Map;
 /**
  * These are the channels that
  * are supported by the default protocol
+ *
+ * <a>https://github.com/DeependProject/Deepend/wiki/Channels</a>
  */
+@RequiredArgsConstructor
 public enum Channel implements NumberProvider<Integer> {
 
     /**
      * Authentication channel
+     *
+     * <a>https://github.com/DeependProject/Deepend/wiki/AUTHENTICATION</a>
      */
     AUTHENTICATE(1),
 
     /**
      * Used to check listen for
      * quality
+     *
+     * <a>https://github.com/DeependProject/Deepend/wiki/CHECK_DATA</a>
      */
     CHECK_DATA(1 << 1),
 
     /**
      * Add data to the server
+     *
+     * <a>https://github.com/DeependProject/Deepend/wiki/ADD_DATA</a>
      */
     ADD_DATA(1 << 2),
 
     /**
      * Get data from the server
+     *
+     * <a>https://github.com/DeependProject/Deepend/wiki/GET_DATA</a>
      */
     GET_DATA(1 << 3),
 
     /**
      * Remove data from the server
+     *
+     * <a>https://github.com/DeependProject/Deepend/wiki/REMOVE_DATA</a>
      */
     REMOVE_DATA(1 << 4),
 
@@ -58,21 +73,17 @@ public enum Channel implements NumberProvider<Integer> {
      */
     UNKNOWN(1 << 5);
 
-    private final Integer id;
-
-    Channel(final Integer id) {
-        this.id = id;
-    }
-
-    @Override
-    public Integer getValue() {
-        return this.id;
-    }
+    @Getter
+    private final Integer value;
 
     @Override
     public String getIdentifier() {
         return this.name();
     }
+
+    //
+    // STATIC STUFF
+    //
 
     private static final Map<Integer, Channel> cache = new HashMap<>();
 

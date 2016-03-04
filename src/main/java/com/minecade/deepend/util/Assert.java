@@ -22,6 +22,8 @@ import lombok.experimental.UtilityClass;
  * Our custom assertion class. This
  * was solely made to give us more
  * control than we previously had.
+ *
+ * @author Citymonstret
  */
 @Stable
 @UtilityClass
@@ -33,7 +35,7 @@ public class Assert {
      * @return String, if passed
      * @throws AssertionError If not passing the test
      */
-    public static String notEmpty(String s) {
+    public static String notEmpty(final String s) {
         try {
             equals(s == null || s.isEmpty(), false);
         } catch (final AssertionError a) {
@@ -48,8 +50,8 @@ public class Assert {
      * @return Array, if passed
      * @throws AssertionError If not passing the test
      */
-    public static Object[] notNull(Object... in) {
-        for (Object i : in) {
+    public static Object[] notNull(final Object... in) {
+        for (final Object i : in) {
             notNull(i);
         }
         return in;
@@ -62,7 +64,7 @@ public class Assert {
      * @return T, if passed
      * @throws AssertionError If not passing the test
      */
-    public static <T> T notNull(T t) {
+    public static <T> T notNull(final T t) {
         try {
             equals(t == null, false);
         } catch (final AssertionError a) {
@@ -79,7 +81,7 @@ public class Assert {
      * @param <Exception> Exception type
      * @throws Exception Exception to cast if a != b
      */
-    public static <Exception extends Throwable> void equals(boolean a, boolean b, Exception t) throws Exception {
+    public static <Exception extends Throwable> void equals(final boolean a, final boolean b, final Exception t) throws Exception {
         if (a != b) {
             throw t;
         }
@@ -91,10 +93,9 @@ public class Assert {
      * @param b Boolean B
      * @throws AssertionError If not passing the test
      */
-    public static void equals(boolean a, boolean b) {
+    public static void equals(final boolean a, final boolean b) {
         equals(a, b, new AssertionError(a, "a != b"));
     }
-
 
     public static final class AssertionError extends RuntimeException {
         public AssertionError(Object o, String s) {

@@ -20,6 +20,7 @@ import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
 import com.minecade.deepend.DeependApplication;
 import com.minecade.deepend.DeependChannelInitializer;
+import com.minecade.deepend.DeependConstants;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
@@ -66,14 +67,13 @@ public class DeependServer implements Runnable {
     }
 
     private final int port;
-    private final DeependServerApplication application;
 
     @Getter
     private final StorageBase storageBase;
 
     @SneakyThrows
     public DeependServer(String[] iargs, @NonNull DeependServerApplication application) {
-        Logger.setup("DeependServer", /* ResourceBundle.getBundle("ServerStrings")*/ new DeependBundle("ServerStrings"));
+        Logger.setup(DeependConstants.SERVER_NAME, new DeependBundle("ServerStrings"));
 
         ServerSettings settings;
         try {
@@ -81,7 +81,6 @@ public class DeependServer implements Runnable {
         } catch(final Exception e) {
             throw new ServerException("Failed to parse server arguments", e);
         }
-
 
         if (settings.getHelp()) {
             Logger.get().info(StringUtils.joinLines(
@@ -93,7 +92,6 @@ public class DeependServer implements Runnable {
         }
 
         this.port = settings.getPort();
-        this.application = application;
 
         Logger.get().info("bootstrap.starting", this.port);
 

@@ -16,7 +16,7 @@ allprojects {
     apply plugin: 'eclipse'
 
     group = 'com.mincade'
-    version = '0.2'
+    version = '0.2.1'
     description = """Deepend"""
 
     compileJava {

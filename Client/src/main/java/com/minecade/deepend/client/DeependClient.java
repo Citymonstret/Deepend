@@ -44,43 +44,61 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.Synchronized;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
+import static com.minecade.deepend.DeependConstants.CLIENT_META;
+import static com.minecade.deepend.DeependConstants.CLIENT_NAME;
+import static com.minecade.deepend.DeependConstants.CLIENT_STRINGS;
+
 /**
- * This is the client, as simple as that
+ * This is the client class. This is final, as it isn't meant
+ * to be extended. Instead you're supposed to start it from
+ * a remote class.
+ *
+ * Wiki: <a>https://github.com/DeependProject/Deepend/wiki/Client</a>
+ *
+ * For an example, see {@link com.minecade.deepend.client.test.TestGameClient}
+ *
+ * @author Citymonstret
  */
 public final class DeependClient {
 
     private static DeependClient instance;
 
     public static DeependClient getInstance() {
+        if (instance == null) {
+            throw new RuntimeException("Cannot get instance before it's declared");
+        }
         return instance;
     }
 
-    public static DeependConnection currentConnection;
+    @Getter
+    private static DeependConnection currentConnection;
 
     @Getter
     public String echoTestString;
 
-    private Collection<PendingRequest> pendingRequests;
-    private volatile boolean shutdown, sentAuthenticationRequest;
-    private DeependBundle properties;
+    private volatile boolean shutdown;
+    private volatile boolean sentAuthenticationRequest;
+
+    @Getter
+    private final DeependBundle properties;
+
+    private final Collection<PendingRequest> pendingRequests;
 
     @SneakyThrows
     public DeependClient(@NonNull DeependClientApplication application, boolean useProvided, String host, int port) {
-        // Make sure the static instance is set
-        instance = this;
+        DeependClient.instance = this;
+        DeependMeta.setMeta(CLIENT_META, "true");
 
-        DeependMeta.setMeta("client", "true");
-
-        // Let's setup the Deepend logger
-        Logger.setup("DeependClient", new DeependBundle("ClientStrings", true));
+        Logger.setup(CLIENT_NAME, new DeependBundle(CLIENT_STRINGS, true));
 
         // These are the default settings for the client
-        this.properties = new DeependBundle("client", false, DeependBundle.DefaultBuilder.create()
+        this.properties = new DeependBundle(CLIENT_META, false, DeependBundle.DefaultBuilder.create()
                 .add("echo.string", "Test")
                 .add("auth.user", "admin")
                 .add("auth.pass", "password")
@@ -105,42 +123,43 @@ public final class DeependClient {
             port1 = port;
         }
 
-        // Make sure the address is set to the
-        // one we're authenticating to
-        //
-        // Otherwise the client will drop
-        // all request :/
-        DeependMeta.setMeta("serverAddr", host1);
-        DeependMeta.setMeta("serverPort", port1 + "");
+        {   // SETUP CONNECTION LIMITATIONS
+            DeependMeta.setMeta("serverAddr", host1);
+            DeependMeta.setMeta("serverPort", port1 + "");
+        }
 
-        this.shutdown = false;
+        {   // DEFAULT VALUES
+            this.shutdown = false;
+            this.pendingRequests = Collections.synchronizedSet(new LinkedHashSet<>());
+        }
 
-        this.pendingRequests = Collections.synchronizedSet(new LinkedHashSet<>());
+        {   // CHANNEL SETUP
+            ChannelManager.instance.addChannel(new GetData());
+            ChannelManager.instance.addChannel(new DeleteData());
+            ChannelManager.instance.addChannel(new AddData());
+            ChannelManager.instance.addChannel(new CheckData());
 
-        // Register default channels
-        ChannelManager.instance.addChannel(new GetData());
-        ChannelManager.instance.addChannel(new DeleteData());
-        ChannelManager.instance.addChannel(new AddData());
-        ChannelManager.instance.addChannel(new CheckData());
+            // Register custom channels
+            application.registerChannels(ChannelManager.instance);
 
-        // Register custom channels
-        application.registerChannels(ChannelManager.instance);
+            // Lock channel registration
+            ChannelManager.instance.lock();
+        }
 
-        // Lock channel registration
-        ChannelManager.instance.lock();
+        {   // FACTORY SETUP
+            // Register byte factories, before everything
+            // is loaded
+            application.registerFactories();
 
-        // Register byte factories, before everything
-        // is loaded
-        application.registerFactories();
+            // Lock byte factory registration
+            ValueFactory.lock();
 
-        // Lock byte factory registration
-        ValueFactory.lock();
+            // Will register all object
+            // mappings
+            application.registerObjectMappings(ObjectManager.instance);
+        }
 
-        // Will register all object
-        // mappings
-        application.registerObjectMappings(ObjectManager.instance);
-
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         final Bootstrap b = new Bootstrap();
         b.group(workerGroup);
@@ -189,7 +208,7 @@ public final class DeependClient {
                 boolean connectionProblems = true;
                 while (!shutdown) {
                     if (!connectionProblems) {
-                        if (currentConnection.isAuthenticated()) {
+                        if (getCurrentConnection().isAuthenticated()) {
                             toRemove = new ArrayList<>();
                             for (PendingRequest r : pendingRequests)
                                 requests:{
@@ -224,7 +243,7 @@ public final class DeependClient {
 
                                     new PendingRequest(Channel.AUTHENTICATE) {
                                         @Override
-                                        protected void makeRequest(DeependBuf buf) {
+                                        protected void makeRequest(final DeependBuf buf) {
                                             Logger.get().info("common.authenticating");
                                             buf.writeString(getProperty("auth.user"));
                                             buf.writeString(getProperty("auth.pass"));
@@ -281,6 +300,7 @@ public final class DeependClient {
         this(application, false, "", -1);
     }
 
+    @Synchronized
     public void requestShutdown() {
         if (!shutdown) {
             Logger.get().info("shutdown.requested");
@@ -288,26 +308,52 @@ public final class DeependClient {
         this.shutdown = true;
     }
 
+    /**
+     * Add a pending request that will be scheduled and
+     * sent as soon as there is a possibility
+     *
+     * @param r Request to send
+     */
     public void addPendingRequest(@NonNull final PendingRequest r) {
         this.pendingRequests.add(r);
     }
 
-    public String getProperty(String key) {
+    public String getProperty(@NonNull String key) {
         return this.properties.get(key);
     }
 
+    /**
+     * Reset the authentication status for this client,
+     * which forces it to re-authenticate
+     */
     public void resetAuthenticationPendingStatus() {
         this.sentAuthenticationRequest = false;
     }
 
+    /**
+     * <a>https://github.com/DeependProject/Deepend/wiki/Client</a>
+     */
     public interface DeependClientApplication extends DeependApplication {
 
         default DeependConnection currentConnection() {
-            return DeependClient.currentConnection;
+            return DeependClient.getCurrentConnection();
         }
 
+        /**
+         * Register requests that will be sent as soon
+         * as the client has established a connection
+         * to the server
+         *
+         * @param client Client (global instance)
+         */
         void registerInitialRequests(DeependClient client);
 
+        /**
+         * Use the ObjectManager to bind any DeependObject implementations to
+         * their specified object type
+         *
+         * @param objectManager Manager (global instance)
+         */
         void registerObjectMappings(ObjectManager objectManager);
 
         @Override

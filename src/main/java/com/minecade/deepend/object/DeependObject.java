@@ -143,8 +143,8 @@ public abstract class DeependObject {
         this.cache = new HashMap<>();
         this.holderMap = new HashMap<>();
         for (Map.Entry<PropertyHolder, PropertyGetter> entry : properties.entrySet()) {
-            this.cache.put(entry.getKey().name, entry.getValue().getValue());
-            this.holderMap.put(entry.getKey().name, entry.getKey());
+            this.cache.put(entry.getKey().getName(), entry.getValue().getValue());
+            this.holderMap.put(entry.getKey().getName(), entry.getKey());
         }
         this.isBuilt = true;
     }
@@ -250,9 +250,9 @@ public abstract class DeependObject {
         abstract Object getValue();
     }
 
-    @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+    @Value
     private class PropertyHolder {
-        @NonNull final String name;
-        @NonNull final DataType type;
+        String name;
+        DataType type;
     }
 }

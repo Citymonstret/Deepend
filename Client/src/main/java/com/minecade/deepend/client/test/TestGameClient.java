@@ -86,7 +86,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         //
 
         // This will simply fetch the updated categories
-        client.addPendingRequest(new StatusRequest(field, statusRecipient, DeependClient.currentConnection));
+        client.addPendingRequest(new StatusRequest(field, statusRecipient, currentConnection()));
 
         // These three requests does the same thing, it just
         // shows that the syntax can be adapted to many different

@@ -64,7 +64,7 @@ public class DataManager<T extends DeependObject, O extends ByteProvider> {
         } else {
             DeependClient.getInstance().addPendingRequest(
                     new ObjectGetRequest(key, getInstance(), (data) -> data.stream().filter(clazz::isInstance)
-                            .forEach(item -> callback.act(clazz.cast(item))), DeependClient.currentConnection)
+                            .forEach(item -> callback.act(clazz.cast(item))), DeependClient.getCurrentConnection())
             );
         }
     }

@@ -36,15 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public class ConnectionFactory {
+public final class ConnectionFactory {
 
     public static final ConnectionFactory instance = new ConnectionFactory();
 
-    private Map<String, DeependConnection> internalMap;
+    private final Map<String, DeependConnection> internalMap = new ConcurrentHashMap<>();
 
-    ConnectionFactory() {
-        this.internalMap = new ConcurrentHashMap<>();
-    }
+    ConnectionFactory() {}
 
     /**
      * Get the connection for a simple address
@@ -64,8 +62,9 @@ public class ConnectionFactory {
      * @param connection Connection
      */
     @Stable
-    final public void addConnection(final @NonNull DeependConnection connection) {
+    final public DeependConnection addConnection(final @NonNull DeependConnection connection) {
         this.internalMap.put(connection.getRemoteAddress().toString(), connection);
+        return connection;
     }
 
     /**
@@ -75,9 +74,7 @@ public class ConnectionFactory {
      */
     @Stable
     final public DeependConnection createConnection(final @NonNull InetSocketAddress remoteAddress) {
-        DeependConnection connection = new DeependConnection(new SimpleAddress(remoteAddress.getHostName()));
-        addConnection(connection);
-        return connection;
+        return addConnection(new DeependConnection(new SimpleAddress(remoteAddress.getHostName())));
     }
 
     /**
@@ -90,7 +87,7 @@ public class ConnectionFactory {
      * @return Created, or re-used connection
      */
     @Beta
-    final public DeependConnection getOrCreate(final @NonNull SocketAddress socketAddress, UUID uuid) {
+    final public DeependConnection getOrCreate(final @NonNull SocketAddress socketAddress, final @NonNull UUID uuid) {
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
         SimpleAddress simpleAddress = new SimpleAddress(inetSocketAddress.getHostName());
         simpleAddress.setUUID(uuid.toString());
