@@ -28,7 +28,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-mainClassName = 'com.minecade.deepend.server.test.TestGameServer'
+mainClassName = 'com.minecade.deepend.server.SimpleServer'
 
 jar {
     manifest {
