@@ -16,9 +16,14 @@
 
 package com.minecade.deepend.channels;
 
+import com.minecade.deepend.reflection.AnnotatedMethod;
+import com.minecade.deepend.reflection.AnnotationUtil;
+import com.minecade.deepend.reflection.ReflectionMethod;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,12 +54,30 @@ public class ChannelManager {
      * @param channel Channel to add
      */
     @SneakyThrows(RuntimeException.class)
-    public void addChannel(@NonNull DeependChannel channel) {
+    public void addChannel(@NonNull final DeependChannel channel) {
         if (locked) {
             throw new RuntimeException("Cannot add channels to locked manager");
         }
         channelMap.put(channel.getChannelType(), channel);
         channelStatusMap.put(channel.getChannelType(), new ChannelStatus(channel.getChannelType()));
+    }
+
+    public void generate(@NonNull Object instance) {
+        this.generate(instance.getClass(), instance);
+    }
+
+    public void generate(@NonNull final Class<?> clazz, Object instance) {
+        final Collection<AnnotatedMethod<ChannelListener>> annotatedMethods = AnnotationUtil.getAnnotatedMethods(ChannelListener.class, clazz);
+
+        for (final AnnotatedMethod<ChannelListener> annotatedMethod : annotatedMethods) {
+            final Method m =  annotatedMethod.getMethod();
+
+            if (!void.class.equals(m.getReturnType())) {
+                new IllegalArgumentException("M doesn't return null").printStackTrace();
+            } else {
+                addChannel(new ChannelBody(annotatedMethod.getAnnotation().channel(), new ReflectionMethod<>(m, instance, Void.class)));
+            }
+        }
     }
 
     /**

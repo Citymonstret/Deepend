@@ -92,18 +92,18 @@ public abstract class DeependObject {
 
     @SneakyThrows
     protected void updateFieldValue(@NonNull String name) {
-        FieldGetter getter = (FieldGetter) properties.get(holderMap.get(name));
+        final FieldGetter getter = (FieldGetter) properties.get(holderMap.get(name));
         this.cache.put(name, getter.getValue());
     }
 
     protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull PropertyGetter getter) {
-        PropertyHolder holder = new PropertyHolder(name, type);
+        final PropertyHolder holder = new PropertyHolder(name, type);
         properties.put(holder, getter);
     }
 
     protected void convertAndRead(@NonNull DeependBuf buf) {
-        Map<String, String> _v = convert(buf, this.properties.size());
-        for (Map.Entry<String, String> _k : _v.entrySet()) {
+        final Map<String, String> _v = convert(buf, this.properties.size());
+        for (final Map.Entry<String, String> _k : _v.entrySet()) {
             try {
                 updateField(_k.getKey(), _k.getValue());
             } catch(final Exception e) {
@@ -113,8 +113,8 @@ public abstract class DeependObject {
     }
 
     protected void sendKeys(@NonNull DeependBuf buf) {
-        StringBuilder builder = new StringBuilder();
-        Iterator<String> keys = cache.keySet().iterator();
+        final StringBuilder builder = new StringBuilder();
+        final Iterator<String> keys = cache.keySet().iterator();
         while (keys.hasNext()) {
             builder.append(keys.next());
             if (keys.hasNext()) {
@@ -128,7 +128,7 @@ public abstract class DeependObject {
     public abstract String toString();
 
     protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull Object value) {
-        PropertyGetter getter = new PropertyGetter() {
+        final PropertyGetter getter = new PropertyGetter() {
             @Override
             Object getValue() {
                 return value;
@@ -142,7 +142,7 @@ public abstract class DeependObject {
         this.isBuilt = false;
         this.cache = new HashMap<>();
         this.holderMap = new HashMap<>();
-        for (Map.Entry<PropertyHolder, PropertyGetter> entry : properties.entrySet()) {
+        for (final Map.Entry<PropertyHolder, PropertyGetter> entry : properties.entrySet()) {
             this.cache.put(entry.getKey().getName(), entry.getValue().getValue());
             this.holderMap.put(entry.getKey().getName(), entry.getKey());
         }
@@ -150,8 +150,8 @@ public abstract class DeependObject {
     }
 
     protected void updateField(@NonNull String key, @NonNull String value) {
-        PropertyHolder holder = holderMap.get(key);
-        FieldGetter getter = (FieldGetter) properties.get(holder);
+        final PropertyHolder holder = holderMap.get(key);
+        final FieldGetter getter = (FieldGetter) properties.get(holder);
         try {
             Object val = null;
 
@@ -206,13 +206,13 @@ public abstract class DeependObject {
 
     public abstract void request(String requestedKey, DeependBuf buf);
 
-    protected Map<String, String> convert(DeependBuf buf, int num) {
-        DataType[] req = new DataType[num * 2];
+    protected Map<String, String> convert(@NonNull DeependBuf buf, int num) {
+        final DataType[] req = new DataType[num * 2];
         for (int i = 0; i < num * 2; i++) {
             req[i] = DataType.STRING;
         }
         buf = new DeependBuf(buf, req);
-        Map<String, String> map = new HashMap<>();
+        final Map<String, String> map = new HashMap<>();
         for (int i = 0; i < num; i++) {
             map.put(buf.getString(), buf.getString());
         }
@@ -224,7 +224,7 @@ public abstract class DeependObject {
         @NonNull private final Field field;
         @NonNull private final Object object;
 
-        public FieldGetter(Field field, Object object) {
+        public FieldGetter(@NonNull Field field, @NonNull Object object) {
             try {
                 field.setAccessible(true);
             } catch (final Exception e) {

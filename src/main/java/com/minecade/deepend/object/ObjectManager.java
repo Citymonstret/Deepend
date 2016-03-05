@@ -57,7 +57,7 @@ public class ObjectManager {
      * @param <T> Object type extending DeependObject
      * @return instance | null
      */
-    public <T extends DeependObject> T getInstance(@NonNull Class<T> clazz) {
+    public <T extends DeependObject> T getInstance(@NonNull final Class<T> clazz) {
         T instance = null;
         try {
             instance = clazz.newInstance();
@@ -77,7 +77,7 @@ public class ObjectManager {
         return getInstance(clazz);
     }
 
-    public boolean hasRegisteredType(byte provider) {
+    public boolean hasRegisteredType(final byte provider) {
         return this.objectMapping.containsKey(provider);
     }
 

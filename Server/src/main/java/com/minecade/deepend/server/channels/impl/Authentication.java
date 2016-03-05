@@ -24,6 +24,7 @@ import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.resources.DeependBundle;
+import lombok.Getter;
 
 public class Authentication extends DeependChannel {
 
@@ -31,6 +32,7 @@ public class Authentication extends DeependChannel {
         super(Channel.AUTHENTICATE);
     }
 
+    @Getter
     private static DeependBundle accountBundle;
     static {
         accountBundle = new DeependBundle("accounts", false, DeependBundle.DefaultBuilder.create().add("admin.password", "password").build());

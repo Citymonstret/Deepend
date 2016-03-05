@@ -29,18 +29,22 @@ package com.minecade.deepend.server.test;/*
  * limitations under the License.
  */
 
+import com.minecade.deepend.ConnectionFactory;
+import com.minecade.deepend.channels.Channel;
+import com.minecade.deepend.channels.ChannelListener;
 import com.minecade.deepend.channels.ChannelManager;
-import com.minecade.deepend.data.DataHolder;
-import com.minecade.deepend.data.DataManager;
-import com.minecade.deepend.data.DataObject;
-import com.minecade.deepend.data.MirrorDataHolder;
+import com.minecade.deepend.connection.DeependConnection;
+import com.minecade.deepend.data.*;
 import com.minecade.deepend.game.GameCategory;
+import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.server.DeependServer;
 import com.minecade.deepend.server.channels.impl.*;
 import com.minecade.deepend.values.ValueFactory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 import static com.minecade.deepend.game.GameCategory.*;
 
@@ -103,11 +107,45 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
 
     @Override
     public void registerChannels(ChannelManager channelManager) {
-        channelManager.addChannel(new Authentication());
+        // Overridden by the ChannelListener below
+        // channelManager.addChannel(new Authentication());
+
         channelManager.addChannel(new GetData());
         channelManager.addChannel(new DeleteData());
         channelManager.addChannel(new AddData());
         channelManager.addChannel(new CheckData());
+
+        // Generate channels from @ChannelListener's
+        channelManager.generate(this);
+    }
+
+    @SneakyThrows
+    @ChannelListener(channel = Channel.AUTHENTICATE)
+    public void onAuthentication(DeependConnection connection, DeependBuf buf) {
+        DeependBuf in = connection.getObject("in", DeependBuf.class);
+
+        String username = in.getString();
+        String password = in.getString();
+
+        // For testing purposes
+        Logger.get().debug("IP: " + connection.getRemoteAddress().getHost() + " | Username: " + username + " | Password: " + password);
+
+        GenericResponse response = GenericResponse.FAILURE;
+
+        if (Authentication.getAccountBundle().containsKey(username + ".password")) {
+            if (Authentication.getAccountBundle().get(username + ".password").equals(password)) {
+                Logger.get().info("Authenticated: " + connection.getRemoteAddress().toString());
+                connection.setAuthenticated(true);
+                response = GenericResponse.SUCCESS;
+                ConnectionFactory.instance.addConnection(connection);
+            }
+        }
+
+        buf.writeByte(response.getValue());
+
+        if (response == GenericResponse.SUCCESS) {
+            buf.writeString(connection.getRemoteAddress().getUUID());
+        }
     }
 
     @Override

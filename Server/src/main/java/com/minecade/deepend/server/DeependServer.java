@@ -24,6 +24,7 @@ import com.minecade.deepend.DeependConstants;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.reflection.Field;
 import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.channels.MainChannel;
 import com.minecade.deepend.server.exceptions.ServerException;
@@ -69,11 +70,13 @@ public class DeependServer implements Runnable {
     private final int port;
 
     @Getter
-    private final StorageBase storageBase;
+    protected StorageBase storageBase;
 
     @SneakyThrows
     public DeependServer(String[] iargs, @NonNull DeependServerApplication application) {
-        Logger.setup(DeependConstants.SERVER_NAME, new DeependBundle("ServerStrings"));
+        Logger.setup(new Field(DeependConstants.class)
+                .withProperties(Field.FieldProperty.ACCESS_GRANT, Field.FieldProperty.ACCESS_REVERT, Field.FieldProperty.STATIC, Field.FieldProperty.CONSTANT)
+                .named("server_name").getValue().toString(), new DeependBundle("ServerStrings"));
 
         ServerSettings settings;
         try {
