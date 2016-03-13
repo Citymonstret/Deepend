@@ -40,7 +40,10 @@ import com.minecade.deepend.game.GameServer;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.ProviderGroup;
-import com.minecade.deepend.request.*;
+import com.minecade.deepend.request.AddRequest;
+import com.minecade.deepend.request.DataRequest;
+import com.minecade.deepend.request.ShutdownRequest;
+import com.minecade.deepend.request.StatusRequest;
 import com.minecade.deepend.values.ValueFactory;
 
 /**
@@ -55,7 +58,9 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
     }
 
     @Override
-    public void registerInitialRequests(DeependClient client) {
+    public void registerInitialRequests(DeependClient client) {}
+
+    public void _registerInitialRequests(DeependClient client) {
         // This is defined outside of the connection itself, as this
         // shouldn't be re-created
         EnumBitField<Byte, GameCategory> categoryEnumBitField = new EnumBitField<>(GameCategory.class);

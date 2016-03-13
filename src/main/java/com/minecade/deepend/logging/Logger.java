@@ -20,9 +20,8 @@ import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.resources.DeependBundle;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.config.ConfigurationFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,6 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Citymonstret
  */
 public class Logger {
+
+    public static Class<? extends LogHandler<Logger, String>> logHandler = Log4jLogHandler.class;
 
     private static Logger unknownLoggerDefault = null;
 
@@ -70,24 +71,20 @@ public class Logger {
         }
     }
 
-    // private final java.util.logging.Logger logger;
-    private final org.apache.logging.log4j.Logger logger;
-
     private final DeependBundle resourceBundle;
+    private final LogHandler<Logger, String> logger;
 
     private boolean debugMode;
 
+    @SneakyThrows
     protected Logger(@NonNull String name, DeependBundle resourceBundle) {
-        // this.logger = java.util.logging.Logger.getLogger(name);
-        // this.logger.setUseParentHandlers(false);
-        // this.logger.addHandler(new LogHandler(resourceBundle));
-
-        ConfigurationFactory.setConfigurationFactory(new LogFactory());
-
+        try {
+            this.logger = logHandler.getConstructor(String.class, Logger.class).newInstance(name, this);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw e;
+        }
         this.resourceBundle = resourceBundle;
         this.debugMode = true;
-
-        this.logger = LogManager.getLogger(name);
     }
 
     /**

@@ -25,10 +25,7 @@ import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.*;
 import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
@@ -37,7 +34,7 @@ import java.util.UUID;
 /**
  * The main server channel implementation
  */
-public class MainChannel extends ChannelHandlerAdapter {
+public class MainChannel extends ChannelInboundHandlerAdapter {
 
     @Override
     final public void channelRead(final ChannelHandlerContext context, Object message) {
@@ -98,6 +95,8 @@ public class MainChannel extends ChannelHandlerAdapter {
                 connection.addMeta("in", in);
                 connection.addMeta("address", context.channel().remoteAddress());
 
+                Logger.get().info("Connection: " + ((InetSocketAddress) context.channel().remoteAddress()).getPort());
+
                 Logger.get().info("Server Response Code: " + serverResponse.name());
 
                 if (channel == null) {
@@ -129,14 +128,16 @@ public class MainChannel extends ChannelHandlerAdapter {
             //response.writeBytes(written);
             written.copyTo(response);
 
+            final DeependConnection finalizedConnection = connection;
+
             // Write and listen for receiving of data
             final ChannelFuture f = context.writeAndFlush(response);
             f.addListener(new ChannelFutureListener() {
                 public void operationComplete(ChannelFuture future) throws Exception {
                     assert f == future;
                     context.close();
-
-                    Logger.get().debug("closed");
+                    assert finalizedConnection != null;
+                    Logger.get().info("Closed connection from: " + finalizedConnection.getRemoteAddress().toString());
                 }
             });
         } finally {

@@ -69,7 +69,8 @@ public abstract class DeependObject {
 
     protected void scan(@NonNull Class<?> clazz) {
         for (final Field field : clazz.getDeclaredFields()) {
-            for (final ObjectProperty property : field.getDeclaredAnnotationsByType(ObjectProperty.class)) {
+            if (field.isAnnotationPresent(ObjectProperty.class)) {
+                ObjectProperty property = field.getDeclaredAnnotation(ObjectProperty.class);
                 DataType type = property.type();
                 if (type == DataType.DEFAULT) {
                     Class<?> fieldType = field.getType();

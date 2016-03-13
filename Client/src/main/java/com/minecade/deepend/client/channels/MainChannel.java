@@ -25,11 +25,11 @@ import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
-public class MainChannel extends ChannelHandlerAdapter {
+public class MainChannel extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext context, Object message) {
@@ -80,14 +80,10 @@ public class MainChannel extends ChannelHandlerAdapter {
                     ChannelManager.instance.getChannel(channel).act(DeependClient.getCurrentConnection(), null);
                 }
             }
+        } catch (final Exception e) {
+            e.printStackTrace();
         } finally {
             ReferenceCountUtil.release(message);
         }
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
-        cause.printStackTrace();
-        context.close();
     }
 }

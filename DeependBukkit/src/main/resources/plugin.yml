@@ -1,0 +1,8 @@
+name: DeependBukkit
+version: 0.1
+description: Bukkit implementation of the deepend client
+load: STARTUP
+author: Citymonstret
+website: http://minecade.com
+main: com.minecade.deepend.bukkit.DeependBukkit
+database: false

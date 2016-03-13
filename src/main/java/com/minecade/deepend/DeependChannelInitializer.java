@@ -18,17 +18,14 @@ package com.minecade.deepend;
 
 import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.netty.compability.AbstractRemoteAddressFilter;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.compression.ZlibCodecFactory;
-import io.netty.handler.codec.compression.ZlibWrapper;
-import io.netty.handler.ipfilter.AbstractRemoteAddressFilter;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.net.InetSocketAddress;
 
@@ -39,20 +36,33 @@ import java.net.InetSocketAddress;
  *
  * @author Citymonstret
  */
-@RequiredArgsConstructor
 public final class DeependChannelInitializer extends ChannelInitializer<SocketChannel> {
+
+    private final Logger logger;
 
     @Getter
     private final Class<? extends ChannelHandlerAdapter> channelHandlerAdapter;
 
+    public DeependChannelInitializer(Class<? extends ChannelHandlerAdapter> channelHandlerAdapter) {
+        Logger.setup("DeependChannelInitializer", null);
+        this.logger = Logger.get("DeependChannelInitializer");
+        this.channelHandlerAdapter = channelHandlerAdapter;
+        this.logger.info("Created new channel initializer for: " + channelHandlerAdapter);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+    }
+
     @Beta
     @Override
-    protected void initChannel(@NonNull final SocketChannel socketChannel) throws Exception {
+    protected void initChannel(@NonNull final SocketChannel socketChannel) {
         final ChannelPipeline pipeline = socketChannel.pipeline();
 
         // Add GZIP Encryption
-        pipeline.addLast(ZlibCodecFactory.newZlibEncoder(ZlibWrapper.GZIP));
-        pipeline.addLast(ZlibCodecFactory.newZlibDecoder(ZlibWrapper.GZIP));
+        // pipeline.addLast(ZlibCodecFactory.newZlibEncoder(ZlibWrapper.GZIP));
+        // pipeline.addLast(ZlibCodecFactory.newZlibDecoder(ZlibWrapper.GZIP));
 
         // If this is a client, limit IP connections
         // to the server, only
@@ -63,16 +73,22 @@ public final class DeependChannelInitializer extends ChannelInitializer<SocketCh
                     boolean allowed = remoteAddress.getHostName().equals(DeependMeta.getMeta("serverAddr"))
                                 && ("" + remoteAddress.getPort()).equals(DeependMeta.getMeta("serverPort"));
                     if (!allowed) {
-                        Logger.get().debug("Dropping channel attempt from: " + remoteAddress.getHostName());
+                        DeependChannelInitializer.this.logger.debug("Dropping channel attempt from: " + remoteAddress.getHostName());
+                    } else {
+                        DeependChannelInitializer.this.logger.debug("Allowed from: " + remoteAddress.getHostName());
                     }
                     return allowed;
                 }
             });
         }
 
-        // This is the main channel; we're using our
-        // own wrappers, because netty is too complex
-        // for what we need
-        pipeline.addLast(getChannelHandlerAdapter().newInstance());
+        try {
+            // This is the main channel; we're using our
+            // own wrappers, because netty is too complex
+            // for what we need
+            pipeline.addLast(getChannelHandlerAdapter().newInstance());
+        } catch (final Exception e) {
+            this.logger.error("Failed to add channel handler adapter", e);
+        }
     }
 }
