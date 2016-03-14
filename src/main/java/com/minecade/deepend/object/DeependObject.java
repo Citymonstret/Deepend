@@ -19,6 +19,7 @@ package com.minecade.deepend.object;
 import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.data.DataType;
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.data.NettyBuf;
 import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.logging.Logger;
 import lombok.*;
@@ -212,7 +213,7 @@ public abstract class DeependObject {
         for (int i = 0; i < num * 2; i++) {
             req[i] = DataType.STRING;
         }
-        buf = new DeependBuf(buf, req);
+        buf = new NettyBuf((NettyBuf) buf, req);
         final Map<String, String> map = new HashMap<>();
         for (int i = 0; i < num; i++) {
             map.put(buf.getString(), buf.getString());

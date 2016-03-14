@@ -22,6 +22,7 @@ import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.data.DataType;
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.data.NettyBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import io.netty.buffer.ByteBuf;
@@ -33,7 +34,7 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext context, Object message) {
-        DeependBuf in = new DeependBuf((ByteBuf) message, new DataType[] {
+        DeependBuf in = new NettyBuf((ByteBuf) message, new DataType[] {
                 DataType.BYTE
         });
 

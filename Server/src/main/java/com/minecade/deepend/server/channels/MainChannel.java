@@ -23,9 +23,13 @@ import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.data.NettyBuf;
 import com.minecade.deepend.logging.Logger;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
@@ -38,7 +42,7 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
 
     @Override
     final public void channelRead(final ChannelHandlerContext context, Object message) {
-        DeependBuf in = new DeependBuf((ByteBuf) message);
+        DeependBuf in = new NettyBuf((ByteBuf) message);
 
         // Prevent writing to the input buf
         in.lock();
@@ -51,7 +55,7 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
             Channel channel;
             boolean everythingFine = false;
             DeependConnection connection = null;
-            DeependBuf written = new DeependBuf(context.alloc().buffer());
+            DeependBuf written = new NettyBuf(context.alloc().buffer());
 
             scope: {
                 // Get the requested channel
@@ -126,7 +130,7 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
             response.writeInt(channel.getValue());
             // Copy channel response
             //response.writeBytes(written);
-            written.copyTo(response);
+            ((NettyBuf) written).copyTo(response);
 
             final DeependConnection finalizedConnection = connection;
 

@@ -20,12 +20,11 @@ import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.DeependChannel;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DataObject;
-import com.minecade.deepend.data.DataType;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.request.DataRequest;
+import com.minecade.deepend.values.ValueFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +37,7 @@ public class DeleteData extends DeependChannel {
 
     @Override
     public void act(DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = new DeependBuf(connection.getBuf("in"),
-                new DataType[] {DataType.STRING, DataType.BYTE});
+        DeependBuf in = connection.getBuf("in");
         // ByteBuf in = connection.getObject("in", ByteBuf.class);
 
         String getID = in.getString();

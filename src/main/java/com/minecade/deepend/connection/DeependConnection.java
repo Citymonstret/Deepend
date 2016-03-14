@@ -17,6 +17,7 @@
 package com.minecade.deepend.connection;
 
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.data.NettyBuf;
 import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.request.UUIDProvider;
 import io.netty.buffer.ByteBuf;
@@ -53,7 +54,7 @@ public class DeependConnection implements UUIDProvider {
     public DeependBuf getBuf(String key) {
         Object o = metaMapping.get(key);
         if (o instanceof ByteBuf) {
-            return new DeependBuf((ByteBuf) o);
+            return new NettyBuf((ByteBuf) o);
         } else if (o instanceof DeependBuf) {
             return (DeependBuf) o;
         }

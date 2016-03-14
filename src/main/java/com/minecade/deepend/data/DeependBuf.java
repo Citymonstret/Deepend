@@ -30,27 +30,19 @@ import io.netty.channel.ChannelFuture;
  * things, and this is what the whole
  * project is built to be using
  */
-public class DeependBuf {
+public abstract class DeependBuf {
 
-    private ByteBuf buf;
-
-    private DataType[] dataType;
-    private Object[] object;
-
-    private final int writtenIndices;
+    protected DataType[] dataType;
+    protected Object[] object;
 
     private int readPointer = 0;
     private int writePointer = 0;
 
+    protected int writtenIndices = 0;
+
     private boolean writeLocked = false;
 
-    /**
-     * Create a wrapper for the specified buf
-     * @param buf Buf to wrap
-     */
-    public DeependBuf(final ByteBuf buf) {
-        this.buf = buf;
-        this.writtenIndices = 0;
+    protected DeependBuf() {
     }
 
     /**
@@ -60,35 +52,7 @@ public class DeependBuf {
         writeLocked = true;
     }
 
-    /**
-     * Create a buf from another buf, and
-     * pre-load the specified values
-     * @param deependBuf Buf to re-create
-     * @param types Values to pre-load
-     */
-    public DeependBuf(final DeependBuf deependBuf, DataType[] types) {
-        this(deependBuf.buf, types);
-    }
-
-    /**
-     * Wrap a ByteBuf and pre-load
-     * the specified values
-     * @param buf Buf to wrap
-     * @param types Values to pre-load
-     */
-    public DeependBuf(final ByteBuf buf, DataType[] types) {
-        this.dataType = types;
-        this.buf = buf;
-        this.object = new Object[types.length];
-
-        for (DataType ignored : types) {
-            read();
-        }
-
-        this.writtenIndices = types.length;
-    }
-
-    private void read() {
+    protected void read() {
         int p = writePointer++;
 
         Object o = null;
@@ -113,7 +77,7 @@ public class DeependBuf {
     }
 
     public GenericResponse getResponse() {
-        return GenericResponse.getGenericResponse(buf.readByte());
+        return GenericResponse.getGenericResponse(readByte());
     }
 
     public void writeByte(ByteProvider response) {
@@ -122,28 +86,19 @@ public class DeependBuf {
         writeByte(response.getValue());
     }
 
-    public void writeByte(byte b) {
+    final public void writeByte(byte b) {
         checkLock();
-
-        buf.writeByte(b);
+        _writeByte(b);
     }
+    protected abstract void _writeByte(byte b);
 
-    public void writeString(String str) {
+    final public void writeString(String str) {
         checkLock();
-
-        byte[] bytes = str.getBytes();
-        buf.writeInt(bytes.length);
-        buf.writeBytes(bytes);
+        _writeString(str);
     }
+    protected abstract void _writeString(String str);
 
-    private String readString() {
-        int lenght = buf.readInt();
-        byte[] bytes = new byte[lenght];
-        for (int i = 0; i < lenght; i++) {
-            bytes[i] = buf.readByte();
-        }
-        return new String(bytes);
-    }
+    protected abstract String readString();
 
     public String getString() {
         Entry entry = get();
@@ -153,9 +108,7 @@ public class DeependBuf {
         return (String) entry.getObject();
     }
 
-    private byte readByte() {
-        return buf.readByte();
-    }
+    protected abstract byte readByte();
 
     public byte getByte() {
         Entry entry = get();
@@ -165,9 +118,7 @@ public class DeependBuf {
         return (byte) entry.object;
     }
 
-    private int readInt() {
-        return buf.readInt();
-    }
+    protected abstract int readInt();
 
     public int getInt() {
         Entry entry = get();
@@ -189,33 +140,24 @@ public class DeependBuf {
 
     public void writeInt(int i) {
         checkLock();
-        buf.writeInt(i);
+        _writeInt(i);
     }
 
-    private void checkLock() {
+    protected abstract void _writeInt(int n);
+
+    protected void checkLock() {
         if (writeLocked) {
             throw new IllegalAccessError("Cannot write to locked buf");
         }
     }
 
-    public boolean readable() {
-        return buf.isReadable();
-    }
+    public abstract boolean readable();
 
     public void writeAll(DeependBuf in) {
         checkLock();
-
-        buf.writeBytes(in.buf);
     }
 
-    public void reset() {
-        buf.resetReaderIndex();
-        buf.resetWriterIndex();
-    }
-
-    public void copyTo(DeependBuf mirrorBuf) {
-        copyTo(mirrorBuf.buf);
-    }
+    public abstract void reset();
 
     private class Entry {
         DataType type;
@@ -239,18 +181,6 @@ public class DeependBuf {
      * Write to the future's channel, and flush it
      * @param future Future
      */
-    public void writeAndFlush(ChannelFuture future) {
-        checkLock();
+    public abstract void writeAndFlush(ChannelFuture future);
 
-        future.channel().writeAndFlush(buf);
-    }
-
-    /**
-     * Copy the bytes from this
-     * buf to a ByteBuf
-     * @param buf Buf to copy to
-     */
-    public void copyTo(ByteBuf buf) {
-        buf.writeBytes(this.buf);
-    }
 }
