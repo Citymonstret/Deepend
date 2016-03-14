@@ -30,7 +30,6 @@ import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.nativeprot.DeependProtocol;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.PendingRequest;
 import com.minecade.deepend.request.ShutdownRequest;
@@ -105,43 +104,6 @@ public final class DeependClient {
                 .add("conn.port", "8000")
                 .build()
         );
-
-        try {
-            DeependProtocol.setup();
-        } catch (final Exception e) {
-            Logger.get().error("Failed to setup native protocol library, using built in", e);
-        }
-
-        byte[] cat = "Cat".getBytes();
-        for (byte b : cat) {
-            System.out.print(b + ",");
-        }
-        System.out.println();
-        System.out.println("len: " + cat.length);
-
-        byte[] bytes = new byte[] {
-                0,0,0,4, // Number of objects
-                0,0,0,0, // Type of object 1
-                0,0,0,1, // Size of object 1
-                      1, // Value of object 1
-                0,0,0,1, // Type of Object 2
-                0,0,0,4, // Size of object 2
-                0,0,0,6, // Value of object 2
-                0,0,0,2, // Type of object 2
-                0,0,0,3, // Length of object 3
-                67, 97, 116,
-                0,0,0,0, // Type of object 1
-                0,0,0,1, // Size of object 1
-                1, // Value of object 1
-        };
-
-        System.out.println("Start testing");
-        try {
-            System.out.println("ReadNativeBuf: " + DeependProtocol.readNativeBuf(bytes.length, bytes));
-        } catch (final Exception e) {
-            e.printStackTrace();
-        }
-        System.exit(0);
 
         // Let's load in some properties
         this.echoTestString = getProperty("echo.string");

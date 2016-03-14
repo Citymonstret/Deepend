@@ -7,25 +7,13 @@ package com.minecade.deepend.nativeprot;
  */
 public class NativeBuf {
 
-    private final int size;
-    private final byte[] bytes;
     private final NativeObj[] objects;
 
-    public NativeBuf(final int size, final byte[] bytes, final NativeObj[] objects) {
-        this.size = size;
-        this.bytes = bytes;
+    public NativeBuf(final NativeObj[] objects) {
         this.objects = objects;
     }
 
     public NativeObj[] getObjects() {
         return this.objects;
-    }
-
-    public int getSize() {
-        return this.size;
-    }
-
-    public byte[] getBytes() {
-        return this.bytes;
     }
 }

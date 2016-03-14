@@ -9,19 +9,27 @@ extern "C" {
 #endif
 /*
  * Class:     com_minecade_deepend_nativeprot_DeependProtocol
- * Method:    readNativeBuf
- * Signature: (I[B)Lcom/minecade/deepend/nativeprot/NativeBuf;
+ * Method:    initialize
+ * Signature: ()V
  */
-JNIEXPORT jobject JNICALL Java_com_minecade_deepend_nativeprot_DeependProtocol_readNativeBuf
-  (JNIEnv *, jclass, jint, jbyteArray);
+JNIEXPORT void JNICALL Java_com_minecade_deepend_nativeprot_DeependProtocol_initialize
+  (JNIEnv *, jclass);
 
 /*
  * Class:     com_minecade_deepend_nativeprot_DeependProtocol
- * Method:    writeNativeBuf
- * Signature: (ILcom/minecade/deepend/nativeprot/NativeObj;)Lcom/minecade/deepend/nativeprot/NativeBuf;
+ * Method:    destroy
+ * Signature: ()V
  */
-JNIEXPORT jobject JNICALL Java_com_minecade_deepend_nativeprot_DeependProtocol_writeNativeBuf
-  (JNIEnv *, jclass, jint, jobject);
+JNIEXPORT void JNICALL Java_com_minecade_deepend_nativeprot_DeependProtocol_destroy
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     com_minecade_deepend_nativeprot_DeependProtocol
+ * Method:    loadNativeBuf
+ * Signature: (I[B)[Lcom/minecade/deepend/nativeprot/NativeObj;
+ */
+JNIEXPORT jobjectArray JNICALL Java_com_minecade_deepend_nativeprot_DeependProtocol_loadNativeBuf
+  (JNIEnv *, jclass, jint, jbyteArray);
 
 #ifdef __cplusplus
 }

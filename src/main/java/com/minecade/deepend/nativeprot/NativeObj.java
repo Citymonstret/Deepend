@@ -1,5 +1,7 @@
 package com.minecade.deepend.nativeprot;
 
+import lombok.Getter;
+
 /**
  * Created 3/13/2016 for Deepend
  *
@@ -9,17 +11,42 @@ public class NativeObj {
 
     public static final int TYPE_INT = 1;
     public static final int TYPE_BYTE = 0;
-    public static final int TYPE_STRING = 3;
+    public static final int TYPE_STRING = 2;
 
     private final int type;
+
+    @Getter
     private int i;
+
+    @Getter
     byte b;
+
+    @Getter
     String s;
 
-    public NativeObj(final int type, int i, byte b, String s) {
+    public NativeObj() {
+        this.type = TYPE_BYTE;
+    }
+
+    public NativeObj(int type, int i, byte b, String s) {
         this.type = type;
         this.i = i;
         this.b = b;
+        this.s = s;
+    }
+
+    public NativeObj(byte b) {
+        this.type = TYPE_BYTE;
+        this.b = b;
+    }
+
+    public NativeObj(int i) {
+        this.type = TYPE_INT;
+        this.i = i;
+    }
+
+    public NativeObj(String s) {
+        this.type = TYPE_STRING;
         this.s = s;
     }
 
