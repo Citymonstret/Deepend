@@ -3,6 +3,8 @@ package com.minecade.deepend.prot;
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.nativeprot.NativeObj;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created 3/14/2016 for Deepend
  *
@@ -40,8 +42,68 @@ public class JavaProtocol implements Protocol {
     }
 
     @Override
-    public NativeBuf writeNativeBuf(int i, NativeObj objs) {
-        return null;
+    public NativeBuf writeNativeBuf(int i, NativeBuf buf) {
+        int allocSize = 0;
+
+        int bufSize = buf.getObjects().length;
+        allocSize += 4;
+
+        for (NativeObj obj : buf.getObjects()) {
+            allocSize += 8; // type int + size int
+            switch (obj.getType()) {
+                case NativeObj.TYPE_BYTE:
+                    allocSize += 1;
+                    break;
+                case NativeObj.TYPE_INT:
+                    allocSize += 4;
+                    break;
+                case NativeObj.TYPE_STRING:
+                    allocSize += obj.getS().getBytes().length;
+                    break;
+                default: break;
+            }
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(allocSize);
+        buffer.put(intToBytes(bufSize));
+
+        for (NativeObj obj : buf.getObjects()) {
+            buffer.put(intToBytes(obj.getType()));
+            switch (obj.getType()) {
+                case NativeObj.TYPE_BYTE:
+                    buffer.put(intToBytes(1));
+                    buffer.put(obj.getB());
+                    break;
+                case NativeObj.TYPE_INT:
+                    buffer.put(intToBytes(4));
+                    buffer.put(intToBytes(obj.getI()));
+                    break;
+                case NativeObj.TYPE_STRING:
+                    buffer.put(intToBytes(obj.getS().getBytes().length));
+                    buffer.put(charsToBytes(obj.getS().toCharArray()));
+                    break;
+                default: break;
+            }
+        }
+
+        buf.setBytes(buffer.array());
+        return buf;
+    }
+
+    public static void test() {
+        JavaProtocol protocol = new JavaProtocol();
+
+        NativeObj[] objects = new NativeObj[3];
+        objects[0] = new NativeObj("Test");
+        objects[1] = new NativeObj(32);
+        objects[2] = new NativeObj((byte) 10);
+
+        NativeBuf wBuf = protocol.writeNativeBuf(0, new NativeBuf(objects));
+        NativeBuf rBuf = protocol.readNativeBuf(0, wBuf.getBytes());
+
+        System.out.println("String: " + rBuf.getObjects()[0].getS());
+        System.out.println("Int: " + rBuf.getObjects()[1].getI());
+        System.out.println("Byte: " + rBuf.getObjects()[2].getB());
     }
 
     char[] bytesToChars(final byte[] bytes, final int size, final Offset offset) {
@@ -51,6 +113,14 @@ public class JavaProtocol implements Protocol {
         }
         offset.add(size);
         return chars;
+    }
+
+    byte[] charsToBytes(final char[] chars) {
+        byte[] bytes = new byte[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            bytes[i] = (byte) chars[i];
+        }
+        return bytes;
     }
 
     byte bytesToByte(final byte[] bytes, final Offset offset) {
@@ -66,6 +136,15 @@ public class JavaProtocol implements Protocol {
         }
         offset.add(4);
         return result;
+    }
+
+    byte[] intToBytes(final int value) {
+        return new byte[] {
+                (byte)(value >>> 24),
+                (byte)(value >>> 16),
+                (byte)(value >>> 8),
+                (byte)(value)
+        };
     }
 
     class Offset {
