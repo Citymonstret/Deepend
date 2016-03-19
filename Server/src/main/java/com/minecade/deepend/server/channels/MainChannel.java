@@ -23,8 +23,8 @@ import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
-import com.minecade.deepend.data.NettyBuf;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.nativeprot.NativeBuf;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -42,20 +42,22 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
 
     @Override
     final public void channelRead(final ChannelHandlerContext context, Object message) {
-        DeependBuf in = new NettyBuf((ByteBuf) message);
+        // DeependBuf in = new NettyBuf((ByteBuf) message);
+        NativeBuf in = new NativeBuf((ByteBuf) message);
 
         // Prevent writing to the input buf
         in.lock();
 
         try {
             int channelID = in.getInt();
-            final ByteBuf response = context.alloc().buffer();
+            // final ByteBuf response = context.alloc().buffer();
+            final NativeBuf response = new NativeBuf(context.alloc().buffer());
 
             ServerResponse serverResponse = ServerResponse.UNKNOWN;
             Channel channel;
             boolean everythingFine = false;
             DeependConnection connection = null;
-            DeependBuf written = new NettyBuf(context.alloc().buffer());
+            DeependBuf written = new NativeBuf(context.alloc().buffer()); // NettyBuf(context.alloc().buffer());
 
             scope: {
                 // Get the requested channel
@@ -67,16 +69,10 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
                     // Let's create a temporary connection
                     connection = new DeependConnection(new SimpleAddress(((InetSocketAddress) context.channel().remoteAddress()).getHostName()));
                 } else {
-                    int uuidLenght = in.getInt();
-                    byte[] uuidBytes = new byte[uuidLenght];
-                    for (int i = 0; i < uuidLenght; i++) {
-                        uuidBytes[i] = in.getByte();
-                    }
-
                     UUID uuid;
 
                     try {
-                        uuid = UUID.fromString(new String(uuidBytes));
+                        uuid = UUID.fromString(in.getString());
                     } catch(final Exception e) {
                         serverResponse = ServerResponse.INVALID_UUID;
                         break scope;
@@ -130,12 +126,13 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
             response.writeInt(channel.getValue());
             // Copy channel response
             //response.writeBytes(written);
-            ((NettyBuf) written).copyTo(response);
+            // ((NettyBuf) written).copyTo(response);
+            ((NativeBuf) written).copyTo(response);
 
             final DeependConnection finalizedConnection = connection;
 
             // Write and listen for receiving of data
-            final ChannelFuture f = context.writeAndFlush(response);
+            final ChannelFuture f = response.writeAndFlush(context);
             f.addListener(new ChannelFutureListener() {
                 public void operationComplete(ChannelFuture future) throws Exception {
                     assert f == future;

@@ -5,6 +5,7 @@ import com.minecade.deepend.prot.JavaProtocol;
 import com.minecade.deepend.prot.Protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +25,7 @@ public class NativeBuf extends DeependBuf {
     private byte[] bytes;
     private ByteBuf buf;
 
-    private int readIndex = 0, writeIndex = 0;
+    private int readIndex = 0;
     private boolean updated = false;
 
     public NativeBuf(final NativeObj[] objects) {
@@ -32,12 +33,17 @@ public class NativeBuf extends DeependBuf {
     }
 
     public NativeBuf(final ByteBuf in) {
-        int size = in.readInt();
-        this.bytes = in.readBytes(size).array();
-        NativeBuf tmp = protocol.readNativeBuf(size, bytes);
-        this.objects = tmp.getObjects();
-        this.i_objects = tmp.i_objects;
-        this.buf = in;
+        if (in.readableBytes() < 4 /* size of an integer */) {
+            this.buf = in;
+            this.i_objects = new ArrayList<>();
+        } else {
+            int size = in.readInt();
+            this.bytes = in.readBytes(size).array();
+            NativeBuf tmp = protocol.readNativeBuf(size, bytes);
+            this.objects = tmp.getObjects();
+            this.i_objects = tmp.i_objects;
+            this.buf = in;
+        }
     }
 
     public NativeBuf(final NativeObj[] objects, final byte[] bytes, ByteBuf buf) {
@@ -69,7 +75,7 @@ public class NativeBuf extends DeependBuf {
 
     @Override
     protected void _writeByte(byte b) {
-        this.i_objects.set(writeIndex++, new NativeObj(b));
+        this.i_objects.add(new NativeObj(b));
         setUpdated();
     }
 
@@ -79,7 +85,7 @@ public class NativeBuf extends DeependBuf {
 
     @Override
     protected void _writeString(String str) {
-        this.i_objects.set(writeIndex++, new NativeObj(str));
+        this.i_objects.add(new NativeObj(str));
         setUpdated();
     }
 
@@ -100,7 +106,7 @@ public class NativeBuf extends DeependBuf {
 
     @Override
     protected void _writeInt(int n) {
-        this.i_objects.set(writeIndex++, new NativeObj(n));
+        this.i_objects.add(new NativeObj(n));
         setUpdated();
     }
 
@@ -112,18 +118,43 @@ public class NativeBuf extends DeependBuf {
     @Override
     public void reset() {
         this.readIndex = 0;
-        this.writeIndex = 0;
         this.i_objects.clear();
         this.updated = false;
     }
 
     @Override
     public void writeAndFlush(ChannelFuture future) {
-        if (this.bytes == null) {
-            protocol.writeNativeBuf(0, this);
-        }
+        checkCompile();
         buf.writeInt(bytes.length);
         buf.writeBytes(bytes);
         future.channel().writeAndFlush(buf);
+    }
+
+    public ChannelFuture writeAndFlush(ChannelHandlerContext context) {
+        checkCompile();
+        buf.writeInt(bytes.length);
+        buf.writeBytes(bytes);
+        return context.writeAndFlush(buf);
+    }
+
+    private void checkCompile() {
+        if (updated || this.bytes == null) {
+            if (this.objects == null) {
+                this.objects = new NativeObj[0];
+            }
+            protocol.writeNativeBuf(0, this);
+        }
+    }
+
+    public void copyTo(NativeBuf buf) {
+        checkCompile();
+        for (NativeObj nativeObj : objects) {
+            buf.addObj(nativeObj);
+        }
+    }
+
+    protected void addObj(NativeObj obj) {
+        this.i_objects.add(obj);
+        setUpdated();
     }
 }

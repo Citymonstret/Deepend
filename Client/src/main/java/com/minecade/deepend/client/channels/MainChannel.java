@@ -20,10 +20,8 @@ import com.minecade.deepend.ServerResponse;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.client.DeependClient;
-import com.minecade.deepend.data.DataType;
-import com.minecade.deepend.data.DeependBuf;
-import com.minecade.deepend.data.NettyBuf;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.object.GenericResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -34,9 +32,10 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext context, Object message) {
-        DeependBuf in = new NettyBuf((ByteBuf) message, new DataType[] {
+        /*DeependBuf in = new NettyBuf((ByteBuf) message, new DataType[] {
                 DataType.BYTE
-        });
+        });*/
+        NativeBuf in = new NativeBuf((ByteBuf) message);
 
         // Make sure no one tries to write to this
         in.lock();
@@ -51,13 +50,7 @@ public class MainChannel extends ChannelInboundHandlerAdapter {
                 GenericResponse authenticationResponse = GenericResponse.getGenericResponse(in.getByte());
 
                 if (authenticationResponse == GenericResponse.SUCCESS) {
-                    int uuidLenght = in.getInt();
-                    byte[] bytes = new byte[uuidLenght];
-                    for (int i = 0; i < uuidLenght; i++) {
-                        bytes[i] = in.getByte();
-                    }
-
-                    DeependClient.getCurrentConnection().getRemoteAddress().setUUID(new String(bytes));
+                    DeependClient.getCurrentConnection().getRemoteAddress().setUUID(in.getString());
                     DeependClient.getCurrentConnection().setAuthenticated(true);
                     DeependClient.getInstance().resetAuthenticationPendingStatus();
 

@@ -58,7 +58,9 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
     }
 
     @Override
-    public void registerInitialRequests(DeependClient client) {}
+    public void registerInitialRequests(DeependClient client) {
+        _registerInitialRequests(client);
+    }
 
     public void _registerInitialRequests(DeependClient client) {
         // This is defined outside of the connection itself, as this

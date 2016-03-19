@@ -18,8 +18,8 @@ package com.minecade.deepend.request;
 
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.data.DeependBuf;
-import com.minecade.deepend.data.NettyBuf;
 import com.minecade.deepend.lib.Stable;
+import com.minecade.deepend.nativeprot.NativeBuf;
 import io.netty.channel.ChannelFuture;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -82,7 +82,7 @@ public abstract class PendingRequest implements Comparable {
      * @param future Future to send the request to
      */
     final public void send(ChannelFuture future) {
-        DeependBuf out = new NettyBuf(future.channel().alloc().buffer());
+        DeependBuf out = new NativeBuf(future.channel().alloc().buffer());
         out.writeInt(requestedChannel.getValue());
         // Will send the UUID if it is specified
         if (provider.getUUID() != null) {

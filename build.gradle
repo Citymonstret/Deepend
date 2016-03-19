@@ -14,9 +14,10 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'idea'
     apply plugin: 'eclipse'
+    apply plugin: 'maven-publish'
 
-    group = 'com.mincade'
-    version = '0.2.1'
+    group = 'com.minecade'
+    version = '0.3.0'
     description = """Deepend"""
 
     compileJava {
@@ -42,7 +43,7 @@ allprojects {
         compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.5'
         compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.5'
         compile 'com.lexicalscope.jewelcli:jewelcli:0.8.9'
-        compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
+        compile group: 'io.netty', name: 'netty-all', version: '4.0.23.Final'
         compile group: 'com.jcraft', name: 'jzlib', version: '1.1.2'
         compile "org.projectlombok:lombok:1.16.6"
     }
