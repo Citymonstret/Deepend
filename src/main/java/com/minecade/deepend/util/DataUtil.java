@@ -16,6 +16,7 @@
 
 package com.minecade.deepend.util;
 
+import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
@@ -53,7 +54,7 @@ public class DataUtil {
      * @return List containing all appropriate data objects
      */
     @Beta
-    public static List<DataObject> getDataObject(@NonNull final DataHolder holder, final String s, @NonNull final DeependBuf buf, final List<DataObject> initialList, final boolean wrapHolder) {
+    public static List<DataObject> getDataObject(DeependConnection connection, @NonNull final DataHolder holder, final String s, @NonNull final DeependBuf buf, final List<DataObject> initialList, final boolean wrapHolder) {
         String name;
 
         try {
@@ -91,13 +92,31 @@ public class DataUtil {
                 }
             }
             name = newName.toString();
+        } else if (name.equals("*u")) {
+            StringBuilder newName = new StringBuilder();
+            for (Object current : holder.values()) {
+                if (current instanceof DataHolder) {
+                    DataHolder ch = (DataHolder) current;
+                    if (ch.getStatus().needsUpdate(connection.getRemoteAddress())) {
+                        newName.append(ch.getIdentifier());
+                    }
+                } else {
+                    newName.append(((DataObject) current).getName());
+                }
+                newName.append(",");
+            }
+            if (newName.toString().endsWith(",")) {
+                name = newName.substring(0, newName.length() - (",").length());
+            } else {
+                name = newName.toString();
+            }
         }
 
         // This means that a list has been sent
         // and that multiple items should be returned
         if (name.contains(",")) {
             for (String p : name.split(",")) {
-                List<DataObject> r = getDataObject(holder, p, buf, new ArrayList<>(), false);
+                List<DataObject> r = getDataObject(connection, holder, p, buf, new ArrayList<>(), false);
                 if (r == null) {
                     return null;
                 }
@@ -114,7 +133,7 @@ public class DataUtil {
                 if (!wrapHolder) {
                     List<DataObject> newList;
                     try {
-                        newList = getDataObject((DataHolder) o, null, buf, new ArrayList<>(), false);
+                        newList = getDataObject(connection, (DataHolder) o, null, buf, new ArrayList<>(), false);
                         if (newList == null) {
                             return Collections.singletonList(new HolderWrapper((DataHolder) o));
                         }

@@ -54,7 +54,7 @@ public class DeleteData extends DeependChannel {
                 break scope;
             }
             DataHolder holder = DataManager.instance.getDataHolder(category);
-            List<DataObject> object = DataUtil.getDataObject(holder, null, in, new ArrayList<>(), true);
+            List<DataObject> object = DataUtil.getDataObject(connection, holder, null, in, new ArrayList<>(), true);
 
             if (object == null) {
                 buf.writeByte(GenericResponse.FAILURE);

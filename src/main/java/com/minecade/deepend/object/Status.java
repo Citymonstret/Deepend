@@ -17,7 +17,6 @@ package com.minecade.deepend.object;
 
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.lib.Stable;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +30,8 @@ import java.util.*;
  * @author Citymonstret
  */
 @Stable
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Status<T> {
+@RequiredArgsConstructor
+public class Status<T> {
 
     private final List<String> receivedUpdate = Collections.synchronizedList(new ArrayList<>());
 

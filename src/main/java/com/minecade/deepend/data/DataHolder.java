@@ -17,6 +17,7 @@
 package com.minecade.deepend.data;
 
 import com.minecade.deepend.bytes.ByteProvider;
+import com.minecade.deepend.object.Status;
 import lombok.*;
 
 import java.util.*;
@@ -32,6 +33,9 @@ public class DataHolder implements Map<String, Object> {
 
     @Setter
     private DataHolder parent;
+
+    @Getter
+    private Status<DataHolder> status = new Status<>(this);
 
     /**
      * Delete this holder from the
@@ -111,6 +115,7 @@ public class DataHolder implements Map<String, Object> {
      * this holder are updated
      */
     protected void pushSync() {
+        this.status.resetStatus();
         this.listeners.forEach(DataListener::requestSync);
     }
 

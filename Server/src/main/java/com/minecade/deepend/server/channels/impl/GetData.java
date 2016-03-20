@@ -55,7 +55,7 @@ public class GetData extends DeependChannel {
                 break scope;
             }
             DataHolder holder = DataManager.instance.getDataHolder(category);
-            List<DataObject> object = DataUtil.getDataObject(holder, null, in, new ArrayList<>(), false);
+            List<DataObject> object = DataUtil.getDataObject(connection, holder, null, in, new ArrayList<>(), false);
 
             if (object == null) {
                 buf.writeByte(GenericResponse.FAILURE);
