@@ -19,65 +19,46 @@ package com.minecade.deepend.client.channels;
 import com.minecade.deepend.ServerResponse;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.ChannelManager;
+import com.minecade.deepend.channels.NettyChannelHandler;
 import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.object.GenericResponse;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
 
-public class MainChannel extends ChannelInboundHandlerAdapter {
+public class MainChannel extends NettyChannelHandler {
 
     @Override
-    public void channelRead(final ChannelHandlerContext context, Object message) {
-        /*DeependBuf in = new NettyBuf((ByteBuf) message, new DataType[] {
-                DataType.BYTE
-        });*/
-        NativeBuf in = new NativeBuf((ByteBuf) message);
+    public void handle(NativeBuf in, NativeBuf response, Object context) throws Exception {
+        ServerResponse serverResponse = ServerResponse.getServerResponse(in.getByte());
+        Channel channel = Channel.getChannel(in.getInt());
+        Logger.get().info("Received message. Response: " + serverResponse.name() + " | Channel: " + channel.name());
+        if (serverResponse == ServerResponse.AUTHENTICATION_ATTEMPTED) {
+            GenericResponse authenticationResponse = GenericResponse.getGenericResponse(in.getByte());
 
-        // Make sure no one tries to write to this
-        in.lock();
-
-        try {
-            ServerResponse serverResponse = ServerResponse.getServerResponse(in.getByte());
-            Channel channel = Channel.getChannel(in.getInt());
-
-            Logger.get().info("Received message. Response: " + serverResponse.name() + " | Channel: " + channel.name());
-
-            if (serverResponse == ServerResponse.AUTHENTICATION_ATTEMPTED) {
-                GenericResponse authenticationResponse = GenericResponse.getGenericResponse(in.getByte());
-
-                if (authenticationResponse == GenericResponse.SUCCESS) {
-                    DeependClient.getCurrentConnection().getRemoteAddress().setUUID(in.getString());
-                    DeependClient.getCurrentConnection().setAuthenticated(true);
-                    DeependClient.getInstance().resetAuthenticationPendingStatus();
-
-                    Logger.get().info("Authentication succeeded | Authentication UUID: " + DeependClient.getCurrentConnection().getRemoteAddress().getUUID());
-                } else {
-                    Logger.get().error("Authentication failed | Was the login details correct?");
-                }
-            } else if (serverResponse == ServerResponse.ALREADY_AUTHENTICATED) {
+            if (authenticationResponse == GenericResponse.SUCCESS) {
+                DeependClient.getCurrentConnection().getRemoteAddress().setUUID(in.getString());
                 DeependClient.getCurrentConnection().setAuthenticated(true);
-            }
+                DeependClient.getInstance().resetAuthenticationPendingStatus();
 
-            if (serverResponse == ServerResponse.REQUIRES_AUTHENTICATION) {
-                Logger.get().error("Not authenticated before trying to run queries!!!");
-            } else if (serverResponse == ServerResponse.INVALID_UUID) {
-                Logger.get().error("Invalid uuid???");
-            } else if (serverResponse == ServerResponse.CHANNEL_EXCEPTION) {
-                Logger.get().error("Server channel failed to return data");
+                Logger.get().info("Authentication succeeded | Authentication UUID: " + DeependClient.getCurrentConnection().getRemoteAddress().getUUID());
             } else {
-                if (channel != Channel.UNKNOWN && channel != Channel.AUTHENTICATE) {
-                    DeependClient.getCurrentConnection().addMeta("in", in);
-                    ChannelManager.instance.getChannel(channel).act(DeependClient.getCurrentConnection(), null);
-                }
+                Logger.get().error("Authentication failed | Was the login details correct?");
             }
-        } catch (final Exception e) {
-            e.printStackTrace();
-        } finally {
-            ReferenceCountUtil.release(message);
+        } else if (serverResponse == ServerResponse.ALREADY_AUTHENTICATED) {
+            DeependClient.getCurrentConnection().setAuthenticated(true);
+        }
+        if (serverResponse == ServerResponse.REQUIRES_AUTHENTICATION) {
+            Logger.get().error("Not authenticated before trying to run queries!!!");
+        } else if (serverResponse == ServerResponse.INVALID_UUID) {
+            Logger.get().error("Invalid uuid???");
+        } else if (serverResponse == ServerResponse.CHANNEL_EXCEPTION) {
+            Logger.get().error("Server channel failed to return data");
+        } else {
+            if (channel != Channel.UNKNOWN && channel != Channel.AUTHENTICATE) {
+                DeependClient.getCurrentConnection().addMeta("in", in);
+                ChannelManager.instance.getChannel(channel).act(DeependClient.getCurrentConnection(), null);
+            }
         }
     }
+
 }

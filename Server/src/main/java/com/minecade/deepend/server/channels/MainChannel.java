@@ -16,139 +16,84 @@
 
 package com.minecade.deepend.server.channels;
 
-import com.minecade.deepend.ConnectionFactory;
 import com.minecade.deepend.ServerResponse;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.ChannelManager;
+import com.minecade.deepend.channels.NettyChannelHandler;
 import com.minecade.deepend.connection.DeependConnection;
-import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
 
-import java.net.InetSocketAddress;
 import java.util.UUID;
 
 /**
  * The main server channel implementation
  */
-public class MainChannel extends ChannelInboundHandlerAdapter {
+public class MainChannel extends NettyChannelHandler {
 
     @Override
-    final public void channelRead(final ChannelHandlerContext context, Object message) {
-        // DeependBuf in = new NettyBuf((ByteBuf) message);
-        NativeBuf in = new NativeBuf((ByteBuf) message);
-
-        // Prevent writing to the input buf
-        in.lock();
-
-        try {
-            int channelID = in.getInt();
-            // final ByteBuf response = context.alloc().buffer();
-            final NativeBuf response = new NativeBuf(context.alloc().buffer());
-
-            ServerResponse serverResponse = ServerResponse.UNKNOWN;
-            Channel channel;
-            boolean everythingFine = false;
-            DeependConnection connection = null;
-            DeependBuf written = new NativeBuf(context.alloc().buffer()); // NettyBuf(context.alloc().buffer());
-
-            scope: {
-                // Get the requested channel
-                channel = Channel.getChannel(channelID);
-                if (channel == null) {
-                    serverResponse = ServerResponse.INVALID_CHANNEL;
-                }
-                if (channel == Channel.AUTHENTICATE) {
-                    // Let's create a temporary connection
-                    connection = new DeependConnection(new SimpleAddress(((InetSocketAddress) context.channel().remoteAddress()).getHostName()));
-                } else {
-                    UUID uuid;
-
-                    try {
-                        uuid = UUID.fromString(in.getString());
-                    } catch(final Exception e) {
-                        serverResponse = ServerResponse.INVALID_UUID;
-                        break scope;
-                    }
-
-                    Logger.get().info("Given UUID: " + uuid.toString());
-                    connection = ConnectionFactory.instance.getOrCreate(context.channel().remoteAddress(), uuid);
-                }
-
-                if (!connection.isAuthenticated()) {
-                    if (channel != Channel.AUTHENTICATE) {
-                        serverResponse = ServerResponse.REQUIRES_AUTHENTICATION;
-                    } else {
-                        serverResponse = ServerResponse.AUTHENTICATION_ATTEMPTED;
-                    }
-                }
-
-                // Add connection meta
-                connection.addMeta("context", context);
-                connection.addMeta("in", in);
-                connection.addMeta("address", context.channel().remoteAddress());
-
-                Logger.get().info("Connection: " + ((InetSocketAddress) context.channel().remoteAddress()).getPort());
-
-                Logger.get().info("Server Response Code: " + serverResponse.name());
-
-                if (channel == null) {
-                    channel = Channel.UNKNOWN;
-                }
-
-                everythingFine = channel != Channel.UNKNOWN && serverResponse != ServerResponse.REQUIRES_AUTHENTICATION;
-
-                if (everythingFine && serverResponse != ServerResponse.AUTHENTICATION_ATTEMPTED) {
-                    serverResponse = ServerResponse.SUCCESS;
-                }
+    public void handle(NativeBuf in, NativeBuf response, Object context) throws Exception {
+        // The ID of the requested channel
+        int channelID = in.getInt();
+        // The response status from the server
+        ServerResponse serverResponse = ServerResponse.UNKNOWN;
+        Channel channel;
+        boolean everythingFine = false;
+        DeependConnection connection = null;
+        DeependBuf written = generateBuf(context);
+        scope: {
+            channel = Channel.getChannel(channelID);
+            if (channel == null) {
+                serverResponse = ServerResponse.INVALID_CHANNEL;
             }
-
-            if (everythingFine) {
-                Logger.get().info("Calling channel of type: " + channel);
+            if (channel == Channel.AUTHENTICATE) {
+                connection = generateConnection(context);
+            } else {
+                UUID uuid;
                 try {
-                    ChannelManager.instance.getChannel(channel).act(connection, written);
-                } catch(final Exception e) {
-                    Logger.get().error("Channel failed :/", e);
-                    serverResponse = ServerResponse.CHANNEL_EXCEPTION;
+                    uuid = UUID.fromString(in.getString());
+                } catch (final Exception e) {
+                    serverResponse = ServerResponse.INVALID_UUID;
+                    break scope;
+                }
+                Logger.get().info("Given UUID: " + uuid.toString());
+                connection = generateConnection(context, uuid);
+            }
+            if (!connection.isAuthenticated()) {
+                if (channel != Channel.AUTHENTICATE) {
+                    serverResponse = ServerResponse.REQUIRES_AUTHENTICATION;
+                } else {
+                    serverResponse = ServerResponse.AUTHENTICATION_ATTEMPTED;
                 }
             }
-            // Write the response code
-            response.writeByte(serverResponse.getValue());
-            // Write the channel ID
-            assert channel != null; // Ugh, java sux :(
-            response.writeInt(channel.getValue());
-            // Copy channel response
-            //response.writeBytes(written);
-            // ((NettyBuf) written).copyTo(response);
-            ((NativeBuf) written).copyTo(response);
-
-            final DeependConnection finalizedConnection = connection;
-
-            // Write and listen for receiving of data
-            final ChannelFuture f = response.writeAndFlush(context);
-            f.addListener(new ChannelFutureListener() {
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    assert f == future;
-                    context.close();
-                    assert finalizedConnection != null;
-                    Logger.get().info("Closed connection from: " + finalizedConnection.getRemoteAddress().toString());
-                }
-            });
-        } finally {
-            ReferenceCountUtil.release(message);
+            connection.addMeta("in", in);
+            Logger.get().info("Server Response Code: " + serverResponse.name());
+            if (channel == null) {
+                channel = Channel.UNKNOWN;
+            }
+            everythingFine = channel != Channel.UNKNOWN && serverResponse != ServerResponse.REQUIRES_AUTHENTICATION;
+            if (everythingFine && serverResponse != ServerResponse.AUTHENTICATION_ATTEMPTED) {
+                serverResponse = ServerResponse.SUCCESS;
+            }
         }
-    }
-
-    @Override
-    final public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
-        cause.printStackTrace();
-        context.close();
+        if (everythingFine) {
+            Logger.get().info("Calling channel of type: " + channel);
+            try {
+                ChannelManager.instance.getChannel(channel).act(connection, written);
+            } catch(final Exception e) {
+                Logger.get().error("Channel failed :/", e);
+                serverResponse = ServerResponse.CHANNEL_EXCEPTION;
+            }
+        }
+        // Write the response code
+        response.writeByte(serverResponse.getValue());
+        // Write the channel ID
+        assert channel != null; // Ugh, java sux :(
+        response.writeInt(channel.getValue());
+        // Copy channel response
+        //response.writeBytes(written);
+        // ((NettyBuf) written).copyTo(response);
+        ((NativeBuf) written).copyTo(response);
     }
 }

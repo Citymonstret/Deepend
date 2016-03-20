@@ -74,6 +74,7 @@ public class DeependBukkit extends JavaPlugin {
     @Override
     public void onDisable() {
         DeependClient.getInstance().addPendingRequest(new ShutdownRequest());
+        //noinspection StatementWithEmptyBody
         while (!DeependClient.getInstance().isShutdown()) {}
     }
 
