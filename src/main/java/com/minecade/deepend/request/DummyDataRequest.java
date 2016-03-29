@@ -1,15 +1,12 @@
 package com.minecade.deepend.request;
 
 import com.minecade.deepend.channels.Channel;
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.data.DeependBuf;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import lombok.Getter;
+
+import com.minecade.deepend.pipeline.DeependContext;
 import lombok.NonNull;
 
-/**
- * Created by Citymonstret on 3/27/2016.
- */
 public class DummyDataRequest extends DataRequest {
 
     public DummyDataRequest(@NonNull final Runnable recipient) {
@@ -17,14 +14,17 @@ public class DummyDataRequest extends DataRequest {
     }
 
     @Override
-    protected void buildRequest(DeependBuf buf) {}
+    public void send(DeependContext context, ChannelHandler handler) {
+        super.send(context, handler);
+    }
 
     @Override
-    public void send(UUIDProvider provider, ChannelFuture future) {}
-
-    @Override
-    public boolean handle(UUIDProvider provider, Bootstrap bootstrap) {
+    public boolean handle(DeependContext context, ChannelHandler handler) {
         return true;
     }
+
+    @Override
+    protected void buildRequest(DeependBuf buf) {}
+
 
 }

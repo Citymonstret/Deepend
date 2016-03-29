@@ -1,9 +1,13 @@
 package com.minecade.deepend.nativeprot;
 
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.pipeline.DeependContext;
 import com.minecade.deepend.prot.JavaProtocol;
 import com.minecade.deepend.prot.Protocol;
+import com.minecade.deepend.prot.ProtocolEncoder;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,6 +126,17 @@ public class NativeBuf extends DeependBuf {
         this.readIndex = 0;
         this.i_objects.clear();
         this.updated = false;
+    }
+
+    @Override
+    public void writeAndFlush(DeependContext context) {
+        try {
+            OutputStream outputStream = context.getSocket().getOutputStream();
+            outputStream.write(ProtocolEncoder.getEncoder().encode(this));
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void compile(ByteBuffer out) {

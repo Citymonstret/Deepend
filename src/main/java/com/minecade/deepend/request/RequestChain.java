@@ -1,7 +1,8 @@
 package com.minecade.deepend.request;
 
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.logging.Logger;
-import io.netty.bootstrap.Bootstrap;
+import com.minecade.deepend.pipeline.DeependContext;
 
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +34,7 @@ public class RequestChain extends Request {
     }
 
     @Override
-    public boolean handle(UUIDProvider provider, Bootstrap bootstrap) {
+    public boolean handle(DeependContext context, ChannelHandler handler) {
         int lastNum = requestCount.get();
         if (lastNum == 0) {
             return true;
@@ -44,7 +45,7 @@ public class RequestChain extends Request {
                 requestCount.decrementAndGet();
                 Logger.get().debug("Finished request");
             });
-            if (!request.handle(provider, bootstrap)) {
+            if (!request.handle(context, handler)) {
                 Logger.get().error("Something went very wrong :///");
             }
             while (lastNum == requestCount.get()) {
@@ -53,7 +54,7 @@ public class RequestChain extends Request {
         }
         Logger.get().info("Done!");
         if (lastRequest != null) {
-            lastRequest.handle(provider, bootstrap);
+            lastRequest.handle(context, handler);
         }
         return true;
     }

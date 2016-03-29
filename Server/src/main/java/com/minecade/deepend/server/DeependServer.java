@@ -41,6 +41,7 @@ import com.minecade.deepend.values.ValueFactory;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.Synchronized;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -56,9 +57,9 @@ import java.nio.ByteBuffer;
  */
 public class DeependServer implements Runnable {
 
-    public static final ProtocolDecoder decoder = new ProtocolDecoder();
-    public static final ProtocolEncoder encoder = new ProtocolEncoder();
-    public static final ChannelHandler handler = new MainChannel();
+    private static final ProtocolDecoder decoder = new ProtocolDecoder();
+    private static final ProtocolEncoder encoder = ProtocolEncoder.getEncoder();
+    private static final ChannelHandler handler = new MainChannel();
 
     private interface ServerSettings {
 
@@ -135,126 +136,189 @@ public class DeependServer implements Runnable {
             @Override
             public void run() {
                 ServerSocket serverSocket = null;
+
                 try {
                     serverSocket = new ServerSocket(port);
                 } catch (final Exception e) {
                     Logger.get().error("Failed to bind to port " + port + ", is it busy?", e);
                 }
+
                 if (serverSocket == null || !serverSocket.isBound()) {
                     Logger.get().error("Failed to start the server socket, shutting down");
                     System.exit(JavaConstants.EXIT_STATUS_FAILURE);
                 }
 
+                // Finalized copy
+                final ServerSocket finalServerSocket = serverSocket;
+
+                // Make sure that everything is shutdown correctly
+                Runtime.getRuntime().addShutdownHook(new Thread("ShutdownThread") {
+
+                    {
+                        Logger.get().info("Added shutdown hook");
+                        this.setDaemon(false);
+                    }
+
+                    @Override
+                    public void run() {
+                        shutdown(finalServerSocket);
+                    }
+                });
+
+                Logger.get().info("Server started on port " + port);
+
                 while (!serverSocket.isClosed()) {
-                    Socket temp = null;
+                    tick(serverSocket);
+                }
+
+                // Call the shutdown method manually if this stage is reached
+                shutdown(serverSocket);
+            }
+        };
+
+        thread.setDaemon(false);
+        thread.start();
+    }
+
+    private boolean internalShutdown;
+
+    @Synchronized
+    private void shutdown(ServerSocket socket) {
+        if (internalShutdown) {
+            Logger.get().error("Cannot shutdown already shutdown server socket");
+            return;
+        }
+
+        // Make sure that we cannot do this twice
+        internalShutdown = true;
+
+        // Save the storage base if it's setup
+        if (storageBase != null) {
+            storageBase.close();
+        }
+
+        // Close the socket
+        try {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            Logger.get().error("Failed to close the server socket", e);
+        }
+
+        Logger.get().info("Successfully shutdown the server");
+    }
+
+    private void tick(ServerSocket serverSocket) {
+        Socket temp = null;
+
+        //
+        // Temp is a fresh connection from a client
+        // and will then be stored in it's own thread,
+        // which is incredibly inefficient, yay
+        //
+
+        try {
+            temp = serverSocket.accept();
+        } catch (final Exception e) {
+            Logger.get().error("Failed to accept incoming socket", e);
+        }
+        if (temp == null || !temp.isConnected()) {
+            Logger.get().error("Failed to accept socket, throwing");
+            return;
+        }
+
+        DeependConnection connection = ConnectionFactory.instance.createConnection(
+                (InetSocketAddress) temp.getRemoteSocketAddress()
+        );
+
+        DeependContext context = new DeependContext(
+                connection, temp, (InetSocketAddress) temp.getRemoteSocketAddress()
+        );
+
+
+        new Thread(connection.getRemoteAddress().toString()) {
+            @Override
+            public void run() {
+                final InputStream iStream;
+                try {
+                    iStream = context.getSocket().getInputStream();
+                } catch (final Exception e) {
+                    Logger.get().error("Failed to fetch socket InputStream", e);
                     try {
-                        temp = serverSocket.accept();
-                    } catch (final Exception e) {
-                        Logger.get().error("Failed to accept incoming socket", e);
+                        context.getSocket().close();
+                    } catch (final Exception ee) {
+                        Logger.get().error("Failed to close socket", ee);
                     }
-                    if (temp == null || !temp.isConnected()) {
-                        Logger.get().error("Failed to accept socket, throwing");
-                        continue;
+                    return;
+                }
+
+                final OutputStream oStream;
+                try {
+                    oStream = context.getSocket().getOutputStream();
+                } catch (final Exception e) {
+                    Logger.get().error("Failed to fetch socket outputStream");
+                    try {
+                        context.getSocket().close();
+                    } catch (final Exception ee) {
+                        Logger.get().error("Failed to close socket", ee);
                     }
+                    return;
+                }
 
-                    DeependConnection connection = ConnectionFactory.instance.createConnection(
-                            (InetSocketAddress) temp.getRemoteSocketAddress()
-                    );
-                    DeependContext context = new DeependContext(
-                            connection, temp, (InetSocketAddress) temp.getRemoteSocketAddress()
-                    );
+                ByteArrayOutputStream bufferStream = null;
 
-                    new Thread(connection.getRemoteAddress().toString()) {
-                        @Override
-                        public void run() {
-                            final InputStream iStream;
-                            try {
-                                iStream = context.getSocket().getInputStream();
-                            } catch (final Exception e) {
-                                Logger.get().error("Failed to fetch socket InputStream", e);
-                                try {
-                                    context.getSocket().close();
-                                } catch (final Exception ee) {
-                                    Logger.get().error("Failed to close socket", ee);
-                                }
-                                return;
+                int nRead;
+                ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
+                byte[] data = new byte[1024 * 1024];
+
+                while (context.getSocket().isConnected()) {
+                    try {
+                        bufferStream = new ByteArrayOutputStream();
+                        try {
+                            buffer.clear();
+
+                            while ((nRead = iStream.read(data, 0, data.length)) != -1) {
+                                bufferStream.write(data, 0, nRead);
                             }
 
-                            final OutputStream oStream;
+                            // Now we've gotten the full request
+                            bufferStream.flush();
+                            byte[] readBytes = bufferStream.toByteArray();
+                            buffer.put(readBytes);
+
+                            NativeBuf inputBuf;
                             try {
-                                oStream = context.getSocket().getOutputStream();
+                                inputBuf = decoder.decode(buffer);
                             } catch (final Exception e) {
-                                Logger.get().error("Failed to fetch socket outputStream");
-                                try {
-                                    context.getSocket().close();
-                                } catch (final Exception ee) {
-                                    Logger.get().error("Failed to close socket", ee);
-                                }
-                                return;
+                                Logger.get().error("Failed to extract NativeBuf", e);
+                                continue;
                             }
 
-                            ByteArrayOutputStream bufferStream = null;
+                            NativeBuf outputBuf = new NativeBuf();
+                            try {
+                                handler.handle(inputBuf, outputBuf, context);
+                            } catch (final Exception e) {
+                                Logger.get().error("Failed to handle request", e);
+                                continue;
+                            }
 
-                            int nRead;
-                            ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
-                            byte[] data = new byte[1024 * 1024];
-
-                            while (context.getSocket().isConnected()) {
-                                try {
-                                    bufferStream = new ByteArrayOutputStream();
-                                    try {
-                                        buffer.clear();
-
-                                        while ((nRead = iStream.read(data, 0, data.length)) != -1) {
-                                            bufferStream.write(data, 0, nRead);
-                                        }
-
-                                        // Now we've gotten the full request
-                                        bufferStream.flush();
-                                        byte[] readBytes = bufferStream.toByteArray();
-                                        buffer.put(readBytes);
-
-                                        NativeBuf inputBuf;
-                                        try {
-                                            inputBuf = decoder.decode(buffer);
-                                        } catch (final Exception e) {
-                                            Logger.get().error("Failed to extract NativeBuf", e);
-                                            continue;
-                                        }
-
-                                        NativeBuf outputBuf = new NativeBuf();
-                                        try {
-                                            handler.handle(inputBuf, outputBuf, context);
-                                        } catch (final Exception e) {
-                                            Logger.get().error("Failed to handle request", e);
-                                            continue;
-                                        }
-
-                                        byte[] output = encoder.encode(outputBuf);
-                                        oStream.write(output);
-                                        oStream.flush();
-                                    } catch (final Exception e) {
-                                        Logger.get().error("Failed to read stream input", e);
-                                    }
-                                } finally {
-                                    if (bufferStream != null) {
-                                        try {
-                                            bufferStream.close();
-                                        } catch (IOException e) {
-                                            Logger.get().error("Failed to close bufferStream", e);
-                                        }
-                                    }
-                                }
+                            byte[] output = encoder.encode(outputBuf);
+                            oStream.write(output);
+                            oStream.flush();
+                        } catch (final Exception e) {
+                            Logger.get().error("Failed to read stream input", e);
+                        }
+                    } finally {
+                        if (bufferStream != null) {
+                            try {
+                                bufferStream.close();
+                            } catch (IOException e) {
+                                Logger.get().error("Failed to close bufferStream", e);
                             }
                         }
-                    }.start();
+                    }
                 }
-
-                if (storageBase != null) {
-                    storageBase.close();
-                }
-
-                Logger.get().info("Successfully shutdown the server");
             }
         };
     }

@@ -12,6 +12,15 @@ import java.nio.ByteBuffer;
  */
 public class ProtocolEncoder {
 
+    private static ProtocolEncoder encoder;
+
+    public static ProtocolEncoder getEncoder() {
+        if (encoder == null) {
+            encoder = new ProtocolEncoder();
+        }
+        return encoder;
+    }
+
     public byte[] encode(DeependBuf buf) {
         NativeBuf nativeBuf = (NativeBuf) buf;
         int size = nativeBuf.getSize();
