@@ -18,13 +18,10 @@ package com.minecade.deepend.data;
 
 import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.object.GenericResponse;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
+import com.minecade.deepend.pipeline.DeependContext;
 
 /**
  * A wrapper for the netty ByteBuf
- *
- * @see ByteBuf
  *
  * This allows for some magnificent
  * things, and this is what the whole
@@ -159,6 +156,8 @@ public abstract class DeependBuf {
 
     public abstract void reset();
 
+    public abstract void writeAndFlush(DeependContext context);
+
     private class Entry {
         DataType type;
         Object object;
@@ -176,11 +175,5 @@ public abstract class DeependBuf {
             return this.object;
         }
     }
-
-    /**
-     * Write to the future's channel, and flush it
-     * @param future Future
-     */
-    public abstract void writeAndFlush(ChannelFuture future);
 
 }

@@ -37,24 +37,24 @@ public class DeleteData extends DeependChannel {
     }
 
     @Override
-    public void act(DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = connection.getObject("in", DeependBuf.class);
+    public void act(final DeependConnection connection, final DeependBuf buf) {
+        final DeependBuf in = connection.getObject("in", DeependBuf.class);
 
         // Just echo the request ID
         buf.writeString(in.getString());
 
         scope: {
-            // String category = readString(in);
-            byte categoryByte = in.getByte();
-            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
+            final byte categoryByte = in.getByte();
+            final String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
 
             if (!DataManager.instance.hasDataHolder(category)) {
                 buf.writeByte(GenericResponse.FAILURE);
                 buf.writeString("Category not found :(");
                 break scope;
             }
-            DataHolder holder = DataManager.instance.getDataHolder(category);
-            List<DataObject> object = DataUtil.getDataObject(connection, holder, null, in, new ArrayList<>(), true);
+
+            final DataHolder holder = DataManager.instance.getDataHolder(category);
+            final List<DataObject> object = DataUtil.getDataObject(connection, holder, null, in, new ArrayList<>(), true);
 
             if (object == null) {
                 buf.writeByte(GenericResponse.FAILURE);
@@ -72,7 +72,7 @@ public class DeleteData extends DeependChannel {
             buf.writeInt(object.size());
 
             // Write the actual response(s)
-            for (DataObject o : object) {
+            for (final DataObject o : object) {
                 buf.writeString(o.getName());
                 buf.writeString(o.getValue());
 

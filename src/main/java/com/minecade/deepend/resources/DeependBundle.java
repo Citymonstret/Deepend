@@ -124,6 +124,8 @@ public class DeependBundle implements ObjectGetter<String, String>, DataFile {
 
     @Override
     public void loadFile() {
+        Map<String, String> l_properties = new HashMap<>();
+
         try (FileReader reader = new FileReader(file)) {
             try (BufferedReader bReader = new BufferedReader(reader)) {
                 String line;
@@ -133,13 +135,30 @@ public class DeependBundle implements ObjectGetter<String, String>, DataFile {
                         continue;
                     }
                     parts[0] = parts[0].replaceAll("\\s+", "");
-                    properties.put(parts[0], parts[1]);
+                    l_properties.put(parts[0], parts[1]);
                 }
             } catch(final Exception ee) {
                 ee.printStackTrace();
             }
         } catch(Exception e) {
             e.printStackTrace();
+        }
+
+        boolean needsSaving = false;
+        for (String key : properties.keySet()) {
+            if (!l_properties.containsKey(key)) {
+                needsSaving = true;
+                l_properties.put(key, properties.get(key));
+            }
+        }
+
+        if (needsSaving) {
+            this.properties.clear();
+        }
+        this.properties.putAll(l_properties);
+
+        if (needsSaving) {
+            saveFile();
         }
     }
 

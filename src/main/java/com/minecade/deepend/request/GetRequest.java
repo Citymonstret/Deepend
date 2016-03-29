@@ -33,7 +33,7 @@ public abstract class GetRequest extends DataRequest {
      * @param dataRecipient Recipient that will handle the data
      * @param provider UUIDProvider used for authentication
      */
-    public GetRequest(DataRecipient dataRecipient, UUIDProvider provider) {
-        super(Channel.GET_DATA, dataRecipient, provider);
+    public GetRequest(DataRecipient dataRecipient) {
+        super(Channel.GET_DATA, dataRecipient);
     }
 }

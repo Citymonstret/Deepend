@@ -3,10 +3,8 @@ package com.minecade.deepend.nativeprot;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.prot.JavaProtocol;
 import com.minecade.deepend.prot.Protocol;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +21,6 @@ public class NativeBuf extends DeependBuf {
     private NativeObj[] objects;
     private final List<NativeObj> i_objects;
     private byte[] bytes;
-    private ByteBuf buf;
 
     private int readIndex = 0;
     private boolean updated = false;
@@ -32,29 +29,25 @@ public class NativeBuf extends DeependBuf {
         this(objects, null, null);
     }
 
-    public NativeBuf(final ByteBuf in) {
-        if (in.readableBytes() < 4 /* size of an integer */) {
-            this.buf = in;
+    public NativeBuf(final ByteBuffer in, int size) {
+        this.bytes = in.array();
+        NativeBuf tmp = protocol.readNativeBuf(size, bytes);
+        this.objects = tmp.getObjects();
+        this.i_objects = tmp.i_objects;
+    }
+
+    public NativeBuf(final NativeObj[] objects, final byte[] bytes, ByteBuffer buf) {
+        this.objects = objects;
+        this.bytes = bytes;
+        if (objects == null) {
             this.i_objects = new ArrayList<>();
         } else {
-            int size = in.readInt();
-            this.bytes = in.readBytes(size).array();
-            NativeBuf tmp = protocol.readNativeBuf(size, bytes);
-            this.objects = tmp.getObjects();
-            this.i_objects = tmp.i_objects;
-            this.buf = in;
+            this.i_objects = new ArrayList<>(Arrays.asList(objects));
         }
     }
 
-    public NativeBuf(final NativeObj[] objects, final byte[] bytes, ByteBuf buf) {
-        this.buf = buf;
-        this.objects = objects;
-        this.bytes = bytes;
-        this.i_objects = new ArrayList<>(Arrays.asList(objects));
-    }
-
-    public void setByteBuf(ByteBuf buf) {
-        this.buf = buf;
+    public NativeBuf() {
+        this(null, null, null);
     }
 
     public NativeObj[] getObjects() {
@@ -91,16 +84,25 @@ public class NativeBuf extends DeependBuf {
 
     @Override
     protected String readString() {
+        if (objects == null) {
+            checkCompile();
+        }
         return objects[readIndex++].getS();
     }
 
     @Override
     protected byte readByte() {
+        if (objects == null) {
+            checkCompile();
+        }
         return objects[readIndex++].getB();
     }
 
     @Override
     protected int readInt() {
+        if (objects == null) {
+            checkCompile();
+        }
         return objects[readIndex++].getI();
     }
 
@@ -122,19 +124,10 @@ public class NativeBuf extends DeependBuf {
         this.updated = false;
     }
 
-    @Override
-    public void writeAndFlush(ChannelFuture future) {
+    public void compile(ByteBuffer out) {
         checkCompile();
-        buf.writeInt(bytes.length);
-        buf.writeBytes(bytes);
-        future.channel().writeAndFlush(buf);
-    }
-
-    public ChannelFuture writeAndFlush(ChannelHandlerContext context) {
-        checkCompile();
-        buf.writeInt(bytes.length);
-        buf.writeBytes(bytes);
-        return context.writeAndFlush(buf);
+        out.putInt(bytes.length);
+        out.put(bytes);
     }
 
     private void checkCompile() {
@@ -156,5 +149,10 @@ public class NativeBuf extends DeependBuf {
     protected void addObj(NativeObj obj) {
         this.i_objects.add(obj);
         setUpdated();
+    }
+
+    public int getSize() {
+        checkCompile();
+        return 4 + bytes.length;
     }
 }

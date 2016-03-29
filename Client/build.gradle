@@ -23,15 +23,6 @@ jar {
     }
 }
 
-publishing {
-    publications {
-        shadow(MavenPublication) {
-            from components.java
-            artifact shadowJar
-        }
-    }
-}
-
 shadowJar {
     append('LICENSE')
 }

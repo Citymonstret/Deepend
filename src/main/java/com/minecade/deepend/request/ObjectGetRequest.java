@@ -42,8 +42,8 @@ public class ObjectGetRequest extends GetRequest {
      * @param dataRecipient Recipient that will handle incoming data
      * @param provider UUIDProvider used for authentication
      */
-    public ObjectGetRequest(String requestedKey, DeependObject object, DataRecipient dataRecipient, UUIDProvider provider) {
-        super(dataRecipient, provider);
+    public ObjectGetRequest(String requestedKey, DeependObject object, DataRecipient dataRecipient) {
+        super(dataRecipient);
         this.object = object;
         this.key = requestedKey;
     }

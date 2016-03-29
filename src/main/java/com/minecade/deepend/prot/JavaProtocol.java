@@ -2,6 +2,7 @@ package com.minecade.deepend.prot;
 
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.nativeprot.NativeObj;
+import com.minecade.deepend.util.GzipUtil;
 
 import java.nio.ByteBuffer;
 
@@ -14,6 +15,8 @@ public class JavaProtocol implements Protocol {
 
     @Override
     public NativeBuf readNativeBuf(int i, byte[] b) {
+        b = GzipUtil.extract(b);
+
         final Offset offset = new Offset();
         int objSize = bytesToInt(b, offset);
 
@@ -86,7 +89,8 @@ public class JavaProtocol implements Protocol {
             }
         }
 
-        buf.setBytes(buffer.array());
+        buf.setBytes(GzipUtil.compress(buffer.array()));
+
         return buf;
     }
 

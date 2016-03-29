@@ -16,18 +16,19 @@
 
 package com.minecade.deepend;
 
-import com.minecade.deepend.lib.Beta;
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.netty.compability.AbstractRemoteAddressFilter;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.socket.SocketChannel;
-import lombok.Getter;
-import lombok.NonNull;
+import com.minecade.deepend.nativeprot.NativeBuf;
+import com.minecade.deepend.pipeline.*;
+import com.minecade.deepend.prot.ProtocolDecoder;
+import com.minecade.deepend.prot.ProtocolEncoder;
 
+import lombok.RequiredArgsConstructor;
+
+import java.io.*;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+
 
 /**
  * This is just a basic netty channel initializer
@@ -36,59 +37,69 @@ import java.net.InetSocketAddress;
  *
  * @author Citymonstret
  */
-public final class DeependChannelInitializer extends ChannelInitializer<SocketChannel> {
+@RequiredArgsConstructor
+public final class DeependChannelInitializer {
 
-    private final Logger logger;
+    private static final ProtocolEncoder encoder = new ProtocolEncoder();
+    private static final ProtocolDecoder decoder = new ProtocolDecoder();
 
-    @Getter
-    private final Class<? extends ChannelHandlerAdapter> channelHandlerAdapter;
+    private final ChannelHandler handler;
 
-    public DeependChannelInitializer(Class<? extends ChannelHandlerAdapter> channelHandlerAdapter) {
-        Logger.setup("DeependChannelInitializer", null);
-        this.logger = Logger.get("DeependChannelInitializer");
-        this.channelHandlerAdapter = channelHandlerAdapter;
-        this.logger.info("Created new channel initializer for: " + channelHandlerAdapter);
-    }
+    public void handle(DeependContext context) throws IOException {
+        boolean allowed = true;
+        InetSocketAddress remoteAddress = context.getAddress();
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-    }
-
-    @Beta
-    @Override
-    protected void initChannel(@NonNull final SocketChannel socketChannel) {
-        final ChannelPipeline pipeline = socketChannel.pipeline();
-
-        // Add GZIP Encryption
-        // pipeline.addLast(ZlibCodecFactory.newZlibEncoder(ZlibWrapper.GZIP));
-        // pipeline.addLast(ZlibCodecFactory.newZlibDecoder(ZlibWrapper.GZIP));
-
-        // If this is a client, limit IP connections
-        // to the server, only
         if (DeependMeta.hasMeta("client")) {
-            pipeline.addLast(new AbstractRemoteAddressFilter<InetSocketAddress>() {
-                @Override
-                protected boolean accept(ChannelHandlerContext ctx, InetSocketAddress remoteAddress) throws Exception {
-                    boolean allowed = remoteAddress.getHostName().equals(DeependMeta.getMeta("serverAddr"))
-                                && ("" + remoteAddress.getPort()).equals(DeependMeta.getMeta("serverPort"));
-                    if (!allowed) {
-                        DeependChannelInitializer.this.logger.debug("Dropping channel attempt from: " + remoteAddress.getHostName());
-                    } else {
-                        DeependChannelInitializer.this.logger.debug("Allowed from: " + remoteAddress.getHostName());
-                    }
-                    return allowed;
-                }
-            });
+            allowed = remoteAddress.getHostName().equals(DeependMeta.getMeta("serverAddr"))
+                    && ("" + remoteAddress.getPort()).equals(DeependMeta.getMeta("serverPort"));
         }
+        if (!allowed) {
+            Logger.get().debug("Dropping channel attempt from: " + remoteAddress.getHostName());
+            context.getSocket().close();
+        } else {
+            ByteArrayOutputStream bufferStream = new ByteArrayOutputStream();
+            InputStream stream = context.getSocket().getInputStream();
+            int nRead;
+            byte[] data = new byte[1024 * 64];
+            while ((nRead = stream.read(data, 0, data.length)) != -1) {
+                bufferStream.write(data, 0, nRead);
+            }
+            bufferStream.flush();
+            byte[] bytes = bufferStream.toByteArray();
+            bufferStream.close();
 
-        try {
-            // This is the main channel; we're using our
-            // own wrappers, because netty is too complex
-            // for what we need
-            pipeline.addLast(getChannelHandlerAdapter().newInstance());
-        } catch (final Exception e) {
-            this.logger.error("Failed to add channel handler adapter", e);
+            ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+            buffer.put(bytes);
+
+            NativeBuf in;
+            try {
+                in = decoder.decode(buffer);
+            } catch (final Exception e) {
+                Logger.get().error("Failed to extract the DeependBuf", e);
+                context.getSocket().close();
+                return;
+            }
+
+            // Remove the buffer
+            // as it isn't needed anymore
+            buffer.clear();
+
+            NativeBuf out = new NativeBuf();
+            try {
+                handler.handle(in, out, context);
+            } catch (final Exception e) {
+                Logger.get().error("Failed to handle channel", e);
+                context.getSocket().close();
+                return;
+            }
+
+            byte[] output = encoder.encode(out);
+            OutputStream outputStream = context.getSocket().getOutputStream();
+            outputStream.write(output);
+            outputStream.flush();
+
+            context.getSocket().close();
         }
     }
+
 }

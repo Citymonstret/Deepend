@@ -21,6 +21,7 @@ import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.lib.Beta;
+import com.minecade.deepend.logging.Logger;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
@@ -125,6 +126,7 @@ public class DataUtil {
         } else {
             Object o = holder.get(name);
             if (o == null) {
+                Logger.get().error(name + ", was null :((((((");
                 return null;
             }
             if (o instanceof DataObject) {

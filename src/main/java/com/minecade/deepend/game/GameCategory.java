@@ -28,7 +28,9 @@ public enum GameCategory implements ByteProvider {
     SERVERS((byte) (1 << 2)),               // Game servers
     PLAYER_SERVERS((byte) (1 << 3)),        // Player -> Server relations
     SERVER_PLAYERS((byte) (1 << 4)),        // Players on a server
-    PROXIES((byte) (1 << 5));               // Game proxies (such as bungee)
+    PLAYER_NAMES((byte) (1 << 6)),
+    SERVER_CATEGORIES((byte) (1 << 5)),               // Game proxies (such as bungee)
+    CATEGORY_SERVERS((byte) (1 << 7));
 
     private final byte categoryID;
 

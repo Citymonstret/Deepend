@@ -18,38 +18,37 @@ package com.minecade.deepend.server.channels;
 
 import com.minecade.deepend.ServerResponse;
 import com.minecade.deepend.channels.Channel;
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.channels.ChannelManager;
-import com.minecade.deepend.channels.NettyChannelHandler;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
+import com.minecade.deepend.pipeline.DeependContext;
 
 import java.util.UUID;
 
 /**
  * The main server channel implementation
  */
-public class MainChannel extends NettyChannelHandler {
+public class MainChannel extends ChannelHandler {
 
     @Override
-    public void handle(NativeBuf in, NativeBuf response, Object context) throws Exception {
+    public void handle(NativeBuf in, NativeBuf response, DeependContext context) {
         // The ID of the requested channel
         int channelID = in.getInt();
         // The response status from the server
         ServerResponse serverResponse = ServerResponse.UNKNOWN;
         Channel channel;
         boolean everythingFine = false;
-        DeependConnection connection = null;
-        DeependBuf written = generateBuf(context);
+        DeependConnection connection = context.getConnection();
+        DeependBuf written = new NativeBuf();
         scope: {
             channel = Channel.getChannel(channelID);
             if (channel == null) {
                 serverResponse = ServerResponse.INVALID_CHANNEL;
             }
-            if (channel == Channel.AUTHENTICATE) {
-                connection = generateConnection(context);
-            } else {
+            if (channel != Channel.AUTHENTICATE) {
                 UUID uuid;
                 try {
                     uuid = UUID.fromString(in.getString());
@@ -58,7 +57,9 @@ public class MainChannel extends NettyChannelHandler {
                     break scope;
                 }
                 Logger.get().info("Given UUID: " + uuid.toString());
-                connection = generateConnection(context, uuid);
+                if (!connection.getUUID().equals(uuid)) {
+                    connection.setAuthenticated(false);
+                }
             }
             if (!connection.isAuthenticated()) {
                 if (channel != Channel.AUTHENTICATE) {

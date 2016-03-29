@@ -3,7 +3,6 @@ dependencies {
     compile rootProject
 }
 
-
 buildscript {
     repositories {
         jcenter()

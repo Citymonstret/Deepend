@@ -39,11 +39,11 @@ public class Authentication extends DeependChannel {
     }
 
     @Override
-    public void act(DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = connection.getObject("in", DeependBuf.class);
+    public void act(final DeependConnection connection, final DeependBuf buf) {
+        final DeependBuf in = connection.getObject("in", DeependBuf.class);
 
-        String username = in.getString();
-        String password = in.getString();
+        final String username = in.getString();
+        final String password = in.getString();
 
         GenericResponse response = GenericResponse.FAILURE;
 

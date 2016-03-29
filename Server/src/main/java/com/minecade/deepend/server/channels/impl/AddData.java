@@ -39,16 +39,16 @@ public class AddData extends DeependChannel {
     }
 
     @Override
-    public void act(DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = connection.getObject("in", DeependBuf.class);
+    public void act(final DeependConnection connection, final DeependBuf buf) {
+        final DeependBuf in = connection.getObject("in", DeependBuf.class);
 
         // Just echo the request ID
         buf.writeString(in.getString());
 
         scope: {
             // String category = readString(in);
-            byte categoryByte = in.getByte();
-            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
+            final byte categoryByte = in.getByte();
+            final String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
 
             if (!DataManager.instance.hasDataHolder(category)) {
                 buf.writeByte(GenericResponse.FAILURE);
@@ -61,14 +61,14 @@ public class AddData extends DeependChannel {
             // Reset main holder status
             DataManager.instance.getDataStatus(category).resetStatus();
 
-            String providerPath = in.getString();
+            final String providerPath = in.getString();
             String[] pathParts = providerPath.split(".");
 
             if (pathParts.length < 1) {
                 pathParts = new String[] {providerPath};
             }
 
-            for (String part : pathParts) {
+            for (final String part : pathParts) {
                 if (holder.containsKey(part)) {
                     holder = (DataHolder) holder.get(part);
                 } else {
@@ -78,15 +78,17 @@ public class AddData extends DeependChannel {
                 }
             }
 
-            List<DataObject> object = new ArrayList<>();
+            final List<DataObject> object = new ArrayList<>();
 
             int numObjects = in.getInt();
 
             for (int i = 0; i < numObjects; i++) {
                 String[] pieces = in.getString().split(":");
+
                 if (pieces.length < 2) {
                     pieces = new String[] {pieces[0], ""};
                 }
+
                 DataObject o = new DataObject(pieces[0], pieces[1]);
                 holder.put(pieces[0], o);
 

@@ -18,13 +18,13 @@ package com.minecade.deepend.connection;
 
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.lib.Stable;
-import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.request.UUIDProvider;
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +38,8 @@ public class DeependConnection implements UUIDProvider {
     @Getter
     private final SimpleAddress remoteAddress;
 
+    private int port = -1;
+
     @Getter
     @Setter
     private boolean authenticated;
@@ -47,15 +49,23 @@ public class DeependConnection implements UUIDProvider {
         this.authenticated = false;
     }
 
+    public DeependConnection(SimpleAddress remoteAddress, int port) {
+        this.remoteAddress = remoteAddress;
+        this.authenticated = false;
+        this.port = port;
+    }
+
+    public int getNullPort() {
+        return this.port;
+    }
+
     public <T> T getObject(String key, Class<T> clazz) {
         return clazz.cast(metaMapping.get(key));
     }
 
     public DeependBuf getBuf(String key) {
         Object o = metaMapping.get(key);
-        if (o instanceof ByteBuf) {
-            return new NativeBuf((ByteBuf) o);
-        } else if (o instanceof DeependBuf) {
+        if (o instanceof DeependBuf) {
             return (DeependBuf) o;
         }
         return null;

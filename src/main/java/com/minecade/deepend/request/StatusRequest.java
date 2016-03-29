@@ -52,8 +52,8 @@ public final class StatusRequest extends PendingRequest {
     @Getter
     private final StatusRecipient recipient;
 
-    public StatusRequest(int field, @NonNull StatusRecipient statusRecipient, UUIDProvider provider) {
-        super(Channel.CHECK_DATA, provider);
+    public StatusRequest(int field, @NonNull StatusRecipient statusRecipient) {
+        super(Channel.CHECK_DATA);
         this.index = currentIndex++;
         this.field = field;
         this.recipient = statusRecipient;

@@ -7,7 +7,6 @@ import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.server.channels.impl.*;
 import com.minecade.deepend.values.ValueFactory;
 
-import static com.minecade.deepend.game.GameCategory.PROXIES;
 import static com.minecade.deepend.game.GameCategory.SERVERS;
 
 public final class SimpleServer implements DeependServer.DeependServerApplication {
@@ -22,7 +21,7 @@ public final class SimpleServer implements DeependServer.DeependServerApplicatio
 
     @Override
     public void registerDataHolders(DataManager dataManager) {
-        DataManager.createDataHolders(PROXIES, SERVERS);
+        DataManager.createDataHolders( SERVERS);
     }
 
     @Override

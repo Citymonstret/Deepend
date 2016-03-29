@@ -100,7 +100,7 @@ public class GameServer extends DeependObject {
             }
         };
 
-        return new ObjectGetRequest(name.toString(), object, recipient, provider);
+        return new ObjectGetRequest(name.toString(), object, recipient);
     }
 
     public static GetRequest requestServer(String name, UUIDProvider provider, ServerCallback callback) {

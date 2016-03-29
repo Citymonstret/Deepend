@@ -17,9 +17,8 @@
 package com.minecade.deepend.client;
 
 import com.minecade.deepend.DeependApplication;
-import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.DeependMeta;
-import com.minecade.deepend.channels.Channel;
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.client.channels.MainChannel;
 import com.minecade.deepend.client.channels.impl.AddData;
@@ -28,27 +27,17 @@ import com.minecade.deepend.client.channels.impl.DeleteData;
 import com.minecade.deepend.client.channels.impl.GetData;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
-import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
-import com.minecade.deepend.request.PendingRequest;
-import com.minecade.deepend.request.ShutdownRequest;
+import com.minecade.deepend.request.Request;
 import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.values.ValueFactory;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import lombok.Synchronized;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
 
 import static com.minecade.deepend.DeependConstants.*;
 
@@ -80,17 +69,24 @@ public final class DeependClient {
     @Getter
     public String echoTestString;
 
-    private volatile boolean shutdown, isShutdown = false;
-    private volatile boolean sentAuthenticationRequest;
+    @Getter
+    private int connectionPools = 3;
+
+    protected volatile boolean shutdown;
+    private volatile boolean isShutdown = false;
+
+    final RequestCloud cloud = new RequestCloud();
+
+    @Getter
+    private final ChannelHandler channelHandler = new MainChannel();
 
     @Getter
     private final DeependBundle properties;
 
-    private final Collection<PendingRequest> pendingRequests;
-
     @SneakyThrows
-    public DeependClient(@NonNull DeependClientApplication application, boolean useProvided, String host, int port) {
+    public DeependClient(@NonNull final DeependClientApplication application, final boolean useProvided, final String host, final int port) {
         DeependClient.instance = this;
+
         DeependMeta.setMeta(CLIENT_META, "true");
 
         Logger.setup(CLIENT_NAME, new DeependBundle(CLIENT_STRINGS, true));
@@ -102,8 +98,11 @@ public final class DeependClient {
                 .add("auth.pass", "password")
                 .add("conn.host", "localhost")
                 .add("conn.port", "8000")
+                .add("pools", "3")
                 .build()
         );
+
+        this.connectionPools = Integer.parseInt(getProperty("pools"));
 
         // Let's load in some properties
         this.echoTestString = getProperty("echo.string");
@@ -128,7 +127,6 @@ public final class DeependClient {
 
         {   // DEFAULT VALUES
             this.shutdown = false;
-            this.pendingRequests = Collections.synchronizedSet(new LinkedHashSet<>());
         }
 
         {   // CHANNEL SETUP
@@ -157,17 +155,6 @@ public final class DeependClient {
             application.registerObjectMappings(ObjectManager.instance);
         }
 
-        final EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-        final Bootstrap b = new Bootstrap();
-        b.group(workerGroup);
-        b.channel(NioSocketChannel.class);
-        b.option(ChannelOption.SO_REUSEADDR, true);
-        b.option(ChannelOption.TCP_NODELAY, true);
-        b.handler(new DeependChannelInitializer(MainChannel.class));
-
-        b.remoteAddress(host1, port1);
-
         try {
             currentConnection = new DeependConnection(new SimpleAddress(InetAddress.getLocalHost().getHostName()));
         } catch (UnknownHostException e) {
@@ -181,131 +168,13 @@ public final class DeependClient {
 
         Logger.get().info("thread.starting");
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    workerGroup.shutdownGracefully();
-                } catch(final Exception e) {
-                    e.printStackTrace();
-                }
-                Logger.get().info("shutdown.completed");
-            }
-        });
-
-        final Thread thread = new Thread() {
-            {
-                setName("ClientThread");
-            }
-
-            @Override
-            public void run() {
-                ChannelFuture future;
-                List<PendingRequest> toRemove;
-                // We're not sure if things are working or
-                // not, so we'll just assume that they aren't
-                boolean connectionProblems = true;
-                while (!shutdown) {
-                    if (!connectionProblems) {
-                        if (getCurrentConnection().isAuthenticated()) {
-                            toRemove = new ArrayList<>();
-                            for (PendingRequest r : pendingRequests)
-                                requests:{
-                                    if (r instanceof ShutdownRequest) {
-                                        requestShutdown();
-                                        break requests;
-                                    }
-                                    if (r.validate()) {
-                                        try {
-                                            future = b.connect().sync();
-                                            r.send(future);
-                                            future.channel().closeFuture().sync();
-                                            // Make sure to only remove
-                                            // if it actually succeeded
-                                            // => will automatically
-                                            // re-try this if it didn't
-                                            // work the first time
-                                            toRemove.add(r);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                            connectionProblems = true;
-                                        }
-                                    } else {
-                                        toRemove.add(r);
-                                    }
-                                }
-                            pendingRequests.removeAll(toRemove);
-                        } else {
-                            if (!sentAuthenticationRequest) {
-                                try {
-                                    future = b.connect().sync();
-
-                                    new PendingRequest(Channel.AUTHENTICATE) {
-                                        @Override
-                                        protected void makeRequest(final DeependBuf buf) {
-                                            Logger.get().info("common.authenticating");
-                                            buf.writeString(getProperty("auth.user"));
-                                            buf.writeString(getProperty("auth.pass"));
-                                        }
-                                    }.send(future);
-                                    future.channel().closeFuture().sync();
-
-                                    sentAuthenticationRequest = true;
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                    connectionProblems = true;
-                                }
-                            }
-                        }
-                    } else {
-                        try {
-                            Logger.get().info("connection.attempting");
-
-                            // Disconnecting means that we
-                            // cannot trust that we're
-                            // authenticated, let's force authenticate!
-                            currentConnection.setAuthenticated(false);
-
-                            // This will just connect and instantly
-                            // disconnect, just to make sure that it
-                            // actually works
-                            b.connect().sync().channel().close().sync();
-
-                            // Yay, it worked! Now let's reset the error
-                            // status ;D
-                            connectionProblems = false;
-
-                            Logger.get().info("connection.success");
-                        } catch(final Exception e) {
-                            Logger.get().error("connection.fail");
-                            try {
-                                sleep(2500);
-                            } catch(final InterruptedException ee) {
-                                ee.printStackTrace();
-                            }
-                        }
-                    }
-                }
-                workerGroup.shutdownGracefully();
-                Logger.get().info("shutdown.completed");
-                isShutdown = true;
-            }
-        };
-
-        thread.setDaemon(false);
-        thread.start();
-    }
-
-    public DeependClient(DeependClientApplication application) {
-        this(application, false, "", -1);
-    }
-
-    @Synchronized
-    public void requestShutdown() {
-        if (!shutdown) {
-            Logger.get().info("shutdown.requested");
+        for (int i = 0; i < connectionPools; i++) {
+            new ClientThread(host1, port1);
         }
-        this.shutdown = true;
+    }
+
+    public DeependClient(final DeependClientApplication application) {
+        this(application, false, "", -1);
     }
 
     /**
@@ -314,20 +183,12 @@ public final class DeependClient {
      *
      * @param r Request to send
      */
-    public void addPendingRequest(@NonNull final PendingRequest r) {
-        this.pendingRequests.add(r);
+    public void addPendingRequest(@NonNull final Request r) {
+        this.cloud.addPendingRequest(r);
     }
 
-    public String getProperty(@NonNull String key) {
+    public String getProperty(@NonNull final String key) {
         return this.properties.get(key);
-    }
-
-    /**
-     * Reset the authentication status for this client,
-     * which forces it to re-authenticate
-     */
-    public void resetAuthenticationPendingStatus() {
-        this.sentAuthenticationRequest = false;
     }
 
     public boolean isShutdown() {
@@ -338,10 +199,6 @@ public final class DeependClient {
      * <a>https://github.com/DeependProject/Deepend/wiki/Client</a>
      */
     public interface DeependClientApplication extends DeependApplication {
-
-        default DeependConnection currentConnection() {
-            return DeependClient.getCurrentConnection();
-        }
 
         /**
          * Register requests that will be sent as soon

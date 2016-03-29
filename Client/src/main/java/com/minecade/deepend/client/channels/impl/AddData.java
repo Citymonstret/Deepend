@@ -32,6 +32,8 @@ import java.util.List;
  */
 public class AddData extends DeependChannel {
 
+    private String getID;
+
     public AddData() {
         super(Channel.ADD_DATA);
     }

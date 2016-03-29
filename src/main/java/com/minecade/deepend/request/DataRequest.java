@@ -21,8 +21,7 @@ import com.minecade.deepend.data.DeependBuf;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,20 +49,26 @@ public abstract class DataRequest extends PendingRequest {
     @Getter
     private final int index;
 
-    @Getter
-    private final DataRecipient recipient;
+    private List<DataRecipient> recipient = new ArrayList<>();
+
+    public DataRecipient getRecipient() {
+        return recipient.get(0);
+    }
 
     /**
      * Constructor
      * @param channel Channel to send the request to
      * @param dataRecipient Recipient that will handle the data
-     * @param provider UUIDProvider used for authentication
      */
-    public DataRequest(@NonNull Channel channel, @NonNull DataRecipient dataRecipient, UUIDProvider provider) {
-        super(channel, provider);
+    public DataRequest(@NonNull Channel channel, @NonNull DataRecipient dataRecipient) {
+        super(channel);
         this.index = currentIndex++;
-        this.recipient = dataRecipient;
+        this.recipient.add(dataRecipient);
         requestMap.put("request::" + index, this);
+    }
+
+    public void addRecipient(@NonNull final DataRecipient recipient) {
+        this.recipient.add(recipient);
     }
 
     /**
@@ -73,7 +78,7 @@ public abstract class DataRequest extends PendingRequest {
      * @param o List of objects
      */
     public void call(final List<Object> o) {
-        recipient.act(o);
+        recipient.forEach(recipient -> recipient.act(o));
     }
 
     @Override

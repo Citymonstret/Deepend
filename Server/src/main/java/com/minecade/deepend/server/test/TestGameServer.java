@@ -72,32 +72,32 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
 
     @Override
     public void registerDataHolders(DataManager dataManager) {
-        DataManager.createDataHolders(PLAYERS, PLAYER_SERVERS, PROXIES, SERVERS);
-        DataManager.instance.registerDataHolder(new MirrorDataHolder(
-                GameCategory.PLAYER_SERVERS.name(),
-                DataManager.instance.getDataHolder(GameCategory.PLAYERS.name()),
-                (x) -> {
-                    if (x instanceof DataHolder) {
-                        DataHolder temp = (DataHolder) x;
-                        return new DataObject(temp.getIdentifier(),
-                                ((DataObject) temp.get("currentServer")).getValue());
-                    }
+        DataManager.createDataHolders(SERVERS);
+        DataHolder servers = DataManager.instance.getDataHolder(SERVERS.name());
+
+        DataManager.instance.registerDataHolder(new MirrorDataHolder(SERVER_CATEGORIES.name(), servers, (o) -> {
+            if (o instanceof DataHolder) {
+                DataHolder holder = (DataHolder) o;
+                if (!holder.containsKey("gameType")) {
                     return null;
                 }
-        ), GameCategory.PLAYER_SERVERS);
-        DataManager.instance.registerDataHolder(new MirrorDataHolder(
-                GameCategory.SERVER_PLAYERS.name(),
-                DataManager.instance.getDataHolder(GameCategory.PLAYERS.name()),
-                (x) -> {
-                    if (x instanceof DataHolder) {
-                        DataHolder temp = (DataHolder) x;
-                        DataHolder server = new DataHolder(((DataObject) temp.get("currentServer")).getValue());
-                        server.put(temp.getIdentifier(), temp.getFallback());
-                        return server;
-                    }
+                return new DataObject(((DataObject) holder.get("gameType")).getValue(), "");
+            }
+            return null;
+        }), SERVER_CATEGORIES);
+
+        DataManager.instance.registerDataHolder(new MirrorDataHolder(CATEGORY_SERVERS.name(), servers, (o) -> {
+            if (o instanceof DataHolder) {
+                DataHolder holder = (DataHolder) o;
+                if (!holder.containsKey("gameType")) {
                     return null;
                 }
-        ), GameCategory.SERVER_PLAYERS);
+                DataHolder newH = new DataHolder(((DataObject) holder.get("gameType")).getValue());
+                newH.put(((DataObject) holder.get("serverName")).getValue(), "");
+                return newH;
+            }
+            return null;
+        }), CATEGORY_SERVERS);
     }
 
     @Override
@@ -150,25 +150,18 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
 
     @Override
     public void after(DeependServer context) {
-        { // Register data holders using a builder pattern
+        for (int i = 0; i < 20; i++) {
+            String category = i % 2 == 0 ? "lobby" : "hunger";
             DataHolder.DataHolderInitalizer.builder()
-                    .name("notch")
-                    .object("currentServer", "lobby1")
-                    .object("name", null)
-                    .object("uuid", "1-3-3-7")
-                    .fallback("uuid")
-                    .build().register(PLAYERS);
-        }
-        { // This is another way to do it
-            DataHolder jeb_ = new DataHolder("jeb_");
-            jeb_.put("currentServer", "lobby1");
-            jeb_.put("uuid", "1-9-9-3");
-            jeb_.put("name", null);
-            jeb_.setFallback("uuid");
-            DataManager.instance.getDataHolder(GameCategory.PLAYERS).put("jeb_", jeb_);
-
-            // DeependServer server = (DeependServer) context;
-            // server.getStorageBase().saveDataHolder("players", jeb_);
+                    .name("SERVER_" + i)
+                    .object("bungeeIdentifier", "server_" + i)
+                    .object("gameType", category)
+                    .object("serverName", "SERVER_" + i)
+                    .object("maxPlayers", "100")
+                    .object("currentPlayers", "" + (100 - i * 5))
+                    .object("gameState", "IN_LOBBY")
+                    .object("serverNum", "" + i)
+                    .build().register(SERVERS);
         }
     }
 }

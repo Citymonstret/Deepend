@@ -17,11 +17,12 @@
 package com.minecade.deepend.request;
 
 import com.minecade.deepend.channels.Channel;
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.lib.Stable;
+import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
-import io.netty.channel.ChannelFuture;
-import lombok.EqualsAndHashCode;
+import com.minecade.deepend.pipeline.DeependContext;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -32,24 +33,10 @@ import lombok.SneakyThrows;
  * @author Citymonstret
  */
 @Stable
-@EqualsAndHashCode
-public abstract class PendingRequest implements Comparable {
+public abstract class PendingRequest extends Request {
 
     @Getter
     private Channel requestedChannel;
-
-    @Getter
-    private UUIDProvider provider;
-
-    /**
-     * Constructor that will default the UUID to null,
-     * should only be used for authentication
-     * @param requestedChannel Channel the
-     *                         request will be sent to
-     */
-    public PendingRequest(Channel requestedChannel) {
-        this(requestedChannel, () -> null);
-    }
 
     /**
      * Constructor which allows for UUID specification,
@@ -59,13 +46,21 @@ public abstract class PendingRequest implements Comparable {
      * @param provider UUID provider (used to authenticate the request)
      */
     @SneakyThrows(IllegalArgumentException.class)
-    public PendingRequest(Channel requestedChannel, UUIDProvider provider) {
+    public PendingRequest(Channel requestedChannel) {
         this.requestedChannel = requestedChannel;
-        this.provider = provider;
+    }
 
-        if (provider == null && requestedChannel != Channel.AUTHENTICATE) {
-            throw new IllegalArgumentException("Cannot specify null UUID for channels other than for authentication");
+    @Override
+    public boolean handle(DeependContext context, ChannelHandler handler) {
+        boolean status;
+        try {
+            this.send(context, handler);
+            status = true;
+        } catch (final Exception e) {
+            Logger.get().error("Something went wrong when handing the pending request", e);
+            status = false;
         }
+        return status;
     }
 
     /**
@@ -81,29 +76,15 @@ public abstract class PendingRequest implements Comparable {
      * @see #makeRequest(DeependBuf) to populate the buf
      * @param future Future to send the request to
      */
-    final public void send(ChannelFuture future) {
-        DeependBuf out = new NativeBuf(future.channel().alloc().buffer());
+     public void send(DeependContext context, ChannelHandler handler) {
+        DeependBuf out = new NativeBuf();
         out.writeInt(requestedChannel.getValue());
         // Will send the UUID if it is specified
-        if (provider.getUUID() != null) {
-            out.writeString(provider.getUUID().toString());
+        if (requestedChannel != Channel.AUTHENTICATE) {
+            out.writeString(context.getConnection().getUUID().toString());
         }
         makeRequest(out);
-        out.writeAndFlush(future);
+        out.writeAndFlush(context);
     }
 
-    @Override
-    public int compareTo(Object o) {
-        return ((o instanceof PendingRequest) && o.equals(this)) ? 0 : -1;
-    }
-
-    /**
-     * Override this to get more
-     * control over the lifespan
-     * of your requests
-     * @return True, unless overridden
-     */
-    public boolean validate() {
-        return true;
-    }
 }

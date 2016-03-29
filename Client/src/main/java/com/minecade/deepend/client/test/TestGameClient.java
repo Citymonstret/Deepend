@@ -40,11 +40,13 @@ import com.minecade.deepend.game.GameServer;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.ProviderGroup;
-import com.minecade.deepend.request.AddRequest;
-import com.minecade.deepend.request.DataRequest;
-import com.minecade.deepend.request.ShutdownRequest;
-import com.minecade.deepend.request.StatusRequest;
+import com.minecade.deepend.request.*;
 import com.minecade.deepend.values.ValueFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created 2/23/2016 for Deepend
@@ -55,6 +57,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
 
     public static void main(String[] args) {
         new DeependClient(new TestGameClient());
+
     }
 
     @Override
@@ -66,7 +69,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         // This is defined outside of the connection itself, as this
         // shouldn't be re-created
         EnumBitField<Byte, GameCategory> categoryEnumBitField = new EnumBitField<>(GameCategory.class);
-        int field = categoryEnumBitField.construct(GameCategory.PLAYERS, GameCategory.PROXIES, GameCategory.SERVERS);
+        int field = categoryEnumBitField.construct(GameCategory.PLAYERS, GameCategory.SERVERS);
 
         //
         //  RE-USABLE LAMBDAS
@@ -93,34 +96,61 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         //
 
         // This will simply fetch the updated categories
-        client.addPendingRequest(new StatusRequest(field, statusRecipient, currentConnection()));
+        client.addPendingRequest(new StatusRequest(field, statusRecipient));
 
         // These three requests does the same thing, it just
         // shows that the syntax can be adapted to many different
         // usage scenarios
         // client.addPendingRequest(GamePlayer.requestPlayer("jeb_,notch", currentConnection(), serverAnnouncement));
-        // client.addPendingRequest(GamePlayer.requestPlayer("*", currentConnection(), serverAnnouncement));
+        // client.addPendingRequest(GamePlayer.requestPlayerNames("*", currentConnection(), serverAnnouncement));
+
+        /*
+
+        UPDATE_CATEGORIES
+            -> Add to category list
+
+        GET_SERVER_NAMES
+            -> Update each server on its own
+
+         */
+
         // client.addPendingRequest(GamePlayer.requestPlayers(new StringList("jeb_", "notch"), currentConnection(), serverAnnouncement));
 
-        client.addPendingRequest(new AddRequest(nullRecipient, currentConnection()) {
-            @Override
-            protected void buildRequest(DeependBuf buf) {
-                buf.writeByte(GameCategory.SERVERS);
-                buf.writeString("server1");
-                buf.writeInt(4);
-                buf.writeString("serverName:server1");
-                buf.writeString("gameType:minigame");
-                buf.writeString("playerCount:10");
-                buf.writeString("maxCount:999");
-            }
-        });
-
-        client.addPendingRequest(GameServer.requestServer("*", currentConnection(),
-                c -> Logger.get().debug(
-                        "Found server: " + c.getServerName() + ", players: " + c.getPlayerCountCurrent() + "/" + c.getPlayerCountMax())));
-
         // This makes the client shut down, quite handy
-        client.addPendingRequest(new ShutdownRequest());
+        List<String> categories = new ArrayList<>();
+
+        final RequestChain requestChain = new RequestChain();
+        requestChain.add(
+            new GetRequest((x) -> x.forEach(y -> {
+                Logger.get().info("Found category: " + y.toString());
+                categories.add(y.toString());
+            })) {
+                @Override
+                protected void buildRequest(DeependBuf buf) {
+                    buf.writeByte(GameCategory.SERVER_CATEGORIES);
+                    buf.writeString("*");
+                }
+            }
+        ).add(
+            new DummyDataRequest(() -> {
+                Logger.get().info("Searching for servers");
+                for (String category : categories) {
+                    requestChain.add(
+                        new GetRequest((servers) -> {
+                            servers.forEach(server -> Logger.get().info("Found: " + server + " in " + category));
+                        }) {
+                            @Override
+                            protected void buildRequest(DeependBuf buf) {
+                                buf.writeByte(GameCategory.CATEGORY_SERVERS);
+                                buf.writeString(category);
+                            }
+                        }
+                    );
+                }
+            })
+        ).addLast(new ShutdownRequest());
+
+        DeependClient.getInstance().addPendingRequest(requestChain);
     }
 
     @Override

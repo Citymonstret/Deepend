@@ -24,8 +24,8 @@ import com.minecade.deepend.channels.Channel;
  */
 public abstract class AddRequest extends DataRequest {
 
-    public AddRequest(DataRecipient dataRecipient, UUIDProvider provider) {
-        super(Channel.ADD_DATA, dataRecipient, provider);
+    public AddRequest(DataRecipient dataRecipient) {
+        super(Channel.ADD_DATA, dataRecipient);
     }
 
 }

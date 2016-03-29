@@ -18,12 +18,18 @@ package com.minecade.deepend.server;
 
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.Option;
+import com.minecade.deepend.ConnectionFactory;
 import com.minecade.deepend.DeependApplication;
-import com.minecade.deepend.DeependChannelInitializer;
 import com.minecade.deepend.DeependConstants;
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.channels.ChannelManager;
+import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.nativeprot.NativeBuf;
+import com.minecade.deepend.pipeline.DeependContext;
+import com.minecade.deepend.prot.ProtocolDecoder;
+import com.minecade.deepend.prot.ProtocolEncoder;
 import com.minecade.deepend.reflection.Field;
 import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.channels.MainChannel;
@@ -32,21 +38,27 @@ import com.minecade.deepend.storage.StorageBase;
 import com.minecade.deepend.util.JavaConstants;
 import com.minecade.deepend.util.StringUtils;
 import com.minecade.deepend.values.ValueFactory;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.ResourceLeakDetector;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.ByteBuffer;
 
 /**
  * The main server implementation
  */
 public class DeependServer implements Runnable {
+
+    public static final ProtocolDecoder decoder = new ProtocolDecoder();
+    public static final ProtocolEncoder encoder = new ProtocolEncoder();
+    public static final ChannelHandler handler = new MainChannel();
 
     private interface ServerSettings {
 
@@ -73,7 +85,7 @@ public class DeependServer implements Runnable {
     protected StorageBase storageBase;
 
     @SneakyThrows
-    public DeependServer(String[] iargs, @NonNull DeependServerApplication application) {
+    public DeependServer(@NonNull final String[] iargs, @NonNull final DeependServerApplication application) {
         Logger.setup(new Field(DeependConstants.class)
                 .withProperties(Field.FieldProperty.ACCESS_GRANT, Field.FieldProperty.ACCESS_REVERT, Field.FieldProperty.STATIC, Field.FieldProperty.CONSTANT)
                 .named("server_name").getValue().toString(), new DeependBundle("ServerStrings"));
@@ -119,69 +131,132 @@ public class DeependServer implements Runnable {
     }
 
     final public void run() {
-        if (System.getProperty("io.netty.leakDetectionLevel") == null) {
-            ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
-        }
-
         Thread thread = new Thread("ServerThread") {
             @Override
             public void run() {
-                // Let's use the simplest group
-                // setup possible
-                EventLoopGroup bossGroup = new NioEventLoopGroup();
-                EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-                // Exceptions aren't fun kids. Stay away from them!
+                ServerSocket serverSocket = null;
                 try {
-                    // This should be clear enough
-                    ServerBootstrap bootstrap = new ServerBootstrap();
-
-                    // Setup the bootstrap
-                    bootstrap.group(bossGroup, workerGroup)
-                            .channel(NioServerSocketChannel.class)
-                            .childHandler(new DeependChannelInitializer(MainChannel.class))
-                            .option(ChannelOption.SO_BACKLOG, 128)
-                            .childOption(ChannelOption.SO_KEEPALIVE, true);
-
-                    // Yay for logging
-                    Logger.get().info("bootstrap.started");
-
-                    // At least they've got a future :o
-                    ChannelFuture future;
-
-                    // Yay for nested try statements
-                    try {
-                        // start the server
-                        future = bootstrap.bind(port).sync();
-                    } catch(final Exception e) { // Nuh! This shouldn't happen :(
-                        Logger.get().error("bootstrap.failed.bind");
-                        return;
-                    }
-                    // Wait until the socket is closed
-                    future.channel().closeFuture().sync();
-
-                    if (storageBase != null) {
-                        storageBase.close();
-                    }
-                } catch(final Exception e) { // Why do you have to hurt me?
-                    e.printStackTrace();
+                    serverSocket = new ServerSocket(port);
+                } catch (final Exception e) {
+                    Logger.get().error("Failed to bind to port " + port + ", is it busy?", e);
                 }
-            }
-        };
+                if (serverSocket == null || !serverSocket.isBound()) {
+                    Logger.get().error("Failed to start the server socket, shutting down");
+                    System.exit(JavaConstants.EXIT_STATUS_FAILURE);
+                }
 
-        thread.setDaemon(false);
-        thread.start();
+                while (!serverSocket.isClosed()) {
+                    Socket temp = null;
+                    try {
+                        temp = serverSocket.accept();
+                    } catch (final Exception e) {
+                        Logger.get().error("Failed to accept incoming socket", e);
+                    }
+                    if (temp == null || !temp.isConnected()) {
+                        Logger.get().error("Failed to accept socket, throwing");
+                        continue;
+                    }
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                Logger.get().info("Shutdown requested");
+                    DeependConnection connection = ConnectionFactory.instance.createConnection(
+                            (InetSocketAddress) temp.getRemoteSocketAddress()
+                    );
+                    DeependContext context = new DeependContext(
+                            connection, temp, (InetSocketAddress) temp.getRemoteSocketAddress()
+                    );
+
+                    new Thread(connection.getRemoteAddress().toString()) {
+                        @Override
+                        public void run() {
+                            final InputStream iStream;
+                            try {
+                                iStream = context.getSocket().getInputStream();
+                            } catch (final Exception e) {
+                                Logger.get().error("Failed to fetch socket InputStream", e);
+                                try {
+                                    context.getSocket().close();
+                                } catch (final Exception ee) {
+                                    Logger.get().error("Failed to close socket", ee);
+                                }
+                                return;
+                            }
+
+                            final OutputStream oStream;
+                            try {
+                                oStream = context.getSocket().getOutputStream();
+                            } catch (final Exception e) {
+                                Logger.get().error("Failed to fetch socket outputStream");
+                                try {
+                                    context.getSocket().close();
+                                } catch (final Exception ee) {
+                                    Logger.get().error("Failed to close socket", ee);
+                                }
+                                return;
+                            }
+
+                            ByteArrayOutputStream bufferStream = null;
+
+                            int nRead;
+                            ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
+                            byte[] data = new byte[1024 * 1024];
+
+                            while (context.getSocket().isConnected()) {
+                                try {
+                                    bufferStream = new ByteArrayOutputStream();
+                                    try {
+                                        buffer.clear();
+
+                                        while ((nRead = iStream.read(data, 0, data.length)) != -1) {
+                                            bufferStream.write(data, 0, nRead);
+                                        }
+
+                                        // Now we've gotten the full request
+                                        bufferStream.flush();
+                                        byte[] readBytes = bufferStream.toByteArray();
+                                        buffer.put(readBytes);
+
+                                        NativeBuf inputBuf;
+                                        try {
+                                            inputBuf = decoder.decode(buffer);
+                                        } catch (final Exception e) {
+                                            Logger.get().error("Failed to extract NativeBuf", e);
+                                            continue;
+                                        }
+
+                                        NativeBuf outputBuf = new NativeBuf();
+                                        try {
+                                            handler.handle(inputBuf, outputBuf, context);
+                                        } catch (final Exception e) {
+                                            Logger.get().error("Failed to handle request", e);
+                                            continue;
+                                        }
+
+                                        byte[] output = encoder.encode(outputBuf);
+                                        oStream.write(output);
+                                        oStream.flush();
+                                    } catch (final Exception e) {
+                                        Logger.get().error("Failed to read stream input", e);
+                                    }
+                                } finally {
+                                    if (bufferStream != null) {
+                                        try {
+                                            bufferStream.close();
+                                        } catch (IOException e) {
+                                            Logger.get().error("Failed to close bufferStream", e);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }.start();
+                }
 
                 if (storageBase != null) {
                     storageBase.close();
                 }
+
+                Logger.get().info("Successfully shutdown the server");
             }
-        });
+        };
     }
 
     /**

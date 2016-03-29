@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.minecade.deepend.server.channels.storage;
+package com.minecade.deepend.server.storage;
 
 import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataObject;

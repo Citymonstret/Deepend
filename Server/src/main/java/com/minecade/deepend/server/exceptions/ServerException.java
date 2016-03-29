@@ -22,13 +22,14 @@ import com.minecade.deepend.exceptions.DeependRuntimeException;
  *
  * @author Citymonstret
  */
+@SuppressWarnings("unused")
 public class ServerException extends DeependRuntimeException {
 
-    public ServerException(String message) {
+    public ServerException(final String message) {
         super("Server", message);
     }
 
-    public ServerException(String message, Throwable cause) {
+    public ServerException(final String message, final Throwable cause) {
         super("Server", message, cause);
     }
 

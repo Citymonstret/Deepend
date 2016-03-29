@@ -19,7 +19,7 @@ com.minecade.deepend.resources
 com.minecade.deepend.server
 com.minecade.deepend.server.channels
 com.minecade.deepend.server.channels.impl
-com.minecade.deepend.server.channels.storage
+com.minecade.deepend.server.storage
 com.minecade.deepend.server.exceptions
 com.minecade.deepend.server.test
 com.minecade.deepend.storage

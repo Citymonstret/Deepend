@@ -33,7 +33,7 @@ public abstract class DeleteRequest extends DataRequest {
      * @param dataRecipient Recipient that will handle the data
      * @param provider Provider used for authentication
      */
-    public DeleteRequest(DataRecipient dataRecipient, UUIDProvider provider) {
-        super(Channel.REMOVE_DATA, dataRecipient, provider);
+    public DeleteRequest(DataRecipient dataRecipient) {
+        super(Channel.REMOVE_DATA, dataRecipient);
     }
 }

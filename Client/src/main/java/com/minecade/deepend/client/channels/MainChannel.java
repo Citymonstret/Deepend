@@ -18,17 +18,20 @@ package com.minecade.deepend.client.channels;
 
 import com.minecade.deepend.ServerResponse;
 import com.minecade.deepend.channels.Channel;
+import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.channels.NettyChannelHandler;
+import com.minecade.deepend.client.ClientThread;
 import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.object.GenericResponse;
+import com.minecade.deepend.pipeline.DeependContext;
 
-public class MainChannel extends NettyChannelHandler {
+public class MainChannel extends ChannelHandler {
 
     @Override
-    public void handle(NativeBuf in, NativeBuf response, Object context) throws Exception {
+    public void handle(NativeBuf in, NativeBuf response, DeependContext context) throws Exception {
         ServerResponse serverResponse = ServerResponse.getServerResponse(in.getByte());
         Channel channel = Channel.getChannel(in.getInt());
         Logger.get().info("Received message. Response: " + serverResponse.name() + " | Channel: " + channel.name());
@@ -38,7 +41,7 @@ public class MainChannel extends NettyChannelHandler {
             if (authenticationResponse == GenericResponse.SUCCESS) {
                 DeependClient.getCurrentConnection().getRemoteAddress().setUUID(in.getString());
                 DeependClient.getCurrentConnection().setAuthenticated(true);
-                DeependClient.getInstance().resetAuthenticationPendingStatus();
+                ClientThread.authenticationAttempted = false;
 
                 Logger.get().info("Authentication succeeded | Authentication UUID: " + DeependClient.getCurrentConnection().getRemoteAddress().getUUID());
             } else {

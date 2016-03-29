@@ -24,9 +24,9 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.util.DataUtil;
+import com.minecade.deepend.values.ValueFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,8 @@ public class GetData extends DeependChannel {
             // String category = readString(in);
             byte categoryByte = in.getByte();
             String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
+
+            Logger.get().info("Category: " + category);
 
             if (!DataManager.instance.hasDataHolder(category)) {
                 buf.writeByte(GenericResponse.FAILURE);

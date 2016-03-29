@@ -5,6 +5,7 @@ package com.minecade.deepend;
  *
  * @author Citymonstret
  */
+@SuppressWarnings("unused")
 public final class DeependConstants {
 
     public static final String
