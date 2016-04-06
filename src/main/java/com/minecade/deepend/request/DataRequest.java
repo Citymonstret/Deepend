@@ -49,6 +49,10 @@ public abstract class DataRequest extends PendingRequest {
     @Getter
     private final int index;
 
+    private String buildID(DataRequest request) {
+        return "request::" + request.index;
+    }
+
     private List<DataRecipient> recipient = new ArrayList<>();
 
     public DataRecipient getRecipient() {
@@ -64,7 +68,7 @@ public abstract class DataRequest extends PendingRequest {
         super(channel);
         this.index = currentIndex++;
         this.recipient.add(dataRecipient);
-        requestMap.put("request::" + index, this);
+        requestMap.put(buildID(this), this);
     }
 
     public void addRecipient(@NonNull final DataRecipient recipient) {
@@ -83,7 +87,7 @@ public abstract class DataRequest extends PendingRequest {
 
     @Override
     final protected void makeRequest(DeependBuf buf) {
-        buf.writeString("request::" + index);
+        buf.writeString(buildID(this));
         buildRequest(buf);
     }
 
@@ -91,13 +95,13 @@ public abstract class DataRequest extends PendingRequest {
      * Build the request
      * @param buf DeependBuf to populate
      */
-    abstract protected void buildRequest(DeependBuf buf);
+    protected void buildRequest(DeependBuf buf){}
 
     /**
      * This will delete the request from the request map
      */
     public void delete() {
-        requestMap.remove("request::" + index);
+        requestMap.remove(buildID(this));
     }
 
     /**

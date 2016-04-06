@@ -45,7 +45,7 @@ public final class DeependChannelInitializer {
 
     private final ChannelHandler handler;
 
-    public void handle(DeependContext context) throws IOException {
+    /* public void handle(DeependContext context) throws IOException {
         boolean allowed = true;
         InetSocketAddress remoteAddress = context.getAddress();
 
@@ -100,6 +100,6 @@ public final class DeependChannelInitializer {
 
             context.getSocket().close();
         }
-    }
+    } */
 
 }

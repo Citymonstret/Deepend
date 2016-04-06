@@ -66,7 +66,7 @@ public class GameServer extends DeependObject {
         sendKeys(buf);
     }
 
-    public static GetRequest requestServers(List<String> names, UUIDProvider provider, ServerCallback callback) {
+    public static GetRequest requestServers(List<String> names, ServerCallback callback) {
         StringBuilder name = new StringBuilder();
         Iterator<String> i = names.iterator();
         while (i.hasNext()) {
@@ -103,11 +103,11 @@ public class GameServer extends DeependObject {
         return new ObjectGetRequest(name.toString(), object, recipient);
     }
 
-    public static GetRequest requestServer(String name, UUIDProvider provider, ServerCallback callback) {
+    public static GetRequest requestServer(String name, ServerCallback callback) {
         if (name.contains(",")) {
-            return requestServers(new StringList(name.split(",")), provider, callback);
+            return requestServers(new StringList(name.split(",")), callback);
         }
-        return requestServers(Collections.singletonList(name), provider, callback);
+        return requestServers(Collections.singletonList(name), callback);
     }
 
     public interface ServerCallback extends ObjectCallback<GameServer> {

@@ -115,7 +115,7 @@ public class GamePlayer extends DeependObject {
         return new ObjectGetRequest(name.toString(), object, recipient);
     }
 
-    public static GetRequest requestPlayer(String name, UUIDProvider provider, PlayerCallback callback) {
+    public static GetRequest requestPlayer(String name, PlayerCallback callback) {
         if (name.contains(",")) {
             return requestPlayers(new StringList(name.split(",")), callback);
         }

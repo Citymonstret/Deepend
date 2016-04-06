@@ -133,6 +133,14 @@ public class JavaProtocol implements Protocol {
         return b;
     }
 
+    public static int bytesToInt(final byte[] bytes) {
+        int result = 0;
+        for (int i = 0; i < 4; i++) {
+            result = (result << 4) + bytes[i];
+        }
+        return result;
+    }
+
     int bytesToInt(final byte[] bytes, final Offset offset) {
         int result = 0;
         for (int i = 0; i < 4; i++) {

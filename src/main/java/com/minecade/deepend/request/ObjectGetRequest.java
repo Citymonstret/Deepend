@@ -40,7 +40,6 @@ public class ObjectGetRequest extends GetRequest {
      * Constructor
      * @param object DeependObject to use for the request
      * @param dataRecipient Recipient that will handle incoming data
-     * @param provider UUIDProvider used for authentication
      */
     public ObjectGetRequest(String requestedKey, DeependObject object, DataRecipient dataRecipient) {
         super(dataRecipient);

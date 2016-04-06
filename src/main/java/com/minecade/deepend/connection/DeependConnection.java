@@ -18,19 +18,15 @@ package com.minecade.deepend.connection;
 
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.lib.Stable;
-import com.minecade.deepend.request.UUIDProvider;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Stable
-public class DeependConnection implements UUIDProvider {
+public class DeependConnection {
 
     private final Map<String, Object> metaMapping = new ConcurrentHashMap<>();
 
@@ -55,10 +51,6 @@ public class DeependConnection implements UUIDProvider {
         this.port = port;
     }
 
-    public int getNullPort() {
-        return this.port;
-    }
-
     public <T> T getObject(String key, Class<T> clazz) {
         return clazz.cast(metaMapping.get(key));
     }
@@ -75,10 +67,4 @@ public class DeependConnection implements UUIDProvider {
         this.metaMapping.put(key, meta);
     }
 
-    private UUID cachedUUID;
-
-    @Override
-    public UUID getUUID() {
-        return cachedUUID == null ? (cachedUUID = UUID.fromString(remoteAddress.getUUID())) : cachedUUID;
-    }
 }

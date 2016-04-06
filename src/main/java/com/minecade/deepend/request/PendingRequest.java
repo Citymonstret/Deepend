@@ -23,8 +23,13 @@ import com.minecade.deepend.lib.Stable;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.pipeline.DeependContext;
+import com.minecade.deepend.prot.ProtocolDecoder;
 import lombok.Getter;
 import lombok.SneakyThrows;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This is a request which will be kept in the
@@ -74,17 +79,65 @@ public abstract class PendingRequest extends Request {
      * This will send the request to the
      * specified future
      * @see #makeRequest(DeependBuf) to populate the buf
-     * @param future Future to send the request to
      */
      public void send(DeependContext context, ChannelHandler handler) {
         DeependBuf out = new NativeBuf();
         out.writeInt(requestedChannel.getValue());
-        // Will send the UUID if it is specified
-        if (requestedChannel != Channel.AUTHENTICATE) {
-            out.writeString(context.getConnection().getUUID().toString());
-        }
         makeRequest(out);
         out.writeAndFlush(context);
-    }
+
+         ByteArrayOutputStream byteArrayOutputStream;
+         if (!context.hasMeta("bufferStream")) {
+             byteArrayOutputStream = new ByteArrayOutputStream();
+             context.setMeta("bufferStream", byteArrayOutputStream);
+         } else {
+             byteArrayOutputStream = context.getMeta("bufferStream");
+         }
+         byteArrayOutputStream.reset();
+
+         InputStream stream;
+         try {
+             stream = context.getSocket().getInputStream();
+         } catch (IOException e) {
+             Logger.get().error("Failed to read from socket InputStream", e);
+             return;
+         }
+
+         byte[] data = new byte[1024 * 1024];
+         int nRead;
+         try {
+             nRead = stream.read(data, 0, data.length);
+         } catch (IOException e) {
+             Logger.get().error("Failed to read from stream", e);
+             return;
+         }
+
+         if (nRead == -1) {
+             Logger.get().error("Stream returned no bytes");
+             return;
+         }
+
+         byteArrayOutputStream.write(data, 0, nRead);
+         try {
+             byteArrayOutputStream.flush();
+         } catch (IOException e) {
+             Logger.get().error("Failed to flush stream", e);
+             return;
+         }
+
+         byte[] readBytes = byteArrayOutputStream.toByteArray();
+
+         if (readBytes.length > 4) {
+             NativeBuf inputBuf;
+             try {
+                 inputBuf = ProtocolDecoder.decoder.decode(readBytes);
+             } catch (final Exception e) {
+                 Logger.get().error("Failed to extract NativeBuf", e);
+                 return;
+             }
+
+             handler.handle(inputBuf, null, context);
+         }
+     }
 
 }

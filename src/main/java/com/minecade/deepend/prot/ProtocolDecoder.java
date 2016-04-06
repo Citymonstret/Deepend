@@ -2,8 +2,6 @@ package com.minecade.deepend.prot;
 
 import com.minecade.deepend.nativeprot.NativeBuf;
 
-import java.nio.ByteBuffer;
-
 /**
  * Created 3/22/2016 for Deepend
  *
@@ -11,15 +9,21 @@ import java.nio.ByteBuffer;
  */
 public class ProtocolDecoder {
 
-    public NativeBuf decode(ByteBuffer buffer) throws Exception {
-        if (buffer.remaining() < 4) {
+    public static final ProtocolDecoder decoder = new ProtocolDecoder();
+
+    public NativeBuf decode(byte[] bytes) throws Exception {
+        if (bytes.length< 4) {
             return null;
         } else {
-            int size = buffer.getInt();
-            if (buffer.remaining() < size) {
-                throw new Exception("Decoder needed " + size + " bytes, found " + buffer.remaining());
+            int size = JavaProtocol.bytesToInt(bytes);
+
+            byte[] remaining = new byte[bytes.length - 4];
+            System.arraycopy(bytes, 4, remaining, 0, bytes.length - 4);
+
+            if (remaining.length < size) {
+                throw new Exception("Decoder needed " + size + " bytes, found " + remaining.length);
             } else {
-                return new NativeBuf(buffer, size);
+                return new NativeBuf(remaining, size);
             }
         }
     }

@@ -19,7 +19,7 @@ import java.util.zip.Inflater;
 @UtilityClass
 public class GzipUtil {
 
-    public static final boolean enabled = true;
+    private static final boolean enabled = false;
 
     private static DeflaterCloud deflaterCloud;
     private static InflaterCloud inflaterCloud;

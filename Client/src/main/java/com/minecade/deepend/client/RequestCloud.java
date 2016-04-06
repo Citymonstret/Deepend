@@ -1,7 +1,6 @@
 package com.minecade.deepend.client;
 
 import com.minecade.deepend.logging.Logger;
-import com.minecade.deepend.request.PendingRequest;
 import com.minecade.deepend.request.Request;
 import com.minecade.deepend.request.ShutdownRequest;
 import com.minecade.deepend.util.Assert;
@@ -15,20 +14,18 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public class RequestCloud {
+class RequestCloud {
 
-    protected final Map<Long, Request> requestMap;
-
-    protected long requestID = 0L;
-
+    private final Map<Long, Request> requestMap;
+    private long requestID = 0L;
     private boolean shutdown = false;
 
-    protected RequestCloud() {
+    RequestCloud() {
         this.requestMap = new ConcurrentHashMap<>();
     }
 
     @Synchronized
-    protected void addPendingRequest(final Request request) {
+    void addPendingRequest(final Request request) {
         Assert.notNull(request);
 
         //
@@ -61,7 +58,7 @@ public class RequestCloud {
     }
 
     @Synchronized
-    protected long loop() {
+    private long loop() {
         for (long i = 0; i < requestID; i++) {
             if (requestMap.containsKey(i)) {
                 return i;

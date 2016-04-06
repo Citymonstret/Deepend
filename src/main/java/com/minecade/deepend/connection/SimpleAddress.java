@@ -33,34 +33,14 @@ public class SimpleAddress {
 
     @Getter
     private final String host;
-    
-    private UUID uuid = UUID.randomUUID();
 
     @Override
     public String toString() {
-        return this.host + ":" + this.uuid;
-    }
-
-    /**
-     * Get the UUID
-     * @return UUID
-     */
-    public String getUUID() {
-        return uuid.toString();
-    }
-
-    /**
-     * Set the UUID
-     * @param uuid UUID
-     */
-    public void setUUID(String uuid) {
-        this.uuid = UUID.fromString(uuid);
+        return this.host;
     }
 
     public static SimpleAddress fromString(String i) {
         String[] parts = i.split(":");
-        SimpleAddress address = new SimpleAddress(parts[0]);
-        address.setUUID(parts[1]);
-        return address;
+        return new SimpleAddress(parts[0]);
     }
 }

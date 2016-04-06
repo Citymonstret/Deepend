@@ -50,6 +50,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 /**
@@ -228,6 +229,8 @@ public class DeependServer implements Runnable {
             return;
         }
 
+        Logger.get().info("Accepted socket from: " + temp.getRemoteSocketAddress().toString());
+
         DeependConnection connection = ConnectionFactory.instance.createConnection(
                 (InetSocketAddress) temp.getRemoteSocketAddress()
         );
@@ -269,45 +272,52 @@ public class DeependServer implements Runnable {
                 ByteArrayOutputStream bufferStream = null;
 
                 int nRead;
-                ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
                 byte[] data = new byte[1024 * 1024];
 
                 while (context.getSocket().isConnected()) {
                     try {
                         bufferStream = new ByteArrayOutputStream();
                         try {
-                            buffer.clear();
-
                             while ((nRead = iStream.read(data, 0, data.length)) != -1) {
+                                Logger.get().info("read: " + nRead);
+
+                                bufferStream.reset();
                                 bufferStream.write(data, 0, nRead);
+                                bufferStream.flush();
+
+                                byte[] readBytes = bufferStream.toByteArray();
+
+                                Logger.get().info("Read bytes: " + readBytes.length);
+
+                                if (readBytes.length > 4) {
+                                    NativeBuf inputBuf;
+
+                                    try {
+                                        inputBuf = decoder.decode(readBytes);
+                                    } catch (final Exception e) {
+                                        Logger.get().error("Failed to extract NativeBuf", e);
+                                        continue;
+                                    }
+
+                                    NativeBuf outputBuf = new NativeBuf();
+                                    try {
+                                        handler.handle(inputBuf, outputBuf, context);
+                                    } catch (final Exception e) {
+                                        Logger.get().error("Failed to handle request", e);
+                                        continue;
+                                    }
+
+                                    byte[] output = encoder.encode(outputBuf);
+                                    oStream.write(output);
+                                    oStream.flush();
+                                }
                             }
-
-                            // Now we've gotten the full request
-                            bufferStream.flush();
-                            byte[] readBytes = bufferStream.toByteArray();
-                            buffer.put(readBytes);
-
-                            NativeBuf inputBuf;
-                            try {
-                                inputBuf = decoder.decode(buffer);
-                            } catch (final Exception e) {
-                                Logger.get().error("Failed to extract NativeBuf", e);
-                                continue;
-                            }
-
-                            NativeBuf outputBuf = new NativeBuf();
-                            try {
-                                handler.handle(inputBuf, outputBuf, context);
-                            } catch (final Exception e) {
-                                Logger.get().error("Failed to handle request", e);
-                                continue;
-                            }
-
-                            byte[] output = encoder.encode(outputBuf);
-                            oStream.write(output);
-                            oStream.flush();
                         } catch (final Exception e) {
-                            Logger.get().error("Failed to read stream input", e);
+                            Logger.get().error("Failed to read stream input");
+                            if (e instanceof SocketException) {
+                                Logger.get().error("Cancelling the connection :(");
+                                return;
+                            }
                         }
                     } finally {
                         if (bufferStream != null) {
@@ -320,7 +330,7 @@ public class DeependServer implements Runnable {
                     }
                 }
             }
-        };
+        }.start();
     }
 
     /**

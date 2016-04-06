@@ -166,7 +166,7 @@ public final class DeependClient {
         // authenticated
         application.registerInitialRequests(this);
 
-        Logger.get().info("thread.starting");
+        Logger.get().info("thread.starting", connectionPools);
 
         for (int i = 0; i < connectionPools; i++) {
             new ClientThread(host1, port1);

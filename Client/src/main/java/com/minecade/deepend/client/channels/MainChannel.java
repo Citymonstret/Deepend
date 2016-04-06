@@ -39,11 +39,10 @@ public class MainChannel extends ChannelHandler {
             GenericResponse authenticationResponse = GenericResponse.getGenericResponse(in.getByte());
 
             if (authenticationResponse == GenericResponse.SUCCESS) {
-                DeependClient.getCurrentConnection().getRemoteAddress().setUUID(in.getString());
                 DeependClient.getCurrentConnection().setAuthenticated(true);
                 ClientThread.authenticationAttempted = false;
 
-                Logger.get().info("Authentication succeeded | Authentication UUID: " + DeependClient.getCurrentConnection().getRemoteAddress().getUUID());
+                Logger.get().info("Authentication succeeded");
             } else {
                 Logger.get().error("Authentication failed | Was the login details correct?");
             }

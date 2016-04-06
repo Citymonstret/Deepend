@@ -90,7 +90,6 @@ public final class ConnectionFactory {
     final public DeependConnection getOrCreate(final @NonNull SocketAddress socketAddress, final @NonNull UUID uuid) {
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
         SimpleAddress simpleAddress = new SimpleAddress(inetSocketAddress.getHostName());
-        simpleAddress.setUUID(uuid.toString());
         if (!internalMap.containsKey(simpleAddress.toString())) {
             return createConnection(inetSocketAddress);
         }

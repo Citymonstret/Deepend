@@ -112,7 +112,7 @@ public class ClientThread extends Thread {
                 try {
                     Logger.get().info("connection.attempting");
                     DeependClient.getCurrentConnection().setAuthenticated(false);
-                    context.getSocket().connect(new InetSocketAddress(host, port));
+                    context.getSocket().connect(new InetSocketAddress(host, port), 10000);
                     connectionProblems = false;
                     Logger.get().info("connection.success");
                 } catch (final Exception e) {

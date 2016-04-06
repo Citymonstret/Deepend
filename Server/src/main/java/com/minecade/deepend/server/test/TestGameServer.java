@@ -142,10 +142,6 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
         }
 
         buf.writeByte(response.getValue());
-
-        if (response == GenericResponse.SUCCESS) {
-            buf.writeString(connection.getRemoteAddress().getUUID());
-        }
     }
 
     @Override

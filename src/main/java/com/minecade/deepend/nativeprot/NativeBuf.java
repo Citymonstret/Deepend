@@ -1,6 +1,7 @@
 package com.minecade.deepend.nativeprot;
 
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.pipeline.DeependContext;
 import com.minecade.deepend.prot.JavaProtocol;
 import com.minecade.deepend.prot.Protocol;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class NativeBuf extends DeependBuf {
 
-    public static final Protocol protocol = new JavaProtocol(); // Make this customizable
+    private static final Protocol protocol = new JavaProtocol(); // Make this customizable
 
     private NativeObj[] objects;
     private final List<NativeObj> i_objects;
@@ -33,11 +34,15 @@ public class NativeBuf extends DeependBuf {
         this(objects, null, null);
     }
 
-    public NativeBuf(final ByteBuffer in, int size) {
-        this.bytes = in.array();
+    public NativeBuf(final byte[] bytes, int size) {
+        this.bytes = bytes;
         NativeBuf tmp = protocol.readNativeBuf(size, bytes);
         this.objects = tmp.getObjects();
         this.i_objects = tmp.i_objects;
+    }
+
+    public NativeBuf(final ByteBuffer in, int size) {
+        this(in.array(), size);
     }
 
     public NativeBuf(final NativeObj[] objects, final byte[] bytes, ByteBuffer buf) {
@@ -76,7 +81,7 @@ public class NativeBuf extends DeependBuf {
         setUpdated();
     }
 
-    protected void setUpdated() {
+    private void setUpdated() {
         this.updated = true;
     }
 
@@ -161,7 +166,7 @@ public class NativeBuf extends DeependBuf {
         }
     }
 
-    protected void addObj(NativeObj obj) {
+    private void addObj(NativeObj obj) {
         this.i_objects.add(obj);
         setUpdated();
     }

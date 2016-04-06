@@ -26,12 +26,16 @@ import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.pipeline.DeependContext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * The main server channel implementation
  */
 public class MainChannel extends ChannelHandler {
+
+    public static List<String> authenticatedUUIDs = new ArrayList<>();
 
     @Override
     public void handle(NativeBuf in, NativeBuf response, DeependContext context) {
@@ -48,19 +52,7 @@ public class MainChannel extends ChannelHandler {
             if (channel == null) {
                 serverResponse = ServerResponse.INVALID_CHANNEL;
             }
-            if (channel != Channel.AUTHENTICATE) {
-                UUID uuid;
-                try {
-                    uuid = UUID.fromString(in.getString());
-                } catch (final Exception e) {
-                    serverResponse = ServerResponse.INVALID_UUID;
-                    break scope;
-                }
-                Logger.get().info("Given UUID: " + uuid.toString());
-                if (!connection.getUUID().equals(uuid)) {
-                    connection.setAuthenticated(false);
-                }
-            }
+
             if (!connection.isAuthenticated()) {
                 if (channel != Channel.AUTHENTICATE) {
                     serverResponse = ServerResponse.REQUIRES_AUTHENTICATION;
@@ -68,6 +60,7 @@ public class MainChannel extends ChannelHandler {
                     serverResponse = ServerResponse.AUTHENTICATION_ATTEMPTED;
                 }
             }
+
             connection.addMeta("in", in);
             Logger.get().info("Server Response Code: " + serverResponse.name());
             if (channel == null) {
