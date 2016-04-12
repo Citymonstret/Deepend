@@ -26,16 +26,10 @@ import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.pipeline.DeependContext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 /**
  * The main server channel implementation
  */
 public class MainChannel extends ChannelHandler {
-
-    public static List<String> authenticatedUUIDs = new ArrayList<>();
 
     @Override
     public void handle(NativeBuf in, NativeBuf response, DeependContext context) {
@@ -44,10 +38,10 @@ public class MainChannel extends ChannelHandler {
         // The response status from the server
         ServerResponse serverResponse = ServerResponse.UNKNOWN;
         Channel channel;
-        boolean everythingFine = false;
+        boolean everythingFine;
         DeependConnection connection = context.getConnection();
         DeependBuf written = new NativeBuf();
-        scope: {
+        {
             channel = Channel.getChannel(channelID);
             if (channel == null) {
                 serverResponse = ServerResponse.INVALID_CHANNEL;
@@ -83,7 +77,6 @@ public class MainChannel extends ChannelHandler {
         // Write the response code
         response.writeByte(serverResponse.getValue());
         // Write the channel ID
-        assert channel != null; // Ugh, java sux :(
         response.writeInt(channel.getValue());
         // Copy channel response
         //response.writeBytes(written);

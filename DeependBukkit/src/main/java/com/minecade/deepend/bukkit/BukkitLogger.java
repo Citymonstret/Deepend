@@ -8,13 +8,12 @@ import com.minecade.deepend.logging.Logger;
  *
  * @author Citymonstret
  */
-public class BukkitLogger implements LogHandler<Logger, String> {
+class BukkitLogger implements LogHandler<Logger, String> {
 
-    private String name;
     private Logger instance;
 
+    @SuppressWarnings("unused")
     public BukkitLogger(String name, Logger instance) {
-        this.name = name;
         this.instance = instance;
     }
 

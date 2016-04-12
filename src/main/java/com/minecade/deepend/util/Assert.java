@@ -81,7 +81,7 @@ public class Assert {
      * @param <Exception> Exception type
      * @throws Exception Exception to cast if a != b
      */
-    public static <Exception extends Throwable> void equals(final boolean a, final boolean b, final Exception t) throws Exception {
+    private static <Exception extends Throwable> void equals(final boolean a, final boolean b, final Exception t) throws Exception {
         if (a != b) {
             throw t;
         }
@@ -98,7 +98,7 @@ public class Assert {
     }
 
     public static final class AssertionError extends RuntimeException {
-        public AssertionError(Object o, String s) {
+        AssertionError(Object o, String s) {
             super("'" + o + "' didn't pass the assertion check; " + s);
         }
     }

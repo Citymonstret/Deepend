@@ -58,6 +58,8 @@ import java.nio.ByteBuffer;
  */
 public class DeependServer implements Runnable {
 
+    public static final double SERVER_VERSION = 0.9;
+
     private static final ProtocolDecoder decoder = new ProtocolDecoder();
     private static final ProtocolEncoder encoder = ProtocolEncoder.getEncoder();
     private static final ChannelHandler handler = new MainChannel();
@@ -184,7 +186,7 @@ public class DeependServer implements Runnable {
     private boolean internalShutdown;
 
     @Synchronized
-    private void shutdown(ServerSocket socket) {
+    private void shutdown(@NonNull final ServerSocket socket) {
         if (internalShutdown) {
             Logger.get().error("Cannot shutdown already shutdown server socket");
             return;
@@ -210,14 +212,8 @@ public class DeependServer implements Runnable {
         Logger.get().info("Successfully shutdown the server");
     }
 
-    private void tick(ServerSocket serverSocket) {
+    private void tick(@NonNull final ServerSocket serverSocket) {
         Socket temp = null;
-
-        //
-        // Temp is a fresh connection from a client
-        // and will then be stored in it's own thread,
-        // which is incredibly inefficient, yay
-        //
 
         try {
             temp = serverSocket.accept();
@@ -231,11 +227,11 @@ public class DeependServer implements Runnable {
 
         Logger.get().info("Accepted socket from: " + temp.getRemoteSocketAddress().toString());
 
-        DeependConnection connection = ConnectionFactory.instance.createConnection(
+        final DeependConnection connection = ConnectionFactory.instance.createConnection(
                 (InetSocketAddress) temp.getRemoteSocketAddress()
         );
 
-        DeependContext context = new DeependContext(
+        final DeependContext context = new DeependContext(
                 connection, temp, (InetSocketAddress) temp.getRemoteSocketAddress()
         );
 

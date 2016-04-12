@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class StatusRequest extends PendingRequest {
 
+    private static final byte TYPE = 0;
+
     private static Map<String, StatusRequest> requestMap = new ConcurrentHashMap<>();
 
     /**
@@ -61,11 +63,13 @@ public final class StatusRequest extends PendingRequest {
     }
 
     public void call(final int field) {
-        recipient.act(field);
+        this.recipient.act(field);
+        this.delete();
     }
 
     @Override
     final protected void makeRequest(DeependBuf buf) {
+        buf.writeByte(TYPE);
         buf.writeString("request::" + index);
         buf.writeInt(getField());
     }

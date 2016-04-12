@@ -24,7 +24,6 @@ import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.resources.DeependBundle;
-import com.minecade.deepend.server.channels.MainChannel;
 import lombok.Getter;
 
 public class Authentication extends DeependChannel {

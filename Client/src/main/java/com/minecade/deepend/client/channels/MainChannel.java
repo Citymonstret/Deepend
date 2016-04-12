@@ -31,7 +31,7 @@ import com.minecade.deepend.pipeline.DeependContext;
 public class MainChannel extends ChannelHandler {
 
     @Override
-    public void handle(NativeBuf in, NativeBuf response, DeependContext context) {
+    public void handle(NativeBuf in, NativeBuf response, DeependContext __context) {
         ServerResponse serverResponse = ServerResponse.getServerResponse(in.getByte());
         Channel channel = Channel.getChannel(in.getInt());
         Logger.get().info("Received message. Response: " + serverResponse.name() + " | Channel: " + channel.name());

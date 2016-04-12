@@ -48,7 +48,6 @@ public abstract class PendingRequest extends Request {
      * should be used for all purposes other than authentication
      * @param requestedChannel Channel the
      *                         request will be sent to
-     * @param provider UUID provider (used to authenticate the request)
      */
     @SneakyThrows(IllegalArgumentException.class)
     public PendingRequest(Channel requestedChannel) {

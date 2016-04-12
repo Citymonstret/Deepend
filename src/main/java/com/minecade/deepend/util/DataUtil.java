@@ -159,12 +159,12 @@ public class DataUtil {
      *
      * @author Citymonstret
      */
-    public static class HolderWrapper extends DataObject {
+    public static final class HolderWrapper extends DataObject {
 
         @Getter
         private final DataHolder holder;
 
-        public HolderWrapper(final DataHolder holder) {
+        HolderWrapper(final DataHolder holder) {
             super(holder.getIdentifier(), "");
             this.holder = holder;
         }

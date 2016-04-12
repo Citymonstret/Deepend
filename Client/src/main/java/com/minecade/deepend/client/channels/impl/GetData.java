@@ -26,6 +26,7 @@ import com.minecade.deepend.object.DeependObject;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.request.DataRequest;
+import com.minecade.deepend.request.SubscriptionRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +39,13 @@ public class GetData extends DeependChannel {
 
     @Override
     public void act(DeependConnection connection, DeependBuf buf) {
-        // ByteBuf in = connection.getObject("in", ByteBuf.class);
         DeependBuf in = connection.getBuf("in");
 
         String getID = in.getString();
         DataRequest request = DataRequest.getRequest(getID);
 
         if (request == null) {
-            Logger.get().error("Got response for unregistered request, throwing!");
-            return;
+            request = SubscriptionRequest.getDummyRequest();
         }
 
         GenericResponse response = in.getResponse();

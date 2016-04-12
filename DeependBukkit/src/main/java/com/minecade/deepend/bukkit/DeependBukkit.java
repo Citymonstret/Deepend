@@ -3,7 +3,7 @@ package com.minecade.deepend.bukkit;
 import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.object.DeependObject;
 import com.minecade.deepend.object.ObjectManager;
-import com.minecade.deepend.request.PendingRequest;
+import com.minecade.deepend.request.Request;
 import com.minecade.deepend.request.ShutdownRequest;
 import com.minecade.deepend.values.ValueFactory;
 import lombok.SneakyThrows;
@@ -15,15 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+@SuppressWarnings({"unused"})
 public class DeependBukkit extends JavaPlugin {
 
-    protected static Logger logger;
+    static Logger logger;
 
     private List<Class<? extends DeependObject>> objects = new ArrayList<>();
     private Map<ValueFactory.FactoryType, ValueFactory> factories = new HashMap<>();
-    private List<PendingRequest> requests = new ArrayList<>();
+    private List<Request> requests = new ArrayList<>();
 
-    boolean created = false;
+    private boolean created = false;
 
     public void addMapping(Class<? extends DeependObject> deependObject) {
         this.objects.add(deependObject);
@@ -33,7 +34,7 @@ public class DeependBukkit extends JavaPlugin {
         this.factories.put(type, factory);
     }
 
-    public void addRequest(PendingRequest request) {
+    public void addRequest(Request request) {
         this.requests.add(request);
     }
 

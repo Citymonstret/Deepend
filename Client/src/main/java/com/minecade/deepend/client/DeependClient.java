@@ -171,6 +171,8 @@ public final class DeependClient {
         for (int i = 0; i < connectionPools; i++) {
             new ClientThread(host1, port1);
         }
+
+        new SubscriptionSocket(channelHandler, host1);
     }
 
     public DeependClient(final DeependClientApplication application) {

@@ -1,5 +1,6 @@
 package com.minecade.deepend.util;
 
+import lombok.NonNull;
 import lombok.Synchronized;
 import lombok.experimental.UtilityClass;
 
@@ -12,7 +13,9 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 /**
- * Created 3/26/2016 for Deepend
+ * This is a specialized system for
+ * compressing and extracting using
+ * native java code
  *
  * @author Citymonstret
  */
@@ -31,17 +34,17 @@ public class GzipUtil {
         }
     }
 
-    public static byte[] compress(byte[] in) {
+    public static byte[] compress(@NonNull final byte[] in) {
         if (!enabled) {
             return in;
         }
-        int deflaterIndex = deflaterCloud.getIndex();
-        Deflater deflater = deflaterCloud.get(deflaterIndex);
+        final int deflaterIndex = deflaterCloud.getIndex();
+        final Deflater deflater = deflaterCloud.get(deflaterIndex);
         byte[] output = null;
         deflater.setInput(in);
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(in.length)) {
+        try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(in.length)) {
             deflater.finish();
-            byte[] buffer = new byte[2048];
+            final byte[] buffer = new byte[2048];
             while (!deflater.finished()) {
                 int count = deflater.deflate(buffer);
                 byteArrayOutputStream.write(buffer, 0, count);
@@ -54,17 +57,17 @@ public class GzipUtil {
         return output;
     }
 
-    public static byte[] extract(byte[] in) {
+    public static byte[] extract(@NonNull final byte[] in) {
         if (!enabled) {
             return in;
         }
-        int inflaterIndex = inflaterCloud.getIndex();
-        Inflater inflater = inflaterCloud.get(inflaterIndex);
+        final int inflaterIndex = inflaterCloud.getIndex();
+        final Inflater inflater = inflaterCloud.get(inflaterIndex);
         byte[] output = null;
         inflater.setInput(in);
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(in.length)) {
+        try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(in.length)) {
             inflater.finished();
-            byte[] buffer = new byte[2048];
+            final byte[] buffer = new byte[2048];
             while (!inflater.finished()) {
                 int count = inflater.inflate(buffer);
                 byteArrayOutputStream.write(buffer, 0, count);
@@ -77,37 +80,17 @@ public class GzipUtil {
         return output;
     }
 
-    private static final class InflaterCloud extends Cloud<Inflater> {
-
-        @Override
-        Inflater generate() {
-            return new Inflater();
-        }
-
-        @Override
-        void reset(int index) {
-            map.get(index).reset();
-        }
-    }
-
-    private static final class DeflaterCloud extends Cloud<Deflater> {
-
-        @Override
-        Deflater generate() {
-            return new Deflater();
-        }
-
-        @Override
-        void reset(int index) {
-            map.get(index).reset();
-        }
-    }
-
+    /**
+     * A simple "cloud" that allows for fetching of
+     * status dependent components
+     *
+     * @param <T> Cloud component type
+     */
     private static abstract class Cloud<T> {
         int index = 0;
 
         protected final Map<Integer, T> map = new ConcurrentHashMap<>();
-        protected final Map<Integer, Boolean> statusMap = new ConcurrentHashMap<>();
+        final Map<Integer, Boolean> statusMap = new ConcurrentHashMap<>();
 
         {
             add(generate(), true);
@@ -169,6 +152,36 @@ public class GzipUtil {
 
         T get(int index) {
             return map.get(index);
+        }
+    }
+
+    //
+    // Implementations
+    //
+
+    private static final class InflaterCloud extends Cloud<Inflater> {
+
+        @Override
+        Inflater generate() {
+            return new Inflater();
+        }
+
+        @Override
+        void reset(int index) {
+            map.get(index).reset();
+        }
+    }
+
+    private static final class DeflaterCloud extends Cloud<Deflater> {
+
+        @Override
+        Deflater generate() {
+            return new Deflater();
+        }
+
+        @Override
+        void reset(int index) {
+            map.get(index).reset();
         }
     }
 }

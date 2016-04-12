@@ -2,6 +2,7 @@ package com.minecade.deepend.request;
 
 import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.pipeline.DeependContext;
+import lombok.NonNull;
 
 public abstract class Request implements Comparable<Request> {
 
@@ -19,7 +20,7 @@ public abstract class Request implements Comparable<Request> {
         return true;
     }
 
-    public int compareTo(Request r2) {
+    public int compareTo(@NonNull final Request r2) {
         if (internalID < r2.internalID) {
             return -1;
         }

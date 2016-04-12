@@ -20,6 +20,7 @@ import com.minecade.deepend.channels.DeependChannel;
 import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.request.StatusRequest;
 import lombok.NonNull;
 
@@ -30,6 +31,9 @@ import lombok.NonNull;
  */
 public class CheckData extends DeependChannel {
 
+    private static final byte TYPE_CHECK =          0;
+    private static final byte TYPE_SUBSCRIPTION =   1;
+
     public CheckData() {
         super(Channel.CHECK_DATA);
     }
@@ -37,12 +41,26 @@ public class CheckData extends DeependChannel {
     @Override
     public void act(@NonNull DeependConnection connection, DeependBuf buf) {
         DeependBuf in = connection.getBuf("in");
-        String getID = in.getString();
-        StatusRequest request = StatusRequest.getRequest(getID);
-        if (request == null) {
-            Logger.get().error("Got response for unregistered request, throwing!");
-            return;
+        byte type = in.getByte();
+        if (type == TYPE_CHECK) {
+            String getID = in.getString();
+            StatusRequest request = StatusRequest.getRequest(getID);
+            if (request == null) {
+                Logger.get().error("Got response for unregistered request, throwing!");
+                return;
+            }
+            request.call(in.getInt());
+        } else {
+            GenericResponse response = GenericResponse.getGenericResponse(in.getByte());
+            switch (response) {
+                case FAILURE: {
+                    Logger.get().error("Subscription channel error: " + in.getString());
+                } return;
+                default: {
+                    break;
+                }
+            }
+            // TODO: Implement this
         }
-        request.call(in.getInt());
     }
 }
