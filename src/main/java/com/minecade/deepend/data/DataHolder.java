@@ -244,9 +244,9 @@ public class DataHolder implements Map<String, Object> {
     }
 
     @Override
-    public Object getOrDefault(Object key, Object defaultValue) {
-        if (containsKey(key)) {
-            return get(key);
+    public Object getOrDefault(@NonNull final Object key, final Object defaultValue) {
+        if (this.containsKey(key)) {
+            return this.get(key);
         }
         return defaultValue;
     }
@@ -260,24 +260,24 @@ public class DataHolder implements Map<String, Object> {
     }
 
     @Override
-    public boolean remove(Object key, Object value) {
+    public boolean remove(@NonNull final Object key, @NonNull final Object value) {
         boolean b = this.data.remove(key, value);
-        pushSync();
+        this.pushSync();
         return b;
     }
 
     @Override
-    public boolean replace(String key, Object oldValue, Object newValue) {
+    public boolean replace(@NonNull final String key, @NonNull final Object oldValue, @NonNull final Object newValue) {
         return this.data.replace(key, oldValue, newValue);
     }
 
     @Override
-    public Object replace(String key, Object value) {
+    public Object replace(@NonNull final String key, @NonNull final Object value) {
         return this.data.replace(key, value);
     }
 
     @Override
-    public void forEach(BiConsumer<? super String, ? super Object> action) {
+    public void forEach(@NonNull final BiConsumer<? super String, ? super Object> action) {
         // This will make sure that
         // data gets deleted, when
         // it's supposed to, etc
@@ -303,20 +303,20 @@ public class DataHolder implements Map<String, Object> {
         private DataHolder parent;
         @Singular("object") private Map<String, Object> objects;
 
-        public DataHolder getDataHolder() {
-            DataHolder holder = new DataHolder(name);
-            if (fallback != null) {
-                holder.setFallback(fallback);
+        DataHolder getDataHolder() {
+            final DataHolder holder = new DataHolder(name);
+            if (this.fallback != null) {
+                holder.setFallback(this.fallback);
             }
-            if (parent != null) {
+            if (this.parent != null) {
                 holder.setParent(parent);
             }
-            holder.putAll(objects);
+            holder.putAll(this.objects);
             return holder;
         }
 
-        public void register(ByteProvider provider) {
-            getDataHolder().register(provider);
+        public void register(@NonNull final ByteProvider provider) {
+            this.getDataHolder().register(provider);
         }
     }
 }

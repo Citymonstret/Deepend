@@ -21,6 +21,7 @@ import com.lexicalscope.jewel.cli.Option;
 import com.minecade.deepend.ConnectionFactory;
 import com.minecade.deepend.DeependApplication;
 import com.minecade.deepend.DeependConstants;
+import com.minecade.deepend.SimpleConnectionFactory;
 import com.minecade.deepend.channels.ChannelHandler;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.connection.DeependConnection;
@@ -57,6 +58,9 @@ import java.nio.ByteBuffer;
  * The main server implementation
  */
 public class DeependServer implements Runnable {
+
+    @Getter
+    private static final ConnectionFactory connectionFactory = new SimpleConnectionFactory();
 
     public static final double SERVER_VERSION = 0.9;
 
@@ -227,7 +231,7 @@ public class DeependServer implements Runnable {
 
         Logger.get().info("Accepted socket from: " + temp.getRemoteSocketAddress().toString());
 
-        final DeependConnection connection = ConnectionFactory.instance.createConnection(
+        final DeependConnection connection = getConnectionFactory().createConnection(
                 (InetSocketAddress) temp.getRemoteSocketAddress()
         );
 
@@ -323,6 +327,8 @@ public class DeependServer implements Runnable {
                                 Logger.get().error("Failed to close bufferStream", e);
                             }
                         }
+
+                        Logger.get().debug("Closed connection thread");
                     }
                 }
             }

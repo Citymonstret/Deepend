@@ -51,6 +51,10 @@ public abstract class DeependObject {
 
     protected volatile boolean isBuilt;
 
+    @Setter
+    @Getter
+    protected boolean deleted = false;
+
     /**
      * @param objectType Object byte ID, through a ByteProvider
      * @param scan Whether or not to scan the member

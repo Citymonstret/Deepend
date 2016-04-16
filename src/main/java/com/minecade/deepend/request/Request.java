@@ -14,6 +14,7 @@ public abstract class Request implements Comparable<Request> {
      * Override this to get more
      * control over the lifespan
      * of your requests
+     * 
      * @return True, unless overridden
      */
     public boolean validate() {

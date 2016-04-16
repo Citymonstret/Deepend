@@ -31,6 +31,7 @@ package com.minecade.deepend.client.test;
  */
 
 import com.minecade.deepend.bits.EnumBitField;
+import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.client.DeependClient;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
@@ -40,6 +41,7 @@ import com.minecade.deepend.game.GameServer;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.ProviderGroup;
+import com.minecade.deepend.object.StringList;
 import com.minecade.deepend.request.*;
 import com.minecade.deepend.values.ValueFactory;
 
@@ -67,57 +69,17 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         _registerInitialRequests(client);
     }
 
-    public void _registerInitialRequests(DeependClient client) {
-        // This is defined outside of the connection itself, as this
-        // shouldn't be re-created
-        EnumBitField<Byte, GameCategory> categoryEnumBitField = new EnumBitField<>(GameCategory.class);
-        int field = categoryEnumBitField.construct(GameCategory.PLAYERS, GameCategory.SERVERS);
-
-        //
-        //  RE-USABLE LAMBDAS
-        //
-        GamePlayer.PlayerCallback serverAnnouncement = player ->
-                Logger.get().info(player.getPlayerName() + " is on server " + player.getPlayerServer());
-
-        DataRequest.DataRecipient debugRecipient = o -> o.forEach(oo -> {
-            if (oo instanceof DataObject) {
-                Logger.get().debug("Found object:");
-                Logger.get().dump(((DataObject) oo));
+    private void _registerInitialRequests(DeependClient client) {
+        client.addPendingRequest(new GetRequest(list -> {
+            Logger.get().info("Got a response with " + list.size() + " objects!");
+            list.forEach(System.out::println);
+        }) {
+            @Override
+            public void buildRequest(DeependBuf buf) {
+                buf.writeByte(GameCategory.SERVER_CATEGORIES);
+                buf.writeString("*");
             }
         });
-
-        DataRequest.DataRecipient nullRecipient = o -> {};
-
-        // Just a simple debug statement for categories, should
-        // be used to add new requests
-        StatusRequest.StatusRecipient statusRecipient = f -> categoryEnumBitField.extract(f)
-                .forEach(category -> Logger.get().info("Updated category: " + category.name()));
-
-        //
-        //  END OF RE-USABLE LAMBDAS
-        //
-
-        // This will simply fetch the updated categories
-        client.addPendingRequest(new StatusRequest(field, statusRecipient));
-
-        // These three requests does the same thing, it just
-        // shows that the syntax can be adapted to many different
-        // usage scenarios
-        // client.addPendingRequest(GamePlayer.requestPlayer("jeb_,notch", currentConnection(), serverAnnouncement));
-        client.addPendingRequest(GamePlayer.requestPlayer("*", serverAnnouncement));
-
-        /*
-
-        UPDATE_CATEGORIES
-            -> Add to category list
-
-        GET_SERVER_NAMES
-            -> Update each server on its own
-
-         */
-
-        // client.addPendingRequest(GamePlayer.requestPlayers(new StringList("jeb_", "notch"), currentConnection(), serverAnnouncement));
-
     }
 
     @Override
@@ -126,7 +88,6 @@ public class TestGameClient implements DeependClient.DeependClientApplication {
         // returns a GamePlayer instance, rather than returning
         // raw data
         ObjectManager.instance.registerMapping(GamePlayer.class);
-        ObjectManager.instance.registerMapping(GameServer.class);
     }
 
     @Override

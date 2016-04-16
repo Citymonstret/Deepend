@@ -23,6 +23,7 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.server.channels.SubscriptionManager;
 import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.GenericResponse;
 
@@ -112,6 +113,8 @@ public class AddData extends DeependChannel {
             // This will reset the
             // channel status
             resetStatus();
+
+            SubscriptionManager.act(Channel.ADD_DATA, categoryByte, holder);
         }
     }
 }

@@ -53,7 +53,7 @@ public class GetData extends DeependChannel {
 
             if (!DataManager.instance.hasDataHolder(category)) {
                 buf.writeByte(GenericResponse.FAILURE);
-                buf.writeString("Category not found :(");
+                buf.writeString("Category not found: " + category);
                 break scope;
             }
             DataHolder holder = DataManager.instance.getDataHolder(category);

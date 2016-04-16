@@ -25,6 +25,7 @@ import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.server.DeependServer;
+import com.minecade.deepend.server.channels.SubscriptionManager;
 import com.minecade.deepend.values.ValueFactory;
 import lombok.NonNull;
 
@@ -77,8 +78,13 @@ public class CheckData extends DeependChannel {
         } else {
             // Subscription request
             buf.writeByte(TYPE_SUBSCRIPTION);
-            buf.writeByte(GenericResponse.FAILURE);
-            buf.writeString("Error: Subscriptions not implemented in server version: " + DeependServer.SERVER_VERSION);
+            buf.writeByte(GenericResponse.SUCCESS);
+            String[] parts = "".split(",");
+            for (String part : parts) {
+                SubscriptionManager.addSubscription(connection.getRemoteAddress().getHost(), Byte.parseByte(part));
+                Logger.get().info("Added subscription for host: + "
+                        + connection.getRemoteAddress().getHost() + ", for channel: " + part);
+            }
         }
     }
 

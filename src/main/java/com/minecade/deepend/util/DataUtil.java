@@ -61,8 +61,8 @@ public class DataUtil {
         try {
             // This will use the pre-defined name, if it
             // exists, otherwise it will attempt to read
-            // it
-            name = s == null ? buf.getString() : s;
+            // it from the DeependBuf
+            name = s == null ? buf.getString() /* Next string in the buf */ : s /* The initial string */;
         } catch(final Exception e) {
             // Oh no! Something went wrong. Don't worry, though;
             // this will spit out everything in the initial
@@ -72,8 +72,10 @@ public class DataUtil {
                     initialList.add((DataObject) value);
                 } else {
                     if (!wrapHolder) {
+                        // Only save the fallback object
                         initialList.add((DataObject)((DataHolder) value).getFallback());
                     } else {
+                        // Wrap the holder, which will then treat is as an object
                         initialList.add(new HolderWrapper((DataHolder) value));
                     }
                 }
@@ -93,7 +95,7 @@ public class DataUtil {
                 }
             }
             name = newName.toString();
-        } else if (name.equals("*u")) {
+        } else if (name.equals("*u")) { // Only updated objects
             StringBuilder newName = new StringBuilder();
             for (Object current : holder.values()) {
                 if (current instanceof DataHolder) {
@@ -124,6 +126,7 @@ public class DataUtil {
                 initialList.addAll(r);
             }
         } else {
+            // Get the object corresponding to the name, from the current holder
             Object o = holder.get(name);
             if (o == null) {
                 Logger.get().error(name + ", was null :((((((");

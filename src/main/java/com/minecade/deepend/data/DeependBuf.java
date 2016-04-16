@@ -17,8 +17,10 @@
 package com.minecade.deepend.data;
 
 import com.minecade.deepend.bytes.ByteProvider;
+import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.pipeline.DeependContext;
+import com.minecade.deepend.values.NumberProvider;
 
 /**
  * A wrapper for the netty ByteBuf
@@ -29,13 +31,13 @@ import com.minecade.deepend.pipeline.DeependContext;
  */
 public abstract class DeependBuf {
 
-    protected DataType[] dataType;
+    private DataType[] dataType;
     protected Object[] object;
 
     private int readPointer = 0;
     private int writePointer = 0;
 
-    protected int writtenIndices = 0;
+    private int writtenIndices = 0;
 
     private boolean writeLocked = false;
 
@@ -81,6 +83,10 @@ public abstract class DeependBuf {
         checkLock();
 
         writeByte(response.getValue());
+    }
+
+    final public void writeByte(boolean b) {
+        this.writeByte((byte) (b ? 1 : 0));
     }
 
     final public void writeByte(byte b) {
@@ -142,7 +148,7 @@ public abstract class DeependBuf {
 
     protected abstract void _writeInt(int n);
 
-    protected void checkLock() {
+    private void checkLock() {
         if (writeLocked) {
             throw new IllegalAccessError("Cannot write to locked buf");
         }
@@ -157,6 +163,12 @@ public abstract class DeependBuf {
     public abstract void reset();
 
     public abstract void writeAndFlush(DeependContext context);
+
+    public void writeInt(NumberProvider<Integer> provider) {
+        this.writeInt(provider.getValue());
+    }
+
+    public abstract void nullify();
 
     private class Entry {
         DataType type;

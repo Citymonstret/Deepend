@@ -15,6 +15,7 @@
  */
 package com.minecade.deepend.logging;
 
+import lombok.NonNull;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -33,13 +34,13 @@ import java.net.URI;
  */
 public class LogFactory extends ConfigurationFactory {
 
-    final static String COLOR_STYLES = "{INFO=cyan bold bright, WARN=yellow bold, TRACE=blue, ERROR=red bright bold, DEBUG=magenta bold}";
+    private final static String COLOR_STYLES = "{INFO=cyan bold bright, WARN=yellow bold, TRACE=blue, ERROR=red bright bold, DEBUG=magenta bold}";
 
-    static String style(String s, String ss) {
+    private static String style(String s, String ss) {
         return "%highlight{" + s + "}{INFO=" + ss + ", WARN=" + ss + ", TRACE=" + ss + ", ERROR=" + ss + ", DEBUG=" + ss + "}";
     }
 
-    static Configuration createConfiguration(final String name, ConfigurationBuilder<BuiltConfiguration> builder) {
+    private static Configuration createConfiguration(final String name, ConfigurationBuilder<BuiltConfiguration> builder) {
         builder.setConfigurationName(name);
         builder.setStatusLevel(Level.ERROR);
 
@@ -70,12 +71,12 @@ public class LogFactory extends ConfigurationFactory {
     }
 
     @Override
-    public Configuration getConfiguration(final String name, final URI configurationLocation) {
+    public Configuration getConfiguration(@NonNull final String name, @NonNull final URI configurationLocation) {
         return createConfiguration(name, newConfigurationBuilder());
     }
 
     @Override
-    public Configuration getConfiguration(ConfigurationSource source) {
+    public Configuration getConfiguration(@NonNull final ConfigurationSource source) {
         return createConfiguration(source.toString(), null);
     }
 }

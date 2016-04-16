@@ -30,6 +30,13 @@ public class NativeBuf extends DeependBuf {
     private int readIndex = 0;
     private boolean updated = false;
 
+    @Override
+    public void nullify() {
+        this.objects = null;
+        this.i_objects.clear();
+        this.bytes = null;
+    }
+
     public NativeBuf(final NativeObj[] objects) {
         this(objects, null, null);
     }

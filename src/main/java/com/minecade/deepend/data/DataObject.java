@@ -36,6 +36,10 @@ public class DataObject {
     @Setter
     private DataHolder holder;
 
+    @Getter
+    @Setter
+    private boolean deleted = false;
+
     /**
      * Constructor
      * @param name Data Key

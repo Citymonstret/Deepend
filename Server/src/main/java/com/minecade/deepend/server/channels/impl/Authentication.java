@@ -24,6 +24,7 @@ import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.resources.DeependBundle;
+import com.minecade.deepend.server.DeependServer;
 import lombok.Getter;
 
 public class Authentication extends DeependChannel {
@@ -52,7 +53,7 @@ public class Authentication extends DeependChannel {
                 Logger.get().info("Authenticated: " + connection.getRemoteAddress().toString());
                 connection.setAuthenticated(true);
                 response = GenericResponse.SUCCESS;
-                ConnectionFactory.instance.addConnection(connection);
+                DeependServer.getConnectionFactory().addConnection(connection);
             }
         }
 

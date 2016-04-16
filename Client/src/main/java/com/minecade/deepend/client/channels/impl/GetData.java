@@ -19,6 +19,7 @@ package com.minecade.deepend.client.channels.impl;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.DeependChannel;
 import com.minecade.deepend.connection.DeependConnection;
+import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
@@ -42,10 +43,16 @@ public class GetData extends DeependChannel {
         DeependBuf in = connection.getBuf("in");
 
         String getID = in.getString();
-        DataRequest request = DataRequest.getRequest(getID);
 
-        if (request == null) {
+        DataRequest request;
+
+        boolean deleted = false;
+
+        if (getID.equals("subscription")) {
             request = SubscriptionRequest.getDummyRequest();
+            deleted = in.getByte() != 0;
+        } else {
+            request = DataRequest.getRequest(getID);
         }
 
         GenericResponse response = in.getResponse();
@@ -60,12 +67,19 @@ public class GetData extends DeependChannel {
                 for (int i = 0; i < num; i++) {
                     String identifier = in.getString();
                     String data = in.getString();
-                    objects.add(new DataObject(identifier, data));
+                    DataObject object = new DataObject(identifier, data);
+                    if (deleted) {
+                        object.setDeleted(true);
+                    }
+                    objects.add(deleted);
                 }
             } else {
                 while (in.readable()) {
                     DeependObject object = ObjectManager.instance
                             .construct(() -> categoryByte, in);
+                    if (deleted) {
+                        object.setDeleted(true);
+                    }
                     objects.add(object);
                 }
             }

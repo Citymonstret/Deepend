@@ -20,6 +20,7 @@ import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.lib.Stable;
+import com.minecade.deepend.pipeline.DeependContext;
 import lombok.NonNull;
 
 import java.net.InetSocketAddress;
@@ -36,36 +37,23 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public final class ConnectionFactory {
-
-    public static final ConnectionFactory instance = new ConnectionFactory();
-
-    private final Map<String, DeependConnection> internalMap = new ConcurrentHashMap<>();
-
-    ConnectionFactory() {}
+public interface ConnectionFactory {
 
     /**
      * Get the connection for a simple address
-     * @param socketAddress Simple Address
+     * @param simpleAddress Simple Address
      * @return Connection | Null
      */
     @Stable
-    final public DeependConnection getConnection(final @NonNull SimpleAddress socketAddress) {
-        if (!internalMap.containsKey(socketAddress.toString())) {
-            return null;
-        }
-        return internalMap.get(socketAddress.toString());
-    }
+    DeependConnection getConnection(final SimpleAddress simpleAddress);
 
     /**
      * Add a connection
      * @param connection Connection
      */
     @Stable
-    final public DeependConnection addConnection(final @NonNull DeependConnection connection) {
-        this.internalMap.put(connection.getRemoteAddress().toString(), connection);
-        return connection;
-    }
+    DeependConnection addConnection(final @NonNull DeependConnection connection);
+
 
     /**
      * Create and add a connection
@@ -73,9 +61,7 @@ public final class ConnectionFactory {
      * @return Registered connection
      */
     @Stable
-    final public DeependConnection createConnection(final @NonNull InetSocketAddress remoteAddress) {
-        return addConnection(new DeependConnection(new SimpleAddress(remoteAddress.getHostName())));
-    }
+    DeependConnection createConnection(final @NonNull InetSocketAddress remoteAddress);
 
     /**
      * Get the connection if it exists,
@@ -87,12 +73,5 @@ public final class ConnectionFactory {
      * @return Created, or re-used connection
      */
     @Beta
-    final public DeependConnection getOrCreate(final @NonNull SocketAddress socketAddress, final @NonNull UUID uuid) {
-        InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
-        SimpleAddress simpleAddress = new SimpleAddress(inetSocketAddress.getHostName());
-        if (!internalMap.containsKey(simpleAddress.toString())) {
-            return createConnection(inetSocketAddress);
-        }
-        return getConnection(simpleAddress);
-    }
+    DeependConnection getOrCreate(final @NonNull SocketAddress socketAddress, final @NonNull UUID uuid);
 }

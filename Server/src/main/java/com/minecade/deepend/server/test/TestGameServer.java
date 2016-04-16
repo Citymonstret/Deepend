@@ -74,7 +74,6 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
     public void registerDataHolders(DataManager dataManager) {
         DataManager.createDataHolders(SERVERS);
         DataHolder servers = DataManager.instance.getDataHolder(SERVERS.name());
-
         DataManager.instance.registerDataHolder(new MirrorDataHolder(SERVER_CATEGORIES.name(), servers, (o) -> {
             if (o instanceof DataHolder) {
                 DataHolder holder = (DataHolder) o;
@@ -85,7 +84,6 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
             }
             return null;
         }), SERVER_CATEGORIES);
-
         DataManager.instance.registerDataHolder(new MirrorDataHolder(CATEGORY_SERVERS.name(), servers, (o) -> {
             if (o instanceof DataHolder) {
                 DataHolder holder = (DataHolder) o;
@@ -137,7 +135,7 @@ public class TestGameServer implements DeependServer.DeependServerApplication {
                 Logger.get().info("Authenticated: " + connection.getRemoteAddress().toString());
                 connection.setAuthenticated(true);
                 response = GenericResponse.SUCCESS;
-                ConnectionFactory.instance.addConnection(connection);
+                DeependServer.getConnectionFactory().addConnection(connection);
             }
         }
 

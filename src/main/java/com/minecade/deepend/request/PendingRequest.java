@@ -24,7 +24,10 @@ import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.pipeline.DeependContext;
 import com.minecade.deepend.prot.ProtocolDecoder;
+import com.minecade.deepend.util.Constants;
+
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
@@ -46,6 +49,7 @@ public abstract class PendingRequest extends Request {
     /**
      * Constructor which allows for UUID specification,
      * should be used for all purposes other than authentication
+     *
      * @param requestedChannel Channel the
      *                         request will be sent to
      */
@@ -55,7 +59,7 @@ public abstract class PendingRequest extends Request {
     }
 
     @Override
-    public boolean handle(DeependContext context, ChannelHandler handler) {
+    public boolean handle(@NonNull final DeependContext context, @NonNull final ChannelHandler handler) {
         boolean status;
         try {
             this.send(context, handler);
@@ -70,73 +74,92 @@ public abstract class PendingRequest extends Request {
     /**
      * This is used to populate the buf
      * with the data needed to make the request
+     *
      * @param buf Buf to populate
      */
     protected abstract void makeRequest(DeependBuf buf);
 
-    /**
-     * This will send the request to the
-     * specified future
-     * @see #makeRequest(DeependBuf) to populate the buf
-     */
-     public void send(DeependContext context, ChannelHandler handler) {
-        DeependBuf out = new NativeBuf();
+    @Stable
+    public void send(@NonNull final DeependContext context,
+                     @NonNull final ChannelHandler handler) {
+        // This is our buf for the output
+        final DeependBuf out = new NativeBuf();
+        // This is the channel ID
         out.writeInt(requestedChannel.getValue());
+        // Now we'll write the request specific data to the buf
         makeRequest(out);
+        // This writes the data from the buf to the stream
         out.writeAndFlush(context);
+        // This removes all data from the buf
+        out.nullify();
 
-         ByteArrayOutputStream byteArrayOutputStream;
-         if (!context.hasMeta("bufferStream")) {
-             byteArrayOutputStream = new ByteArrayOutputStream();
-             context.setMeta("bufferStream", byteArrayOutputStream);
-         } else {
-             byteArrayOutputStream = context.getMeta("bufferStream");
-         }
-         byteArrayOutputStream.reset();
+        // This makes sure that we have a working
+        // ByteArrayOutputStream to pass our data through
+        final ByteArrayOutputStream byteArrayOutputStream;
+        if (!context.hasMeta("bufferStream")) {
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            context.setMeta("bufferStream", byteArrayOutputStream);
+        } else {
+            byteArrayOutputStream = context.getMeta("bufferStream");
+        }
+        byteArrayOutputStream.reset();
 
-         InputStream stream;
-         try {
-             stream = context.getSocket().getInputStream();
-         } catch (IOException e) {
-             Logger.get().error("Failed to read from socket InputStream", e);
-             return;
-         }
+        // This is the stream from which we'll read the data
+        final InputStream stream;
+        try {
+            stream = context.getSocket().getInputStream();
+        } catch (final IOException e) {
+            Logger.get()
+                    .error("Failed to read from socket InputStream", e);
+            return;
+        }
 
-         byte[] data = new byte[1024 * 1024];
-         int nRead;
-         try {
-             nRead = stream.read(data, 0, data.length);
-         } catch (IOException e) {
-             Logger.get().error("Failed to read from stream", e);
-             return;
-         }
+        // A simple 1MB buffer
+        final byte[] data = new byte[Constants.MEGABYTE];
 
-         if (nRead == -1) {
-             Logger.get().error("Stream returned no bytes");
-             return;
-         }
+        // Here we read all available data (up to a megabyte)
+        final int nRead;
+        try {
+            nRead = stream.read(data, 0, data.length);
+        } catch (final IOException e) {
+            Logger.get().error("Failed to read from stream", e);
+            return;
+        }
 
-         byteArrayOutputStream.write(data, 0, nRead);
-         try {
-             byteArrayOutputStream.flush();
-         } catch (IOException e) {
-             Logger.get().error("Failed to flush stream", e);
-             return;
-         }
+        if (nRead == -1) {
+            Logger.get().error("Stream returned no bytes");
+            return;
+        }
 
-         byte[] readBytes = byteArrayOutputStream.toByteArray();
+        // Now we write the read data to the buffer
+        byteArrayOutputStream.write(data, 0, nRead);
+        try {
+            byteArrayOutputStream.flush();
+        } catch (final IOException e) {
+            Logger.get().error("Failed to flush stream", e);
+            return;
+        }
 
-         if (readBytes.length > 4) {
-             NativeBuf inputBuf;
-             try {
-                 inputBuf = ProtocolDecoder.decoder.decode(readBytes);
-             } catch (final Exception e) {
-                 Logger.get().error("Failed to extract NativeBuf", e);
-                 return;
-             }
+        // And extract the available bytes
+        final byte[] readBytes = byteArrayOutputStream
+                .toByteArray();
 
-             handler.handle(inputBuf, null, context);
-         }
-     }
+        // 4 bytes = 1 32bit integer,
+        // which is the size indicator for the protocol
+        // Any less, and we just get rid of it
+        if (readBytes.length > 4) {
+            final NativeBuf inputBuf;
+            try {
+                // Here we turn the raw data into objects
+                inputBuf = ProtocolDecoder.decoder
+                        .decode(readBytes);
+            } catch (final Exception e) {
+                Logger.get().error("Failed to extract NativeBuf", e);
+                return;
+            }
+            // And now we pass the data to the channel handler
+            handler.handle(inputBuf, null, context);
+        }
+    }
 
 }

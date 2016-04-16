@@ -35,10 +35,14 @@ import java.util.Map;
 @Beta
 public class ValueFactory<DataType extends Number, Group extends ProviderGroup<DataType, ValueProvider<DataType>>> {
 
-    static boolean locked = false;
+    /**
+     * Lock status
+     */
+    private static volatile boolean locked = false;
 
     /**
-     * Lock the byte factory factorization process
+     * Lock the byte factory factorization process,
+     * preventing any factories from being added
      */
     public static void lock() {
         locked = true;
@@ -83,7 +87,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * @return Factory for the specified type
      */
     @SneakyThrows(RuntimeException.class)
-    public static ValueFactory getFactory(@NonNull FactoryType type) {
+    public static ValueFactory getFactory(@NonNull final FactoryType type) {
         if (!map.containsKey(type)) {
             throw new RuntimeException("No byte factory registered for: " + type.name());
         }
@@ -97,7 +101,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
     @Getter
     private NumberProvider unknown;
 
-    public ValueFactory(@NonNull Group group, @NonNull NumberProvider unknown) {
+    public ValueFactory(@NonNull final Group group, @NonNull final NumberProvider unknown) {
         this.cache = new HashMap<>();
         this.rCache = new HashMap<>();
         this.group = group;
@@ -119,7 +123,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * @return Name if registered, else
      *         the default value {@link #getUnknown()}
      */
-    public String getName(Number b) {
+    public String getName(@NonNull final Number b) {
         if (!rCache.containsKey(b)) {
             return unknown.getIdentifier();
         }
@@ -134,7 +138,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * @return Byte if registered, else
      *         the default value (@see #getUnknown()}
      */
-    public Number getNumberValue(String key) {
+    public Number getNumberValue(@NonNull final String key) {
         if (!cache.containsKey(key)) {
             return unknown.getValue();
         }

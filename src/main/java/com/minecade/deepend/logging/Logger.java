@@ -55,7 +55,7 @@ public class Logger {
         return logger;
     }
 
-    public static Logger get(String name) {
+    public static Logger get(@NonNull final String name) {
         return loggerMap.get(name);
     }
 
@@ -64,7 +64,7 @@ public class Logger {
      * @param name Logger Name
      * @param resourceBundle Logger translation bundle
      */
-    public static void setup(String name, DeependBundle resourceBundle) {
+    public static void setup(@NonNull final String name, DeependBundle resourceBundle) {
         loggerMap.put(name, new Logger(name, resourceBundle));
         if (unknownLoggerDefault == null) {
             unknownLoggerDefault = loggerMap.get(name);
@@ -77,7 +77,7 @@ public class Logger {
     private boolean debugMode;
 
     @SneakyThrows
-    protected Logger(@NonNull String name, DeependBundle resourceBundle) {
+    protected Logger(@NonNull final String name, DeependBundle resourceBundle) {
         try {
             this.logger = logHandler.getConstructor(String.class, Logger.class).newInstance(name, this);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -93,21 +93,21 @@ public class Logger {
      * @param message Message
      * @return The instance
      */
-    public Logger info(String message) {
-        logger.info(getMessage(message));
+    public Logger info(@NonNull final String message) {
+        this.logger.info(getMessage(message));
         return this;
     }
 
-    public Logger info(String message, Object ... replacements) {
+    public Logger info(@NonNull final String message, Object ... replacements) {
         String[] transformed = new String[replacements.length];
         for (int i = 0; i < replacements.length; i++) {
             transformed[i] = replacements[i].toString();
         }
-        logger.info(String.format(getMessage(message), transformed));
+        this.logger.info(String.format(getMessage(message), transformed));
         return this;
     }
 
-    private String getMessage(String message) {
+    private String getMessage(@NonNull final String message) {
         String m = message;
         if (this.resourceBundle != null && this.resourceBundle.containsKey(message)) {
             m = this.resourceBundle.get(message);
@@ -120,7 +120,7 @@ public class Logger {
      * @see #info(String)
      * @param o Object to dump
      */
-    public void dump(DataObject o) {
+    public void dump(@NonNull final DataObject o) {
         this.info("\"" + o.getName() + "\":" + "\"" + o.getValue() + "\"");
     }
 
@@ -129,7 +129,7 @@ public class Logger {
      * @param message Error Message
      * @return this
      */
-    public Logger error(String message) {
+    public Logger error(@NonNull final String message) {
         return error(message, null);
     }
 
@@ -146,9 +146,9 @@ public class Logger {
      * @param message Message
      * @return this
      */
-    public Logger debug(String message) {
+    public Logger debug(@NonNull final String message) {
         // logger.warning(message);
-        logger.debug(getMessage(message));
+        this.logger.debug(getMessage(message));
         return this;
     }
 
@@ -158,7 +158,7 @@ public class Logger {
      * @param map Map to dump
      * @return this
      */
-    public Logger dump(@NonNull Map<?,?> map) {
+    public Logger dump(@NonNull final Map<?,?> map) {
         map.forEach(this::dump);
         return this;
     }

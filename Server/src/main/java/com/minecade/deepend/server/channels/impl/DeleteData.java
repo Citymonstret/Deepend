@@ -23,6 +23,7 @@ import com.minecade.deepend.data.DataHolder;
 import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.server.channels.SubscriptionManager;
 import com.minecade.deepend.values.ValueFactory;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.util.DataUtil;
@@ -82,6 +83,8 @@ public class DeleteData extends DeependChannel {
             }
 
             resetStatus();
+
+            SubscriptionManager.act(Channel.REMOVE_DATA, categoryByte, holder);
         }
     }
 }

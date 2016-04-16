@@ -34,8 +34,6 @@ public class DeependConnection {
     @Getter
     private final SimpleAddress remoteAddress;
 
-    private int port = -1;
-
     @Getter
     @Setter
     private boolean authenticated;
@@ -48,7 +46,6 @@ public class DeependConnection {
     public DeependConnection(SimpleAddress remoteAddress, int port) {
         this.remoteAddress = remoteAddress;
         this.authenticated = false;
-        this.port = port;
     }
 
     public <T> T getObject(String key, Class<T> clazz) {
