@@ -5,3 +5,7 @@ connection.fail: Failed to connect, re-trying in 2.5 seconds
 connection.attempting: Attempting to connect to the server
 common.authenticating: Authenticating
 thread.starting: Starting main thread, with %s connection pools
+cthread.socket.close.failure: Failed to close client socket
+cthread.shutdown: All threads shutdown
+cthread.connect.faliure: Failed to connect to the server
+shutdown.started: Terminating...

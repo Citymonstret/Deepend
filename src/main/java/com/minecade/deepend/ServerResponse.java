@@ -28,6 +28,14 @@ import java.util.Map;
  * Response codes that the
  * server may return
  *
+ * This might change from version to version,
+ * so it is quite important that you keep
+ * your server and clients on the same version
+ *
+ * It is highly recommended to use the enum
+ * as much as possible, and only rely on the
+ * actual byte when reading or sending the data
+ *
  * @author Citymonstret
  */
 @Beta

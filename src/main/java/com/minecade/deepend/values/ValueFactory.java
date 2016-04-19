@@ -138,6 +138,7 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * @return Byte if registered, else
      *         the default value (@see #getUnknown()}
      */
+    @SuppressWarnings("unused")
     public Number getNumberValue(@NonNull final String key) {
         if (!cache.containsKey(key)) {
             return unknown.getValue();

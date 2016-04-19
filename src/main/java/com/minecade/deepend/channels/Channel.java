@@ -48,7 +48,7 @@ public enum Channel implements NumberProvider<Integer> {
     CHECK_DATA(1 << 1),
 
     /**
-     * Add data to the server
+     * Add data, or update data on the server
      *
      * <a>https://github.com/DeependProject/Deepend/wiki/ADD_DATA</a>
      */

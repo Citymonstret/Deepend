@@ -33,14 +33,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class DataRequest extends PendingRequest {
 
-    private static Map<String, DataRequest> requestMap = new ConcurrentHashMap<>();
+    private static final Map<String, DataRequest> requestMap =
+            new ConcurrentHashMap<>();
 
     /**
      * Get a request based on its ID
      * @param s Request ID
      * @return Request
      */
-    public static DataRequest getRequest(String s) {
+    public static DataRequest getRequest(@NonNull final String s) {
         return requestMap.get(s);
     }
 
@@ -49,7 +50,7 @@ public abstract class DataRequest extends PendingRequest {
     @Getter
     private final int index;
 
-    private String buildID(DataRequest request) {
+    private String buildID(@NonNull final DataRequest request) {
         return "request::" + request.index;
     }
 
@@ -64,7 +65,7 @@ public abstract class DataRequest extends PendingRequest {
      * @param channel Channel to send the request to
      * @param dataRecipient Recipient that will handle the data
      */
-    public DataRequest(@NonNull Channel channel, @NonNull DataRecipient dataRecipient) {
+    public DataRequest(@NonNull final Channel channel, @NonNull final DataRecipient dataRecipient) {
         super(channel);
         this.index = currentIndex++;
         this.recipient.add(dataRecipient);
@@ -81,13 +82,13 @@ public abstract class DataRequest extends PendingRequest {
      * per definition
      * @param o List of objects
      */
-    public void call(final List<Object> o) {
+    public void call(@NonNull final List<Object> o) {
         recipient.forEach(recipient -> recipient.act(o));
     }
 
     @Override
-    final protected void makeRequest(DeependBuf buf) {
-        buf.writeString(buildID(this));
+    final protected void makeRequest(@NonNull final DeependBuf buf) {
+        buf.writeString(this.buildID(this));
         buildRequest(buf);
     }
 
@@ -95,13 +96,13 @@ public abstract class DataRequest extends PendingRequest {
      * Build the request
      * @param buf DeependBuf to populate
      */
-    protected void buildRequest(DeependBuf buf){}
+    protected void buildRequest(@NonNull final DeependBuf buf){}
 
     /**
      * This will delete the request from the request map
      */
     public void delete() {
-        requestMap.remove(buildID(this));
+        requestMap.remove(this.buildID(this));
     }
 
     /**

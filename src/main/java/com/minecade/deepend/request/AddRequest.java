@@ -18,13 +18,13 @@ package com.minecade.deepend.request;
 import com.minecade.deepend.channels.Channel;
 
 /**
- * Created 2/26/2016 for Deepend
+ * Used to add/update data on the server
  *
  * @author Citymonstret
  */
 public abstract class AddRequest extends DataRequest {
 
-    public AddRequest(DataRecipient dataRecipient) {
+    public AddRequest(final DataRecipient dataRecipient) {
         super(Channel.ADD_DATA, dataRecipient);
     }
 

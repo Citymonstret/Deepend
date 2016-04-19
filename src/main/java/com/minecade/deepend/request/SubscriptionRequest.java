@@ -33,6 +33,7 @@ public final class SubscriptionRequest extends PendingRequest {
 
     public SubscriptionRequest(final ByteProvider ... channels) {
         super(Channel.CHECK_DATA);
+
         this.channels = channels;
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < channels.length; i++) {

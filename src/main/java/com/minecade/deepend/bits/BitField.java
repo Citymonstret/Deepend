@@ -51,7 +51,7 @@ public class BitField<DataType extends Number, Provider extends ValueProvider<Da
      * @param field Bit Field
      * @return Extracted objects (will never be null)
      */
-    public final Collection<Provider> extract(int field) {
+    public final Collection<Provider> extract(final int field) {
         if (field == 0) {
             return Collections.emptySet();
         }
@@ -70,7 +70,7 @@ public class BitField<DataType extends Number, Provider extends ValueProvider<Da
      *
      * @return Constructed BitField
      */
-    public final int construct(@NonNull Collection<Provider> objects) {
+    public final int construct(@NonNull final Collection<Provider> objects) {
         Iterator<Provider> iterator = objects.iterator();
         if (!iterator.hasNext()) {
             return 0;

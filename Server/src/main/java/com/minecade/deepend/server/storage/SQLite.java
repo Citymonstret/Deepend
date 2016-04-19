@@ -36,6 +36,10 @@ import java.util.*;
 /**
  * Created 2/27/2016 for Deepend
  *
+ *********************************************
+ * This is real unstable, shouldn't be used  *
+ *********************************************
+ *
  * @author Citymonstret
  */
 public class SQLite implements StorageBase {

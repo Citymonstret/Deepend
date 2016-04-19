@@ -44,7 +44,7 @@ public class ChannelManager {
      */
     public static final ChannelManager instance = new ChannelManager();
 
-    ChannelManager() {}
+    private ChannelManager() {}
 
     /**
      * Register a channel, can only
@@ -85,11 +85,11 @@ public class ChannelManager {
      * @param channel Channel Enum
      * @return Implementation of the requested channel
      */
-    public DeependChannel getChannel(@NonNull Channel channel) {
+    public DeependChannel getChannel(@NonNull final Channel channel) {
         return channelMap.get(channel);
     }
 
-    public ChannelStatus getChannelStatus(@NonNull Channel channel) {
+    public ChannelStatus getChannelStatus(@NonNull final Channel channel) {
         return channelStatusMap.get(channel);
     }
 

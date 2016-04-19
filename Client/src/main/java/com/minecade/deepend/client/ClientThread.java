@@ -39,17 +39,25 @@ public class ClientThread extends Thread {
     private long lastExecutionTime = -1;
 
     ClientThread(@NonNull final String host, final int port) {
+        // direct parameters
         this.host = host;
         this.port = port;
+        //
 
-        Socket socket;
+        //
+        // TODO: Look into optimizing the default socket
+        //
+        final Socket socket;
         try {
             socket = new Socket();
         } catch (final Exception e) {
-            Logger.get().error("Failed to connect to server :(", e);
+            Logger.get().error("cthread.connect.failure", e);
             throw new RuntimeException(e);
         }
 
+        //
+        // TODO: Optimize this
+        //
         this.context = new DeependContext(
                 DeependClient.getCurrentConnection(),
                 socket,
@@ -70,6 +78,10 @@ public class ClientThread extends Thread {
         while (!DeependClient.getInstance().shutdown) {
             if (!connectionProblems) {
                 if (DeependClient.getCurrentConnection().isAuthenticated()) {
+
+                    // This is used to postpone all actions after authentication, as
+                    // it previously would cause some strange issues.
+                    // TODO: Investigate cause to issues
                     if (skippedSets > 0) {
                         if (System.currentTimeMillis() - lastExecutionTime > 1000) {
                             --skippedSets;
@@ -78,11 +90,16 @@ public class ClientThread extends Thread {
                         continue;
                     }
 
+                    // TODO: Re-evaluate
+                    // This might be a very stupid thing to do
+                    // And I'm open to suggestions
                     final Request request = DeependClient.getInstance().cloud.get();
                     if (request == null) {
                         continue;
                     }
 
+                    // This skips requests that might be invalid. This can be used to
+                    // set a time limit to requests, or something similar to that
                     if (request.validate()) {
                         if (!request.handle(context, DeependClient.getInstance().getChannelHandler())) {
                             connectionProblems = true;
@@ -92,6 +109,8 @@ public class ClientThread extends Thread {
                 } else {
                     if (!authenticationAttempted) {
                         try {
+                            // This is actually a quite good showcase of the construction
+                            // of a request!
                             new PendingRequest(Channel.AUTHENTICATE) {
                                 @Override
                                 protected void makeRequest(final DeependBuf buf) {
@@ -111,9 +130,15 @@ public class ClientThread extends Thread {
                 skippedSets = 5;
                 try {
                     Logger.get().info("connection.attempting");
-                    DeependClient.getCurrentConnection().setAuthenticated(false);
-                    context.getSocket().connect(new InetSocketAddress(host, port), 10000);
+                    // Re-force authentication = magic
+                    DeependClient.getCurrentConnection()
+                            .setAuthenticated(false);
+                    // Prone to throw exceptions. Evil code :(((
+                    context.getSocket()
+                            .connect(new InetSocketAddress(host, port), 10000);
                     connectionProblems = false;
+
+                    // Yay! We passed!
                     Logger.get().info("connection.success");
                 } catch (final Exception e) {
                     Logger.get().error("connection.fail");
@@ -126,11 +151,15 @@ public class ClientThread extends Thread {
             }
         }
 
+        //
+        // SHUTDOWN CODE
+        //
+
         if (context.getSocket() != null) {
             try {
                 context.getSocket().close();
             } catch (IOException e) {
-                Logger.get().error("Failed to close client socket", e);
+                Logger.get().error("cthread.socket.close.failure", e);
             }
         }
 
@@ -139,8 +168,8 @@ public class ClientThread extends Thread {
         ++sThreads;
 
         if (sThreads >= threads) {
-            Logger.get().info("All threads shutdown!");
-            Logger.get().info("Terminating...");
+            Logger.get().info("cthread.shutdown");
+            Logger.get().info("shutdown.started");
             System.exit(0);
         }
     }

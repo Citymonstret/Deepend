@@ -62,12 +62,13 @@ public class DeependServer implements Runnable {
     @Getter
     private static final ConnectionFactory connectionFactory = new SimpleConnectionFactory();
 
-    public static final double SERVER_VERSION = 0.9;
-
     private static final ProtocolDecoder decoder = new ProtocolDecoder();
     private static final ProtocolEncoder encoder = ProtocolEncoder.getEncoder();
     private static final ChannelHandler handler = new MainChannel();
 
+    /**
+     * This is used to parse client arguments, using {@link CliFactory}
+     */
     private interface ServerSettings {
 
         @Option(
@@ -87,6 +88,7 @@ public class DeependServer implements Runnable {
         boolean getHelp();
     }
 
+    @Getter
     private final int port;
 
     @Getter
@@ -94,11 +96,12 @@ public class DeependServer implements Runnable {
 
     @SneakyThrows
     public DeependServer(@NonNull final String[] iargs, @NonNull final DeependServerApplication application) {
+        // This will replace the logger name, which is a constant (using reflection magic)
         Logger.setup(new Field(DeependConstants.class)
                 .withProperties(Field.FieldProperty.ACCESS_GRANT, Field.FieldProperty.ACCESS_REVERT, Field.FieldProperty.STATIC, Field.FieldProperty.CONSTANT)
                 .named("server_name").getValue().toString(), new DeependBundle("ServerStrings"));
 
-        ServerSettings settings;
+        final ServerSettings settings;
         try {
             settings = CliFactory.parseArguments(ServerSettings.class, iargs);
         } catch(final Exception e) {
@@ -139,7 +142,7 @@ public class DeependServer implements Runnable {
     }
 
     final public void run() {
-        Thread thread = new Thread("ServerThread") {
+        final Thread thread = new Thread("ServerThread") {
             @Override
             public void run() {
                 ServerSocket serverSocket = null;
@@ -281,6 +284,8 @@ public class DeependServer implements Runnable {
                             while ((nRead = iStream.read(data, 0, data.length)) != -1) {
                                 Logger.get().info("read: " + nRead);
 
+                                // This is a bit stupid, sure.
+                                // But it does the job, and it does it real good
                                 bufferStream.reset();
                                 bufferStream.write(data, 0, nRead);
                                 bufferStream.flush();
