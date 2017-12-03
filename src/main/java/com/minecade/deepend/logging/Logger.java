@@ -45,7 +45,7 @@ public class Logger
     }
 
     private final DeependBundle resourceBundle;
-    private final LogHandler<Logger, String> logger;
+    private LogHandler<Logger, String> logger;
     private boolean debugMode;
 
     @SneakyThrows

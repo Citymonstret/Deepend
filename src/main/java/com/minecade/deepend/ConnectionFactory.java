@@ -20,7 +20,6 @@ import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.lib.Stable;
-import lombok.NonNull;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -52,7 +51,7 @@ public interface ConnectionFactory
      * @param connection Connection
      */
     @Stable
-    DeependConnection addConnection(final @NonNull DeependConnection connection);
+    DeependConnection addConnection(final DeependConnection connection);
 
 
     /**
@@ -62,7 +61,7 @@ public interface ConnectionFactory
      * @return Registered connection
      */
     @Stable
-    DeependConnection createConnection(final @NonNull InetSocketAddress remoteAddress);
+    DeependConnection createConnection(final InetSocketAddress remoteAddress);
 
     /**
      * Get the connection if it exists,
@@ -73,5 +72,5 @@ public interface ConnectionFactory
      * @return Created, or re-used connection
      */
     @Beta
-    DeependConnection getOrCreate(final @NonNull SocketAddress socketAddress, final @NonNull UUID uuid);
+    DeependConnection getOrCreate(final SocketAddress socketAddress, final UUID uuid);
 }
