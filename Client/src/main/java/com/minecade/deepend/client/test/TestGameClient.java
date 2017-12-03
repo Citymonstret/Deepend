@@ -38,6 +38,7 @@ import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.request.GetRequest;
+import com.minecade.deepend.request.ShutdownRequest;
 import com.minecade.deepend.values.ValueFactory;
 
 /**
@@ -74,6 +75,7 @@ public class TestGameClient implements DeependClient.DeependClientApplication
                 buf.writeString( "*" );
             }
         } );
+        client.addPendingRequest( new ShutdownRequest() );
     }
 
     @Override

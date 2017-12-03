@@ -53,7 +53,6 @@ public interface ConnectionFactory
     @Stable
     DeependConnection addConnection(final DeependConnection connection);
 
-
     /**
      * Create and add a connection
      *

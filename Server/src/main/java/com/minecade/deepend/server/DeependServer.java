@@ -285,7 +285,9 @@ public class DeependServer implements Runnable
                 int nRead;
                 byte[] data = new byte[ 1024 * 1024 ];
 
-                while ( context.getSocket().isConnected() )
+                boolean shouldStop = false;
+
+                while ( context.getSocket().isConnected() && !shouldStop )
                 {
                     try
                     {
@@ -355,7 +357,7 @@ public class DeependServer implements Runnable
                                 Logger.get().error( "Failed to close bufferStream", e );
                             }
                         }
-
+                        shouldStop = true;
                         Logger.get().debug( "Closed connection thread" );
                     }
                 }
