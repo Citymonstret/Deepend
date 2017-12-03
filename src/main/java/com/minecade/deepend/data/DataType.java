@@ -19,7 +19,8 @@ package com.minecade.deepend.data;
 /**
  * Simple data types
  */
-public enum DataType {
+public enum DataType
+{
     INT,
     BYTE,
     STRING,

@@ -40,24 +40,6 @@ allprojects {
         mavenLocal()
     }
 
-    publishing {
-        repositories {
-            maven {
-                credentials {
-                    username = "$mavenUser";
-                    password = "$mavenPassword";
-                }
-                url "http://repo.mineca.de/nexus/content/repositories/releases/"
-            }
-        }
-        publications {
-            shadow(MavenPublication) {
-                from components.java
-                artifact shadowJar
-            }
-        }
-    }
-
     dependencies {
         compile 'org.yaml:snakeyaml:1.17'
         compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.5'

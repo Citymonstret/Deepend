@@ -5,14 +5,17 @@ package com.minecade.deepend.nativeprot;
  *
  * @author Citymonstret
  */
-public class DeependProtocol {
+public class DeependProtocol
+{
 
-    public static void setup() throws Exception {
-        System.loadLibrary("NativeProtocol");
+    public static void setup() throws Exception
+    {
+        System.loadLibrary( "NativeProtocol" );
         initialize();
     }
 
     public native static void initialize();
+
     public native static void destroy();
 
     public native static NativeObj[] loadNativeBuf(int i, byte b[]);

@@ -23,10 +23,12 @@ import com.minecade.deepend.object.Status;
  *
  * @author Citymonstret
  */
-public class DataStatus extends Status<ByteProvider> {
+public class DataStatus extends Status<ByteProvider>
+{
 
-    public DataStatus(ByteProvider category) {
-        super(category);
+    public DataStatus(ByteProvider category)
+    {
+        super( category );
     }
 
 }

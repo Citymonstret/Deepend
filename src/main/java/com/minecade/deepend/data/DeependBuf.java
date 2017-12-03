@@ -17,23 +17,22 @@
 package com.minecade.deepend.data;
 
 import com.minecade.deepend.bytes.ByteProvider;
-import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.pipeline.DeependContext;
 import com.minecade.deepend.values.NumberProvider;
 
 /**
  * A wrapper for the netty ByteBuf
- *
+ * <p>
  * This allows for some magnificent
  * things, and this is what the whole
  * project is built to be using
  */
-public abstract class DeependBuf {
+public abstract class DeependBuf
+{
 
-    private DataType[] dataType;
     protected Object[] object;
-
+    private DataType[] dataType;
     private int readPointer = 0;
     private int writePointer = 0;
 
@@ -41,27 +40,32 @@ public abstract class DeependBuf {
 
     private boolean writeLocked = false;
 
-    protected DeependBuf() {
+    protected DeependBuf()
+    {
     }
 
     /**
      * Disallow writing to this buf
      */
-    public void lock() {
+    public void lock()
+    {
         writeLocked = true;
     }
 
-    protected void read() {
+    protected void read()
+    {
         int p = writePointer++;
 
         Object o = null;
-        DataType type = dataType[p];
+        DataType type = dataType[ p ];
 
-        switch (type) {
+        switch ( type )
+        {
             case BYTE:
                 o = readByte();
                 break;
-            case STRING: {
+            case STRING:
+            {
                 o = readString();
                 break;
             }
@@ -72,40 +76,49 @@ public abstract class DeependBuf {
                 break;
         }
 
-        object[p] = o;
+        object[ p ] = o;
     }
 
-    public GenericResponse getResponse() {
-        return GenericResponse.getGenericResponse(readByte());
+    public GenericResponse getResponse()
+    {
+        return GenericResponse.getGenericResponse( readByte() );
     }
 
-    public void writeByte(ByteProvider response) {
+    public void writeByte(ByteProvider response)
+    {
         checkLock();
 
-        writeByte(response.getValue());
+        writeByte( response.getValue() );
     }
 
-    final public void writeByte(boolean b) {
-        this.writeByte((byte) (b ? 1 : 0));
+    final public void writeByte(boolean b)
+    {
+        this.writeByte( (byte) ( b ? 1 : 0 ) );
     }
 
-    final public void writeByte(byte b) {
+    final public void writeByte(byte b)
+    {
         checkLock();
-        _writeByte(b);
+        _writeByte( b );
     }
+
     protected abstract void _writeByte(byte b);
 
-    final public void writeString(String str) {
+    final public void writeString(String str)
+    {
         checkLock();
-        _writeString(str);
+        _writeString( str );
     }
+
     protected abstract void _writeString(String str);
 
     protected abstract String readString();
 
-    public String getString() {
+    public String getString()
+    {
         Entry entry = get();
-        if (entry == null) {
+        if ( entry == null )
+        {
             return readString();
         }
         return (String) entry.getObject();
@@ -113,9 +126,11 @@ public abstract class DeependBuf {
 
     protected abstract byte readByte();
 
-    public byte getByte() {
+    public byte getByte()
+    {
         Entry entry = get();
-        if (entry == null) {
+        if ( entry == null )
+        {
             return readByte();
         }
         return (byte) entry.object;
@@ -123,40 +138,48 @@ public abstract class DeependBuf {
 
     protected abstract int readInt();
 
-    public int getInt() {
+    public int getInt()
+    {
         Entry entry = get();
-        if (entry == null) {
+        if ( entry == null )
+        {
             return readInt();
         }
         return (int) entry.getObject();
     }
 
-    public Entry get() {
+    public Entry get()
+    {
         int p = readPointer++;
 
-        if (p >= writtenIndices) {
+        if ( p >= writtenIndices )
+        {
             return null;
         }
 
-        return new Entry(dataType[p], object[p]);
+        return new Entry( dataType[ p ], object[ p ] );
     }
 
-    public void writeInt(int i) {
+    public void writeInt(int i)
+    {
         checkLock();
-        _writeInt(i);
+        _writeInt( i );
     }
 
     protected abstract void _writeInt(int n);
 
-    private void checkLock() {
-        if (writeLocked) {
-            throw new IllegalAccessError("Cannot write to locked buf");
+    private void checkLock()
+    {
+        if ( writeLocked )
+        {
+            throw new IllegalAccessError( "Cannot write to locked buf" );
         }
     }
 
     public abstract boolean readable();
 
-    public void writeAll(DeependBuf in) {
+    public void writeAll(DeependBuf in)
+    {
         checkLock();
     }
 
@@ -164,26 +187,32 @@ public abstract class DeependBuf {
 
     public abstract void writeAndFlush(DeependContext context);
 
-    public void writeInt(NumberProvider<Integer> provider) {
-        this.writeInt(provider.getValue());
+    public void writeInt(NumberProvider<Integer> provider)
+    {
+        this.writeInt( provider.getValue() );
     }
 
     public abstract void nullify();
 
-    private class Entry {
+    private class Entry
+    {
+
         DataType type;
         Object object;
 
-        Entry(DataType type, Object object) {
+        Entry(DataType type, Object object)
+        {
             this.type = type;
             this.object = object;
         }
 
-        public DataType getType() {
+        public DataType getType()
+        {
             return this.type;
         }
 
-        public Object getObject() {
+        public Object getObject()
+        {
             return this.object;
         }
     }

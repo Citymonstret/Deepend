@@ -37,118 +37,147 @@ import java.util.List;
  * @author Citymonstret
  */
 @UtilityClass
-public class DataUtil {
+public class DataUtil
+{
 
     /**
      * Will loop through a holder and find
      * all appropriate data objects
      *
-     * @param holder Holder to search in
-     * @param s Name | Null (will then read from buf)
-     * @param buf Input buffer
+     * @param holder      Holder to search in
+     * @param s           Name | Null (will then read from buf)
+     * @param buf         Input buffer
      * @param initialList Pre-created list
-     * @param wrapHolder If this is true, then
-     *                   holders will be wrapped
-     *                   to objects, rather than
-     *                   being read from
-     *
+     * @param wrapHolder  If this is true, then
+     *                    holders will be wrapped
+     *                    to objects, rather than
+     *                    being read from
      * @return List containing all appropriate data objects
      */
     @Beta
-    public static List<DataObject> getDataObject(DeependConnection connection, @NonNull final DataHolder holder, final String s, @NonNull final DeependBuf buf, final List<DataObject> initialList, final boolean wrapHolder) {
+    public static List<DataObject> getDataObject(DeependConnection connection, @NonNull final DataHolder holder, final String s, @NonNull final DeependBuf buf, final List<DataObject> initialList, final boolean wrapHolder)
+    {
         String name;
 
-        try {
+        try
+        {
             // This will use the pre-defined name, if it
             // exists, otherwise it will attempt to read
             // it from the DeependBuf
             name = s == null ? buf.getString() /* Next string in the buf */ : s /* The initial string */;
-        } catch(final Exception e) {
+        } catch ( final Exception e )
+        {
             // Oh no! Something went wrong. Don't worry, though;
             // this will spit out everything in the initial
             // holder, and return that instead
-            holder.forEach((key, value) -> {
-                if (value instanceof DataObject) {
-                    initialList.add((DataObject) value);
-                } else {
-                    if (!wrapHolder) {
+            holder.forEach( (key, value) -> {
+                if ( value instanceof DataObject )
+                {
+                    initialList.add( (DataObject) value );
+                } else
+                {
+                    if ( !wrapHolder )
+                    {
                         // Only save the fallback object
-                        initialList.add((DataObject)((DataHolder) value).getFallback());
-                    } else {
+                        initialList.add( (DataObject) ( (DataHolder) value ).getFallback() );
+                    } else
+                    {
                         // Wrap the holder, which will then treat is as an object
-                        initialList.add(new HolderWrapper((DataHolder) value));
+                        initialList.add( new HolderWrapper( (DataHolder) value ) );
                     }
                 }
-            });
+            } );
             return initialList;
         }
 
         // The star means that all objects within the holder should be
         // returned, so let's convert it to a list instead
-        if (name.equals("*")) {
+        if ( name.equals( "*" ) )
+        {
             StringBuilder newName = new StringBuilder();
             Iterator<String> strings = holder.keySet().iterator();
-            while (strings.hasNext()) {
-                newName.append(strings.next());
-                if (strings.hasNext()) {
-                    newName.append(",");
+            while ( strings.hasNext() )
+            {
+                newName.append( strings.next() );
+                if ( strings.hasNext() )
+                {
+                    newName.append( "," );
                 }
             }
             name = newName.toString();
-        } else if (name.equals("*u")) { // Only updated objects
+        } else if ( name.equals( "*u" ) )
+        { // Only updated objects
             StringBuilder newName = new StringBuilder();
-            for (Object current : holder.values()) {
-                if (current instanceof DataHolder) {
+            for ( Object current : holder.values() )
+            {
+                if ( current instanceof DataHolder )
+                {
                     DataHolder ch = (DataHolder) current;
-                    if (ch.getStatus().needsUpdate(connection.getRemoteAddress())) {
-                        newName.append(ch.getIdentifier());
+                    if ( ch.getStatus().needsUpdate( connection.getRemoteAddress() ) )
+                    {
+                        newName.append( ch.getIdentifier() );
                     }
-                } else {
-                    newName.append(((DataObject) current).getName());
+                } else
+                {
+                    newName.append( ( (DataObject) current ).getName() );
                 }
-                newName.append(",");
+                newName.append( "," );
             }
-            if (newName.toString().endsWith(",")) {
-                name = newName.substring(0, newName.length() - (",").length());
-            } else {
+            if ( newName.toString().endsWith( "," ) )
+            {
+                name = newName.substring( 0, newName.length() - ( "," ).length() );
+            } else
+            {
                 name = newName.toString();
             }
         }
 
         // This means that a list has been sent
         // and that multiple items should be returned
-        if (name.contains(",")) {
-            for (String p : name.split(",")) {
-                List<DataObject> r = getDataObject(connection, holder, p, buf, new ArrayList<>(), false);
-                if (r == null) {
+        if ( name.contains( "," ) )
+        {
+            for ( String p : name.split( "," ) )
+            {
+                List<DataObject> r = getDataObject( connection, holder, p, buf, new ArrayList<>(), false );
+                if ( r == null )
+                {
                     return null;
                 }
-                initialList.addAll(r);
+                initialList.addAll( r );
             }
-        } else {
+        } else
+        {
             // Get the object corresponding to the name, from the current holder
-            Object o = holder.get(name);
-            if (o == null) {
-                Logger.get().error(name + ", was null :((((((");
+            Object o = holder.get( name );
+            if ( o == null )
+            {
+                Logger.get().error( name + ", was null :((((((" );
                 return null;
             }
-            if (o instanceof DataObject) {
-                initialList.add((DataObject) o);
-            } else if (o instanceof DataHolder) {
-                if (!wrapHolder) {
+            if ( o instanceof DataObject )
+            {
+                initialList.add( (DataObject) o );
+            } else if ( o instanceof DataHolder )
+            {
+                if ( !wrapHolder )
+                {
                     List<DataObject> newList;
-                    try {
-                        newList = getDataObject(connection, (DataHolder) o, null, buf, new ArrayList<>(), false);
-                        if (newList == null) {
-                            return Collections.singletonList(new HolderWrapper((DataHolder) o));
+                    try
+                    {
+                        newList = getDataObject( connection, (DataHolder) o, null, buf, new ArrayList<>(), false );
+                        if ( newList == null )
+                        {
+                            return Collections.singletonList( new HolderWrapper( (DataHolder) o ) );
                         }
-                    } catch (final Exception e) {
+                    } catch ( final Exception e )
+                    {
                         e.printStackTrace();
-                        return Collections.singletonList(new HolderWrapper((DataHolder) o));
+                        return Collections.singletonList( new HolderWrapper( (DataHolder) o ) );
                     }
-                    initialList.addAll(newList);
-                } else {
-                    initialList.add(new HolderWrapper((DataHolder) o));
+                    initialList.addAll( newList );
+                } else
+                {
+                    initialList.add( new HolderWrapper( (DataHolder) o ) );
                 }
             }
         }
@@ -162,18 +191,21 @@ public class DataUtil {
      *
      * @author Citymonstret
      */
-    public static final class HolderWrapper extends DataObject {
+    public static final class HolderWrapper extends DataObject
+    {
 
         @Getter
         private final DataHolder holder;
 
-        HolderWrapper(final DataHolder holder) {
-            super(holder.getIdentifier(), "");
+        HolderWrapper(final DataHolder holder)
+        {
+            super( holder.getIdentifier(), "" );
             this.holder = holder;
         }
 
         @Override
-        public void delete() {
+        public void delete()
+        {
             this.holder.delete();
         }
     }

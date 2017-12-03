@@ -5,8 +5,12 @@ package com.minecade.deepend.logging;
  *
  * @author Citymonstret
  */
-public interface LogHandler<T, M> {
+public interface LogHandler<T, M>
+{
+
     T info(M message);
+
     T error(M message);
+
     T debug(M message);
 }

@@ -14,117 +14,142 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-class SubscriptionSocket extends Thread {
+class SubscriptionSocket extends Thread
+{
 
     private static final int SERVER_SOCKET_PORT = 4345; /* TODO: Make configurable */
 
     private final ServerSocket socket;
     private final ChannelHandler handler;
     private final String host;
+    private volatile boolean shutdown = false;
 
-    SubscriptionSocket(final ChannelHandler handler, String host) {
-        try {
-            this.socket = new ServerSocket(SERVER_SOCKET_PORT);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize the client server socket", e);
+    SubscriptionSocket(final ChannelHandler handler, String host)
+    {
+        try
+        {
+            this.socket = new ServerSocket( SERVER_SOCKET_PORT );
+        } catch ( IOException e )
+        {
+            throw new RuntimeException( "Failed to initialize the client server socket", e );
         }
         this.handler = handler;
         this.host = host;
-        this.setName("SubscriptionManager");
+        this.setName( "SubscriptionManager" );
         this.start();
     }
 
     @Override
-    public void run() {
-        Logger.get().info("Waiting for @subscription requests");
+    public void run()
+    {
+        Logger.get().info( "Waiting for @subscription requests" );
 
         Socket in;
-        try {
+        try
+        {
             in = socket.accept();
-        } catch (final Exception e) {
-            Logger.get().error("Failed to accept incoming socket | Shutting down", e);
+        } catch ( final Exception e )
+        {
+            Logger.get().error( "Failed to accept incoming socket | Shutting down", e );
             this.close();
             return;
         }
 
-        Logger.get().info("Got a subscription message from the server!");
+        Logger.get().info( "Got a subscription message from the server!" );
 
         InetSocketAddress remoteAddress = (InetSocketAddress) in.getRemoteSocketAddress();
-        if (!remoteAddress.getHostString().equals(this.host)) {
-            Logger.get().error("Illegal host name @subscription: " + remoteAddress.getHostString());
-        } else {
+        if ( !remoteAddress.getHostString().equals( this.host ) )
+        {
+            Logger.get().error( "Illegal host name @subscription: " + remoteAddress.getHostString() );
+        } else
+        {
             scope:
             {
                 final InputStream stream;
-                try {
+                try
+                {
                     stream = in.getInputStream();
-                } catch (final Exception e) {
-                    Logger.get().error("Failed to fetch InputStream", e);
+                } catch ( final Exception e )
+                {
+                    Logger.get().error( "Failed to fetch InputStream", e );
                     break scope;
                 }
 
-                byte[] data = new byte[Constants.MEGABYTE];
+                byte[] data = new byte[ Constants.MEGABYTE ];
 
                 int nRead;
-                try {
-                    nRead = stream.read(data, 0, data.length);
-                } catch (final Exception e) {
-                    Logger.get().error("Failed to read data from socket", e);
+                try
+                {
+                    nRead = stream.read( data, 0, data.length );
+                } catch ( final Exception e )
+                {
+                    Logger.get().error( "Failed to read data from socket", e );
                     break scope;
                 }
 
-                if (nRead == -1) {
-                    Logger.get().error("Stream returned no bytes");
+                if ( nRead == -1 )
+                {
+                    Logger.get().error( "Stream returned no bytes" );
                     break scope;
                 }
 
                 final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                byteArrayOutputStream.write(data, 0, nRead);
+                byteArrayOutputStream.write( data, 0, nRead );
 
-                try {
+                try
+                {
                     byteArrayOutputStream.flush();
-                } catch (final Exception e) {
-                    Logger.get().error("Failed to flush to buffer", e);
+                } catch ( final Exception e )
+                {
+                    Logger.get().error( "Failed to flush to buffer", e );
                     return;
                 }
 
                 byte[] readBytes = byteArrayOutputStream.toByteArray();
-                if (readBytes.length > 4) {
+                if ( readBytes.length > 4 )
+                {
                     NativeBuf inputBuf;
-                    try {
-                        inputBuf = ProtocolDecoder.decoder.decode(readBytes);
-                    } catch (final Exception e) {
-                        Logger.get().error("Failed to extract NativeBuf", e);
+                    try
+                    {
+                        inputBuf = ProtocolDecoder.decoder.decode( readBytes );
+                    } catch ( final Exception e )
+                    {
+                        Logger.get().error( "Failed to extract NativeBuf", e );
                         break scope;
                     }
-                    handler.handle(inputBuf, null, null);
+                    handler.handle( inputBuf, null, null );
                 }
             }
         }
 
-        try {
+        try
+        {
             in.close();
-        } catch (final Exception e) {
-            Logger.get().error("Failed to close socket", e);
+        } catch ( final Exception e )
+        {
+            Logger.get().error( "Failed to close socket", e );
         }
 
-        if (!shutdown) {
-            if (!socket.isClosed()) {
+        if ( !shutdown )
+        {
+            if ( !socket.isClosed() )
+            {
                 this.run();
             }
         }
     }
 
-    private volatile boolean shutdown = false;
-
     @Synchronized
-    private void close() {
+    private void close()
+    {
         this.shutdown = true;
-        try {
+        try
+        {
             this.socket.close();
-            Logger.get().info("Shutdown subscription socket");
-        } catch (IOException e) {
-            Logger.get().error("Failed to close the subscription socket", e);
+            Logger.get().info( "Shutdown subscription socket" );
+        } catch ( IOException e )
+        {
+            Logger.get().error( "Failed to close the subscription socket", e );
         }
     }
 }

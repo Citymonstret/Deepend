@@ -11,7 +11,8 @@ import java.util.UUID;
  *
  * @author Citymonstret
  */
-public interface DeependChannelHandler {
+public interface DeependChannelHandler
+{
 
     void handle(NativeBuf in, NativeBuf out, Object context) throws Exception;
 

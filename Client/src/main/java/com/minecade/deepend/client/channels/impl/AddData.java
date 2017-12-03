@@ -30,46 +30,53 @@ import java.util.List;
 /**
  * @author Citymonstret
  */
-public class AddData extends DeependChannel {
+public class AddData extends DeependChannel
+{
 
     private String getID;
 
-    public AddData() {
-        super(Channel.ADD_DATA);
+    public AddData()
+    {
+        super( Channel.ADD_DATA );
     }
 
     @Override
-    public void act(DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = connection.getBuf("in");
+    public void act(DeependConnection connection, DeependBuf buf)
+    {
+        DeependBuf in = connection.getBuf( "in" );
         // ByteBuf in = connection.getObject("in", ByteBuf.class);
 
         String getID = in.getString();
-        DataRequest request = DataRequest.getRequest(getID);
+        DataRequest request = DataRequest.getRequest( getID );
 
-        if (request == null) {
-            Logger.get().error("Got response for unregistered request, throwing!");
+        if ( request == null )
+        {
+            Logger.get().error( "Got response for unregistered request, throwing!" );
             return;
         }
 
         GenericResponse response = in.getResponse();
 
-        if (response == GenericResponse.SUCCESS) {
+        if ( response == GenericResponse.SUCCESS )
+        {
             byte categoryByte = in.getByte();
 
             int num = in.getInt();
 
             List<Object> objects = new ArrayList<>();
 
-            for (int i = 0; i < num; i++) {
+            for ( int i = 0; i < num; i++ )
+            {
                 String identifier = in.getString();
                 String data = in.getString();
-                objects.add(new DataObject(identifier, data));
+                objects.add( new DataObject( identifier, data ) );
             }
 
-            request.call(objects);
+            request.call( objects );
             request.delete();
-        } else {
-            Logger.get().error("Failed to add data: \""+ in.getString() + "\"");
+        } else
+        {
+            Logger.get().error( "Failed to add data: \"" + in.getString() + "\"" );
         }
     }
 }

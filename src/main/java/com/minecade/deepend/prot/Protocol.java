@@ -7,7 +7,8 @@ import com.minecade.deepend.nativeprot.NativeBuf;
  *
  * @author Citymonstret
  */
-public interface Protocol {
+public interface Protocol
+{
 
     NativeBuf readNativeBuf(int i, byte b[]);
 

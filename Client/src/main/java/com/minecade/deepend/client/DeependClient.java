@@ -39,90 +39,82 @@ import lombok.SneakyThrows;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import static com.minecade.deepend.DeependConstants.*;
+import static com.minecade.deepend.DeependConstants.CLIENT_META;
+import static com.minecade.deepend.DeependConstants.CLIENT_NAME;
+import static com.minecade.deepend.DeependConstants.CLIENT_STRINGS;
 
 /**
  * This is the client class. This is final, as it isn't meant
  * to be extended. Instead you're supposed to start it from
  * a remote class.
- *
+ * <p>
  * Wiki: <a>https://github.com/DeependProject/Deepend/wiki/Client</a>
- *
+ * <p>
  * For an example, see {@link com.minecade.deepend.client.test.TestGameClient}
  *
  * @author Citymonstret
  */
-public final class DeependClient {
+public final class DeependClient
+{
 
     private static DeependClient instance;
-
-    public static DeependClient getInstance() {
-        if (instance == null) {
-            throw new RuntimeException("Cannot get instance before it's declared");
-        }
-        return instance;
-    }
-
     @Getter
     private static DeependConnection currentConnection;
-
-    @Getter
-    public String echoTestString;
-
-    @Getter
-    private int connectionPools = 3;
-
-    protected volatile boolean shutdown;
-    private volatile boolean isShutdown = false;
-
     final RequestCloud cloud = new RequestCloud();
-
     @Getter
     private final ChannelHandler channelHandler = new MainChannel();
-
     @Getter
     private final DeependBundle properties;
+    @Getter
+    public String echoTestString;
+    protected volatile boolean shutdown;
+    @Getter
+    private int connectionPools = 3;
+    private volatile boolean isShutdown = false;
 
     @SneakyThrows
-    public DeependClient(@NonNull final DeependClientApplication application, final boolean useProvided, final String host, final int port) {
+    public DeependClient(@NonNull final DeependClientApplication application, final boolean useProvided, final String host, final int port)
+    {
         DeependClient.instance = this;
 
-        DeependMeta.setMeta(CLIENT_META, "true");
+        DeependMeta.setMeta( CLIENT_META, "true" );
 
-        Logger.setup(CLIENT_NAME, new DeependBundle(CLIENT_STRINGS, true));
+        Logger.setup( CLIENT_NAME, new DeependBundle( CLIENT_STRINGS, true ) );
 
         // These are the default settings for the client
-        this.properties = new DeependBundle(CLIENT_META, false, DeependBundle.DefaultBuilder.create()
-                .add("echo.string", "Test")
-                .add("auth.user", "admin")
-                .add("auth.pass", "password")
-                .add("conn.host", "localhost")
-                .add("conn.port", "8000")
-                .add("pools", "3")
+        this.properties = new DeependBundle( CLIENT_META, false, DeependBundle.DefaultBuilder.create()
+                .add( "echo.string", "Test" )
+                .add( "auth.user", "admin" )
+                .add( "auth.pass", "password" )
+                .add( "conn.host", "localhost" )
+                .add( "conn.port", "8000" )
+                .add( "pools", "3" )
                 .build()
         );
 
-        this.connectionPools = Integer.parseInt(getProperty("pools"));
+        this.connectionPools = Integer.parseInt( getProperty( "pools" ) );
 
         // Let's load in some properties
-        this.echoTestString = getProperty("echo.string");
+        this.echoTestString = getProperty( "echo.string" );
 
         // Local variables
         String host1;
         int port1;
 
-        if (!useProvided) {
-            host1 = getProperty("conn.host");
-            port1 = Integer.parseInt(getProperty("conn.port"));
-        } else {
-            Logger.get().info("Using provided values, this is not recommended.");
+        if ( !useProvided )
+        {
+            host1 = getProperty( "conn.host" );
+            port1 = Integer.parseInt( getProperty( "conn.port" ) );
+        } else
+        {
+            Logger.get().info( "Using provided values, this is not recommended." );
             host1 = host;
             port1 = port;
         }
 
         {   // SETUP CONNECTION LIMITATIONS
-            DeependMeta.setMeta("serverAddr", host1);
-            DeependMeta.setMeta("serverPort", port1 + "");
+            DeependMeta.setMeta( "serverAddr", host1 );
+            DeependMeta.setMeta( "serverPort", port1 + "" );
         }
 
         {   // DEFAULT VALUES
@@ -130,13 +122,13 @@ public final class DeependClient {
         }
 
         {   // CHANNEL SETUP
-            ChannelManager.instance.addChannel(new GetData());
-            ChannelManager.instance.addChannel(new DeleteData());
-            ChannelManager.instance.addChannel(new AddData());
-            ChannelManager.instance.addChannel(new CheckData());
+            ChannelManager.instance.addChannel( new GetData() );
+            ChannelManager.instance.addChannel( new DeleteData() );
+            ChannelManager.instance.addChannel( new AddData() );
+            ChannelManager.instance.addChannel( new CheckData() );
 
             // Register custom channels
-            application.registerChannels(ChannelManager.instance);
+            application.registerChannels( ChannelManager.instance );
 
             // Lock channel registration
             ChannelManager.instance.lock();
@@ -152,31 +144,44 @@ public final class DeependClient {
 
             // Will register all object
             // mappings
-            application.registerObjectMappings(ObjectManager.instance);
+            application.registerObjectMappings( ObjectManager.instance );
         }
 
-        try {
-            currentConnection = new DeependConnection(new SimpleAddress(InetAddress.getLocalHost().getHostName()));
-        } catch (UnknownHostException e) {
+        try
+        {
+            currentConnection = new DeependConnection( new SimpleAddress( InetAddress.getLocalHost().getHostName() ) );
+        } catch ( UnknownHostException e )
+        {
             e.printStackTrace();
         }
 
         // Register requests that will
         // be sent as soon as we're
         // authenticated
-        application.registerInitialRequests(this);
+        application.registerInitialRequests( this );
 
-        Logger.get().info("thread.starting", connectionPools);
+        Logger.get().info( "thread.starting", connectionPools );
 
-        for (int i = 0; i < connectionPools; i++) {
-            new ClientThread(host1, port1);
+        for ( int i = 0; i < connectionPools; i++ )
+        {
+            new ClientThread( host1, port1 );
         }
 
-        new SubscriptionSocket(channelHandler, host1);
+        new SubscriptionSocket( channelHandler, host1 );
     }
 
-    public DeependClient(final DeependClientApplication application) {
-        this(application, false, "", -1);
+    public DeependClient(final DeependClientApplication application)
+    {
+        this( application, false, "", -1 );
+    }
+
+    public static DeependClient getInstance()
+    {
+        if ( instance == null )
+        {
+            throw new RuntimeException( "Cannot get instance before it's declared" );
+        }
+        return instance;
     }
 
     /**
@@ -185,22 +190,26 @@ public final class DeependClient {
      *
      * @param r Request to send
      */
-    public void addPendingRequest(@NonNull final Request r) {
-        this.cloud.addPendingRequest(r);
+    public void addPendingRequest(@NonNull final Request r)
+    {
+        this.cloud.addPendingRequest( r );
     }
 
-    public String getProperty(@NonNull final String key) {
-        return this.properties.get(key);
+    public String getProperty(@NonNull final String key)
+    {
+        return this.properties.get( key );
     }
 
-    public boolean isShutdown() {
+    public boolean isShutdown()
+    {
         return isShutdown;
     }
 
     /**
      * <a>https://github.com/DeependProject/Deepend/wiki/Client</a>
      */
-    public interface DeependClientApplication extends DeependApplication {
+    public interface DeependClientApplication extends DeependApplication
+    {
 
         /**
          * Register requests that will be sent as soon
@@ -220,6 +229,8 @@ public final class DeependClient {
         void registerObjectMappings(ObjectManager objectManager);
 
         @Override
-        default void registerChannels(ChannelManager channelManager) {}
+        default void registerChannels(ChannelManager channelManager)
+        {
+        }
     }
 }

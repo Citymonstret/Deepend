@@ -21,26 +21,29 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public enum GameCategory implements ByteProvider {
+public enum GameCategory implements ByteProvider
+{
 
-    UNKNOWN((byte) 1),                      // Unknown category type
-    PLAYERS((byte) (1 << 1)),               // Game players
-    SERVERS((byte) (1 << 2)),               // Game servers
-    PLAYER_SERVERS((byte) (1 << 3)),        // Player -> Server relations
-    SERVER_PLAYERS((byte) (1 << 4)),        // Players on a server
-    PLAYER_NAMES((byte) (1 << 6)),
-    SERVER_CATEGORIES((byte) (1 << 5)),               // Game proxies (such as bungee)
-    CATEGORY_SERVERS((byte) (1 << 7));
+    UNKNOWN( (byte) 1 ),                      // Unknown category type
+    PLAYERS( (byte) ( 1 << 1 ) ),               // Game players
+    SERVERS( (byte) ( 1 << 2 ) ),               // Game servers
+    PLAYER_SERVERS( (byte) ( 1 << 3 ) ),        // Player -> Server relations
+    SERVER_PLAYERS( (byte) ( 1 << 4 ) ),        // Players on a server
+    PLAYER_NAMES( (byte) ( 1 << 6 ) ),
+    SERVER_CATEGORIES( (byte) ( 1 << 5 ) ),               // Game proxies (such as bungee)
+    CATEGORY_SERVERS( (byte) ( 1 << 7 ) );
 
     private final byte categoryID;
 
     @Override
-    public Byte getValue() {
+    public Byte getValue()
+    {
         return this.categoryID;
     }
 
     @Override
-    public String getIdentifier() {
+    public String getIdentifier()
+    {
         return this.name();
     }
 }

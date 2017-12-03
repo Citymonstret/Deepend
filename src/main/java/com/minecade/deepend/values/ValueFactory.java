@@ -33,51 +33,61 @@ import java.util.Map;
  * @author Citymonstret
  */
 @Beta
-public class ValueFactory<DataType extends Number, Group extends ProviderGroup<DataType, ValueProvider<DataType>>> {
+public class ValueFactory<DataType extends Number, Group extends ProviderGroup<DataType, ValueProvider<DataType>>>
+{
 
     /**
      * Lock status
      */
     private static volatile boolean locked = false;
+    private static Map<FactoryType, ValueFactory> map = new HashMap<>();
+    private final Map<String, Number> cache;
+    private final Map<Number, String> rCache;
+    private final Group group;
+    @Getter
+    private NumberProvider unknown;
+    // This will prevent it from being generated when not used
+    private BitField<? extends Number, ? extends ValueProvider<? extends Number>> bitField;
+    public ValueFactory(@NonNull final Group group, @NonNull final NumberProvider unknown)
+    {
+        this.cache = new HashMap<>();
+        this.rCache = new HashMap<>();
+        this.group = group;
+
+        this.unknown = unknown;
+
+        group.values().forEach( e -> {
+            cache.put( e.getIdentifier(), e.getValue() );
+            rCache.put( e.getValue(), e.getIdentifier() );
+        } );
+    }
 
     /**
      * Lock the byte factory factorization process,
      * preventing any factories from being added
      */
-    public static void lock() {
+    public static void lock()
+    {
         locked = true;
     }
-
-    /**
-     * Factory Types
-     */
-    public enum FactoryType {
-
-        /**
-         * Categories used for
-         * data management
-         */
-        DATA_TYPE
-    }
-
-    private static Map<FactoryType, ValueFactory> map = new HashMap<>();
 
     /**
      * This will add a byte factory for the
      * given factory type
      *
-     * @param type What should this factory be used for
-     * @param factory Factory for the given type
-     *
-     * @param <B> Enum implementing ByteProvider
+     * @param type       What should this factory be used for
+     * @param factory    Factory for the given type
+     * @param <B>        Enum implementing ByteProvider
      * @param <DataType> Number implementation
      */
     @SneakyThrows(RuntimeException.class)
-    public static <DataType extends Number, B extends ProviderGroup<DataType, ValueProvider<DataType>>> void addValueFactory(@NonNull FactoryType type, @NonNull ValueFactory<DataType, B> factory) {
-        if (locked) {
-            throw new RuntimeException("Cannot add factory to locked manager");
+    public static <DataType extends Number, B extends ProviderGroup<DataType, ValueProvider<DataType>>> void addValueFactory(@NonNull FactoryType type, @NonNull ValueFactory<DataType, B> factory)
+    {
+        if ( locked )
+        {
+            throw new RuntimeException( "Cannot add factory to locked manager" );
         }
-        map.put(type, factory);
+        map.put( type, factory );
     }
 
     /**
@@ -87,31 +97,13 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * @return Factory for the specified type
      */
     @SneakyThrows(RuntimeException.class)
-    public static ValueFactory getFactory(@NonNull final FactoryType type) {
-        if (!map.containsKey(type)) {
-            throw new RuntimeException("No byte factory registered for: " + type.name());
+    public static ValueFactory getFactory(@NonNull final FactoryType type)
+    {
+        if ( !map.containsKey( type ) )
+        {
+            throw new RuntimeException( "No byte factory registered for: " + type.name() );
         }
-        return map.get(type);
-    }
-
-    private final Map<String, Number> cache;
-    private final Map<Number, String> rCache;
-    private final Group group;
-
-    @Getter
-    private NumberProvider unknown;
-
-    public ValueFactory(@NonNull final Group group, @NonNull final NumberProvider unknown) {
-        this.cache = new HashMap<>();
-        this.rCache = new HashMap<>();
-        this.group = group;
-
-        this.unknown = unknown;
-
-        group.values().forEach(e -> {
-            cache.put(e.getIdentifier(), e.getValue());
-            rCache.put(e.getValue(), e.getIdentifier());
-        });
+        return map.get( type );
     }
 
     /**
@@ -119,40 +111,54 @@ public class ValueFactory<DataType extends Number, Group extends ProviderGroup<D
      * value for the specified bye
      *
      * @param b Byte
-     *
      * @return Name if registered, else
-     *         the default value {@link #getUnknown()}
+     * the default value {@link #getUnknown()}
      */
-    public String getName(@NonNull final Number b) {
-        if (!rCache.containsKey(b)) {
+    public String getName(@NonNull final Number b)
+    {
+        if ( !rCache.containsKey( b ) )
+        {
             return unknown.getIdentifier();
         }
-        return rCache.get(b);
+        return rCache.get( b );
     }
 
     /**
      * Get the byte for the enum name
      *
      * @param key Enum name
-     *
      * @return Byte if registered, else
-     *         the default value (@see #getUnknown()}
+     * the default value (@see #getUnknown()}
      */
     @SuppressWarnings("unused")
-    public Number getNumberValue(@NonNull final String key) {
-        if (!cache.containsKey(key)) {
+    public Number getNumberValue(@NonNull final String key)
+    {
+        if ( !cache.containsKey( key ) )
+        {
             return unknown.getValue();
         }
-        return cache.get(key);
+        return cache.get( key );
     }
 
-    // This will prevent it from being generated when not used
-    private BitField<? extends Number, ? extends ValueProvider<? extends Number>> bitField;
-
-    public BitField<? extends Number, ? extends ValueProvider<? extends Number>> constructBitField() {
-        if (bitField == null) { // Added caching to this
-            bitField = new BitField<>(group);
+    public BitField<? extends Number, ? extends ValueProvider<? extends Number>> constructBitField()
+    {
+        if ( bitField == null )
+        { // Added caching to this
+            bitField = new BitField<>( group );
         }
         return bitField;
+    }
+
+    /**
+     * Factory Types
+     */
+    public enum FactoryType
+    {
+
+        /**
+         * Categories used for
+         * data management
+         */
+        DATA_TYPE
     }
 }

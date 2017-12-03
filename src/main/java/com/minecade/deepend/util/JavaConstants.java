@@ -25,7 +25,8 @@ import lombok.experimental.UtilityClass;
  */
 @Stable
 @UtilityClass
-public class JavaConstants {
+public class JavaConstants
+{
 
     public static final int EXIT_STATUS_SUCCESS = 0;
     public static final int EXIT_STATUS_FAILURE = 1;

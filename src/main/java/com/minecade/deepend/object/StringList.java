@@ -29,11 +29,13 @@ import java.util.Arrays;
  * @author Citymonstret
  */
 @Stable
-public final class StringList extends ArrayList<String> {
+public final class StringList extends ArrayList<String>
+{
 
-    public StringList(@NonNull final String... strings) {
-        super(strings.length);
-        super.addAll(Arrays.asList(strings));
+    public StringList(@NonNull final String... strings)
+    {
+        super( strings.length );
+        super.addAll( Arrays.asList( strings ) );
     }
 
 }

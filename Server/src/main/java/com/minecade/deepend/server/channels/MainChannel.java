@@ -29,10 +29,12 @@ import com.minecade.deepend.pipeline.DeependContext;
 /**
  * The main server channel implementation
  */
-public class MainChannel extends ChannelHandler {
+public class MainChannel extends ChannelHandler
+{
 
     @Override
-    public void handle(NativeBuf in, NativeBuf response, DeependContext context) {
+    public void handle(NativeBuf in, NativeBuf response, DeependContext context)
+    {
         // The ID of the requested channel
         int channelID = in.getInt();
         // The response status from the server
@@ -42,45 +44,54 @@ public class MainChannel extends ChannelHandler {
         DeependConnection connection = context.getConnection();
         DeependBuf written = new NativeBuf();
         {
-            channel = Channel.getChannel(channelID);
-            if (channel == null) {
+            channel = Channel.getChannel( channelID );
+            if ( channel == null )
+            {
                 serverResponse = ServerResponse.INVALID_CHANNEL;
             }
 
-            if (!connection.isAuthenticated()) {
-                if (channel != Channel.AUTHENTICATE) {
+            if ( !connection.isAuthenticated() )
+            {
+                if ( channel != Channel.AUTHENTICATE )
+                {
                     serverResponse = ServerResponse.REQUIRES_AUTHENTICATION;
-                } else {
+                } else
+                {
                     serverResponse = ServerResponse.AUTHENTICATION_ATTEMPTED;
                 }
             }
 
-            connection.addMeta("in", in);
-            Logger.get().info("Server Response Code: " + serverResponse.name());
-            if (channel == null) {
+            connection.addMeta( "in", in );
+            Logger.get().info( "Server Response Code: " + serverResponse.name() );
+            if ( channel == null )
+            {
                 channel = Channel.UNKNOWN;
             }
             everythingFine = channel != Channel.UNKNOWN && serverResponse != ServerResponse.REQUIRES_AUTHENTICATION;
-            if (everythingFine && serverResponse != ServerResponse.AUTHENTICATION_ATTEMPTED) {
+            if ( everythingFine && serverResponse != ServerResponse.AUTHENTICATION_ATTEMPTED )
+            {
                 serverResponse = ServerResponse.SUCCESS;
             }
         }
-        if (everythingFine) {
-            Logger.get().info("Calling channel of type: " + channel);
-            try {
-                ChannelManager.instance.getChannel(channel).act(connection, written);
-            } catch(final Exception e) {
-                Logger.get().error("Channel failed :/", e);
+        if ( everythingFine )
+        {
+            Logger.get().info( "Calling channel of type: " + channel );
+            try
+            {
+                ChannelManager.instance.getChannel( channel ).act( connection, written );
+            } catch ( final Exception e )
+            {
+                Logger.get().error( "Channel failed :/", e );
                 serverResponse = ServerResponse.CHANNEL_EXCEPTION;
             }
         }
         // Write the response code
-        response.writeByte(serverResponse.getValue());
+        response.writeByte( serverResponse.getValue() );
         // Write the channel ID
-        response.writeInt(channel.getValue());
+        response.writeInt( channel.getValue() );
         // Copy channel response
         //response.writeBytes(written);
         // ((NettyBuf) written).copyTo(response);
-        ((NativeBuf) written).copyTo(response);
+        ( (NativeBuf) written ).copyTo( response );
     }
 }

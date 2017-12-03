@@ -11,7 +11,8 @@ import java.lang.reflect.Method;
  * @author Citymonstret
  */
 @Value
-public class AnnotatedMethod<T extends Annotation> {
+public class AnnotatedMethod<T extends Annotation>
+{
 
     T annotation;
 

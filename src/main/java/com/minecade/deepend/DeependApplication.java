@@ -26,7 +26,8 @@ import com.minecade.deepend.lib.Stable;
  * @author Citymonstret
  */
 @Stable
-public interface DeependApplication {
+public interface DeependApplication
+{
 
     /**
      * Register all byte factories
@@ -43,5 +44,7 @@ public interface DeependApplication {
     /**
      * Actions done after initialization
      */
-    default void after(final Object context) {}
+    default void after(final Object context)
+    {
+    }
 }

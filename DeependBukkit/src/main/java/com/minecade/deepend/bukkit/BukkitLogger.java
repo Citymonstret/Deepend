@@ -8,30 +8,35 @@ import com.minecade.deepend.logging.Logger;
  *
  * @author Citymonstret
  */
-class BukkitLogger implements LogHandler<Logger, String> {
+class BukkitLogger implements LogHandler<Logger, String>
+{
 
     private Logger instance;
 
     @SuppressWarnings("unused")
-    public BukkitLogger(String name, Logger instance) {
+    public BukkitLogger(String name, Logger instance)
+    {
         this.instance = instance;
     }
 
     @Override
-    public Logger info(String message) {
-        DeependBukkit.logger.info(message);
+    public Logger info(String message)
+    {
+        DeependBukkit.logger.info( message );
         return instance;
     }
 
     @Override
-    public Logger error(String message) {
-        DeependBukkit.logger.severe(message);
+    public Logger error(String message)
+    {
+        DeependBukkit.logger.severe( message );
         return instance;
     }
 
     @Override
-    public Logger debug(String message) {
-        DeependBukkit.logger.warning(message);
+    public Logger debug(String message)
+    {
+        DeependBukkit.logger.warning( message );
         return instance;
     }
 

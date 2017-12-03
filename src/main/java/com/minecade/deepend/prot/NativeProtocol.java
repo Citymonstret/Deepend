@@ -8,17 +8,20 @@ import com.minecade.deepend.nativeprot.NativeBuf;
  *
  * @author Citymonstret
  */
-public class NativeProtocol implements Protocol {
+public class NativeProtocol implements Protocol
+{
 
     @Override
-    public NativeBuf readNativeBuf(int i, byte[] b) {
+    public NativeBuf readNativeBuf(int i, byte[] b)
+    {
         return new NativeBuf(
-                DeependProtocol.loadNativeBuf(i, b)
+                DeependProtocol.loadNativeBuf( i, b )
         );
     }
 
     @Override
-    public NativeBuf writeNativeBuf(int i, NativeBuf buf) {
+    public NativeBuf writeNativeBuf(int i, NativeBuf buf)
+    {
         return null;
         // return DeependProtocol.writeNativeBuf(i, objs);
     }

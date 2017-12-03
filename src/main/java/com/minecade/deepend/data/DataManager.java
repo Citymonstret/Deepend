@@ -28,46 +28,55 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public class DataManager {
+public class DataManager
+{
 
     /**
      * The only instance of this
      */
     public static final DataManager instance = new DataManager();
 
-    private final DataHolder mainDataHolder = new DataHolder("data");
+    private final DataHolder mainDataHolder = new DataHolder( "data" );
 
     private final Map<String, DataStatus> dataStatusMap;
 
-    DataManager() {
+    DataManager()
+    {
         this.dataStatusMap = new ConcurrentHashMap<>();
     }
 
-    public static void createDataHolder(ByteProvider provider) {
-        instance.registerDataHolder(new DataHolder(provider.getIdentifier()), provider);
+    public static void createDataHolder(ByteProvider provider)
+    {
+        instance.registerDataHolder( new DataHolder( provider.getIdentifier() ), provider );
     }
 
-    public static void createDataHolders(ByteProvider ... providers) {
-        for (ByteProvider provider : providers) {
-            createDataHolder(provider);
+    public static void createDataHolders(ByteProvider... providers)
+    {
+        for ( ByteProvider provider : providers )
+        {
+            createDataHolder( provider );
         }
     }
 
-    public void registerDataHolder(@NonNull final DataHolder dataHolder, @NonNull ByteProvider category) {
-        this.mainDataHolder.put(dataHolder.getIdentifier(), dataHolder);
-        this.registerDataStatus(category);
+    public void registerDataHolder(@NonNull final DataHolder dataHolder, @NonNull ByteProvider category)
+    {
+        this.mainDataHolder.put( dataHolder.getIdentifier(), dataHolder );
+        this.registerDataStatus( category );
     }
 
-    private void registerDataStatus(ByteProvider category) {
-        this.dataStatusMap.put(category.getIdentifier(), new DataStatus(category));
+    private void registerDataStatus(ByteProvider category)
+    {
+        this.dataStatusMap.put( category.getIdentifier(), new DataStatus( category ) );
     }
 
-    public DataStatus getDataStatus(ByteProvider category) {
-        return getDataStatus(category.getIdentifier());
+    public DataStatus getDataStatus(ByteProvider category)
+    {
+        return getDataStatus( category.getIdentifier() );
     }
 
-    public DataStatus getDataStatus(String name) {
-        return dataStatusMap.get(name);
+    public DataStatus getDataStatus(String name)
+    {
+        return dataStatusMap.get( name );
     }
 
     /**
@@ -76,24 +85,28 @@ public class DataManager {
      * @param key Holder key
      * @return True | False
      */
-    public boolean hasDataHolder(final String key) {
-        return this.mainDataHolder.containsKey(key);
+    public boolean hasDataHolder(final String key)
+    {
+        return this.mainDataHolder.containsKey( key );
     }
 
     /**
      * Get a data holder
-     * @see #hasDataHolder(String) to check if it exists
+     *
      * @param key Data holder key
      * @return Holder | New data holder if non-existent
+     * @see #hasDataHolder(String) to check if it exists
      */
-    public DataHolder getDataHolder(@NonNull final Object key) {
-        Object data = mainDataHolder.get(key.toString());
-        if (data instanceof DataHolder) {
+    public DataHolder getDataHolder(@NonNull final Object key)
+    {
+        Object data = mainDataHolder.get( key.toString() );
+        if ( data instanceof DataHolder )
+        {
             return (DataHolder) data;
         }
         // Otherwise let's make a dataholder
-        DataHolder holder = new DataHolder(key.toString());
-        holder.put(key.toString(), data);
+        DataHolder holder = new DataHolder( key.toString() );
+        holder.put( key.toString(), data );
         return holder;
     }
 }

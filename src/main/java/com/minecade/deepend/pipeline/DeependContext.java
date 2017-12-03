@@ -10,15 +10,14 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DeependContext {
-
-    @Getter
-    @Setter
-    private DeependConnection connection;
+public class DeependContext
+{
 
     @Getter
     private final InetSocketAddress address;
-
+    @Getter
+    @Setter
+    private DeependConnection connection;
     @Getter
     @Setter
     private DeependBuf deependBuf;
@@ -32,22 +31,26 @@ public class DeependContext {
 
     private Map<String, Object> meta;
 
-    public DeependContext(final DeependConnection connection, final Socket socket, final InetSocketAddress address) {
+    public DeependContext(final DeependConnection connection, final Socket socket, final InetSocketAddress address)
+    {
         this.connection = connection;
         this.address = address;
         this.socket = socket;
         this.meta = new HashMap<>();
     }
 
-    public <T> T getMeta(String key) {
-        return (T) meta.get(key);
+    public <T> T getMeta(String key)
+    {
+        return (T) meta.get( key );
     }
 
-    public boolean hasMeta(String key) {
-        return meta.containsKey(key);
+    public boolean hasMeta(String key)
+    {
+        return meta.containsKey( key );
     }
 
-    public void setMeta(String key, Object object) {
-        this.meta.put(key, object);
+    public void setMeta(String key, Object object)
+    {
+        this.meta.put( key, object );
     }
 }

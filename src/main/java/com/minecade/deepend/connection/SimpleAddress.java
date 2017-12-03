@@ -20,8 +20,6 @@ import com.minecade.deepend.lib.Stable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
-
 /**
  * A simple address (connection address)
  *
@@ -29,18 +27,21 @@ import java.util.UUID;
  */
 @Stable
 @RequiredArgsConstructor
-public class SimpleAddress {
+public class SimpleAddress
+{
 
     @Getter
     private final String host;
 
-    @Override
-    public String toString() {
-        return this.host;
+    public static SimpleAddress fromString(String i)
+    {
+        String[] parts = i.split( ":" );
+        return new SimpleAddress( parts[ 0 ] );
     }
 
-    public static SimpleAddress fromString(String i) {
-        String[] parts = i.split(":");
-        return new SimpleAddress(parts[0]);
+    @Override
+    public String toString()
+    {
+        return this.host;
     }
 }

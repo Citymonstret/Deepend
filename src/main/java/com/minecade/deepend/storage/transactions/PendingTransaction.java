@@ -21,6 +21,8 @@ package com.minecade.deepend.storage.transactions;
  * @author Citymonstret
  */
 @FunctionalInterface
-public interface PendingTransaction {
+public interface PendingTransaction
+{
+
     Object performTransaction();
 }

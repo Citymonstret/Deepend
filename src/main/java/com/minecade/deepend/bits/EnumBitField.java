@@ -31,31 +31,38 @@ import java.util.EnumSet;
  */
 @Beta
 @SuppressWarnings("ALL")
-public class EnumBitField<DataType extends Number, E extends Enum<E> & ValueProvider<DataType>> {
+public class EnumBitField<DataType extends Number, E extends Enum<E> & ValueProvider<DataType>>
+{
 
     private BitField bitField;
 
-    public EnumBitField(Class<E> clazz) {
-        this(clazz, new BitField<>(new ProviderGroup<>(EnumSet.allOf(clazz))));
+    public EnumBitField(Class<E> clazz)
+    {
+        this( clazz, new BitField<>( new ProviderGroup<>( EnumSet.allOf( clazz ) ) ) );
     }
 
-    public EnumBitField(Class<E> clazz, BitField bitField) {
+    public EnumBitField(Class<E> clazz, BitField bitField)
+    {
         this.bitField = bitField;
     }
 
-    public final int construct(E ... objects) {
-        return construct(Arrays.asList(objects));
+    public final int construct(E... objects)
+    {
+        return construct( Arrays.asList( objects ) );
     }
 
-    public final int construct(@NonNull Collection<E> objects) {
-        return bitField.construct(objects);
+    public final int construct(@NonNull Collection<E> objects)
+    {
+        return bitField.construct( objects );
     }
 
-    public BitField getBitField() {
+    public BitField getBitField()
+    {
         return this.bitField;
     }
 
-    public final Collection<E> extract(int field) {
-        return bitField.extract(field);
+    public final Collection<E> extract(int field)
+    {
+        return bitField.extract( field );
     }
 }

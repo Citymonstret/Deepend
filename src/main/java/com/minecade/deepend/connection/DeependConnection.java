@@ -26,7 +26,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Stable
-public class DeependConnection {
+public class DeependConnection
+{
 
     private final Map<String, Object> metaMapping = new ConcurrentHashMap<>();
 
@@ -38,30 +39,36 @@ public class DeependConnection {
     @Setter
     private boolean authenticated;
 
-    public DeependConnection(SimpleAddress remoteAddress) {
+    public DeependConnection(SimpleAddress remoteAddress)
+    {
         this.remoteAddress = remoteAddress;
         this.authenticated = false;
     }
 
-    public DeependConnection(SimpleAddress remoteAddress, int port) {
+    public DeependConnection(SimpleAddress remoteAddress, int port)
+    {
         this.remoteAddress = remoteAddress;
         this.authenticated = false;
     }
 
-    public <T> T getObject(String key, Class<T> clazz) {
-        return clazz.cast(metaMapping.get(key));
+    public <T> T getObject(String key, Class<T> clazz)
+    {
+        return clazz.cast( metaMapping.get( key ) );
     }
 
-    public DeependBuf getBuf(String key) {
-        Object o = metaMapping.get(key);
-        if (o instanceof DeependBuf) {
+    public DeependBuf getBuf(String key)
+    {
+        Object o = metaMapping.get( key );
+        if ( o instanceof DeependBuf )
+        {
             return (DeependBuf) o;
         }
         return null;
     }
 
-    public void addMeta(String key, Object meta) {
-        this.metaMapping.put(key, meta);
+    public void addMeta(String key, Object meta)
+    {
+        this.metaMapping.put( key, meta );
     }
 
 }

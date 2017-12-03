@@ -22,12 +22,16 @@ import com.minecade.deepend.data.DeependBuf;
 /**
  * This will request the client to shutdown
  */
-public class ShutdownRequest extends PendingRequest {
+public class ShutdownRequest extends PendingRequest
+{
 
-    public ShutdownRequest() {
-        super(Channel.UNKNOWN);
+    public ShutdownRequest()
+    {
+        super( Channel.UNKNOWN );
     }
 
     @Override
-    final protected void makeRequest(DeependBuf buf) {}
+    final protected void makeRequest(DeependBuf buf)
+    {
+    }
 }

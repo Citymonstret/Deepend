@@ -10,22 +10,26 @@ import java.nio.ByteBuffer;
  *
  * @author Citymonstret
  */
-public class ProtocolEncoder {
+public class ProtocolEncoder
+{
 
     private static ProtocolEncoder encoder;
 
-    public static ProtocolEncoder getEncoder() {
-        if (encoder == null) {
+    public static ProtocolEncoder getEncoder()
+    {
+        if ( encoder == null )
+        {
             encoder = new ProtocolEncoder();
         }
         return encoder;
     }
 
-    public byte[] encode(DeependBuf buf) {
+    public byte[] encode(DeependBuf buf)
+    {
         NativeBuf nativeBuf = (NativeBuf) buf;
         int size = nativeBuf.getSize();
-        ByteBuffer buffer = ByteBuffer.allocate(size);
-        nativeBuf.compile(buffer);
+        ByteBuffer buffer = ByteBuffer.allocate( size );
+        nativeBuf.compile( buffer );
         return buffer.array();
     }
 

@@ -22,18 +22,20 @@ import com.minecade.deepend.channels.Channel;
  * This is a request that will attempt
  * to fetch data
  *
- * @see com.minecade.deepend.request.DataRequest
- *
  * @author Citymonstret
+ * @see com.minecade.deepend.request.DataRequest
  */
-public abstract class GetRequest extends DataRequest {
+public abstract class GetRequest extends DataRequest
+{
 
     /**
      * Constructor
+     *
      * @param dataRecipient Recipient that will handle the data
-     * @param provider UUIDProvider used for authentication
+     * @param provider      UUIDProvider used for authentication
      */
-    public GetRequest(DataRecipient dataRecipient) {
-        super(Channel.GET_DATA, dataRecipient);
+    public GetRequest(DataRecipient dataRecipient)
+    {
+        super( Channel.GET_DATA, dataRecipient );
     }
 }

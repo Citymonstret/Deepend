@@ -23,7 +23,8 @@ import com.minecade.deepend.data.DataObject;
  *
  * @author Citymonstret
  */
-public interface StorageBase {
+public interface StorageBase
+{
 
     void setup();
 

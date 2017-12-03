@@ -9,68 +9,83 @@ import java.util.List;
  *
  * @author Citymonstret
  */
-public final class Field {
+public final class Field
+{
 
     private final Class<?> clazz;
     private final List<FieldProperty> propertyList;
     private String name;
     private Object instance;
 
-    public Field(Class<?> clazz) {
+    public Field(Class<?> clazz)
+    {
         this.clazz = clazz;
         this.propertyList = new ArrayList<>();
     }
 
-    public Field withProperty(FieldProperty property) {
-        this.propertyList.add(property);
+    public Field withProperty(FieldProperty property)
+    {
+        this.propertyList.add( property );
         return this;
     }
 
-    public Field withProperties(FieldProperty ... properties) {
-        for (FieldProperty property : properties) {
-            withProperty(property);
+    public Field withProperties(FieldProperty... properties)
+    {
+        for ( FieldProperty property : properties )
+        {
+            withProperty( property );
         }
         return this;
     }
 
-    public Field fromInstance(Object instance) {
+    public Field fromInstance(Object instance)
+    {
         this.instance = instance;
         return this;
     }
 
-    public Field named(String name) {
+    public Field named(String name)
+    {
         this.name = name;
         return this;
     }
 
-    public java.lang.reflect.Field getField() throws Exception {
-        if (instance == null && !propertyList.contains(FieldProperty.STATIC)) {
-            throw new RuntimeException("Cannot fetch static field that isn't static!");
+    public java.lang.reflect.Field getField() throws Exception
+    {
+        if ( instance == null && !propertyList.contains( FieldProperty.STATIC ) )
+        {
+            throw new RuntimeException( "Cannot fetch static field that isn't static!" );
         }
-        if (propertyList.contains(FieldProperty.CONSTANT)) {
+        if ( propertyList.contains( FieldProperty.CONSTANT ) )
+        {
             this.name = name.toUpperCase();
         }
-        java.lang.reflect.Field field = clazz.getDeclaredField(name);
-        if (propertyList.contains(FieldProperty.ACCESS_GRANT)) {
-            field.setAccessible(true);
+        java.lang.reflect.Field field = clazz.getDeclaredField( name );
+        if ( propertyList.contains( FieldProperty.ACCESS_GRANT ) )
+        {
+            field.setAccessible( true );
         }
         return field;
     }
 
-    public Object getValue() throws Exception {
-        return getField().get(instance);
+    public Object getValue() throws Exception
+    {
+        return getField().get( instance );
     }
 
-    public Field setValue(Object newValue) throws Exception {
+    public Field setValue(Object newValue) throws Exception
+    {
         java.lang.reflect.Field field = getField();
-        if (propertyList.contains(FieldProperty.CONSTANT)) {
-            new Field(java.lang.reflect.Field.class).named("modifiers").withProperties(FieldProperty.ACCESS_GRANT).fromInstance(field).getField().setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        if ( propertyList.contains( FieldProperty.CONSTANT ) )
+        {
+            new Field( java.lang.reflect.Field.class ).named( "modifiers" ).withProperties( FieldProperty.ACCESS_GRANT ).fromInstance( field ).getField().setInt( field, field.getModifiers() & ~Modifier.FINAL );
         }
-        field.set(instance, newValue);
+        field.set( instance, newValue );
         return this;
     }
 
-    public enum FieldProperty {
+    public enum FieldProperty
+    {
         STATIC,
         CONSTANT,
         ACCESS_GRANT,

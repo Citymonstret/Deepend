@@ -21,7 +21,12 @@ import com.minecade.deepend.data.DataType;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.logging.Logger;
-import lombok.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import lombok.Synchronized;
+import lombok.Value;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -30,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- **********************************************************
+ * *********************************************************
  * Direct involvement with this
  * class is not recommended, unless
  * you know what you're doing!
@@ -40,169 +45,201 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Beta
 @SuppressWarnings("unused")
-public abstract class DeependObject {
-
-    @Getter
-    private ByteProvider objectType;
+public abstract class DeependObject
+{
 
     protected Map<PropertyHolder, PropertyGetter> properties;
     protected Map<String, Object> cache = null;
     protected Map<String, PropertyHolder> holderMap = null;
-
     protected volatile boolean isBuilt;
-
     @Setter
     @Getter
     protected boolean deleted = false;
+    @Getter
+    private ByteProvider objectType;
 
     /**
      * @param objectType Object byte ID, through a ByteProvider
-     * @param scan Whether or not to scan the member
-     *             type for @ObjectProperty properties
-     * @param clazz Class that is implementing this
+     * @param scan       Whether or not to scan the member
+     *                   type for @ObjectProperty properties
+     * @param clazz      Class that is implementing this
      */
-    public DeependObject(@NonNull ByteProvider objectType, boolean scan, @NonNull Class<?> clazz) {
+    public DeependObject(@NonNull ByteProvider objectType, boolean scan, @NonNull Class<?> clazz)
+    {
         this.objectType = objectType;
         this.properties = new ConcurrentHashMap<>();
         this.isBuilt = false;
 
-        if (scan) {
-            scan(clazz);
+        if ( scan )
+        {
+            scan( clazz );
         }
     }
 
-    protected void scan(@NonNull Class<?> clazz) {
-        for (final Field field : clazz.getDeclaredFields()) {
-            if (field.isAnnotationPresent(ObjectProperty.class)) {
-                ObjectProperty property = field.getDeclaredAnnotation(ObjectProperty.class);
+    public DeependObject(ByteProvider objectType)
+    {
+        this( objectType, false, null );
+    }
+
+    protected void scan(@NonNull Class<?> clazz)
+    {
+        for ( final Field field : clazz.getDeclaredFields() )
+        {
+            if ( field.isAnnotationPresent( ObjectProperty.class ) )
+            {
+                ObjectProperty property = field.getDeclaredAnnotation( ObjectProperty.class );
                 DataType type = property.type();
-                if (type == DataType.DEFAULT) {
+                if ( type == DataType.DEFAULT )
+                {
                     Class<?> fieldType = field.getType();
-                    if (fieldType == int.class) {
+                    if ( fieldType == int.class )
+                    {
                         type = DataType.INT;
-                    } else if (fieldType == String.class) {
+                    } else if ( fieldType == String.class )
+                    {
                         type = DataType.STRING;
-                    } else if (fieldType == byte.class) {
+                    } else if ( fieldType == byte.class )
+                    {
                         type = DataType.BYTE;
-                    } else {
-                        Logger.get().error("Unknown type set when DEFAULT for field " + field.getDeclaringClass().getSimpleName() + "#" + field.getName());
+                    } else
+                    {
+                        Logger.get().error( "Unknown type set when DEFAULT for field " + field.getDeclaringClass().getSimpleName() + "#" + field.getName() );
                         continue;
                     }
                 }
-                addValue(property.name(), type, new FieldGetter(field, this));
+                addValue( property.name(), type, new FieldGetter( field, this ) );
             }
         }
         buildValues();
     }
 
     @SneakyThrows
-    protected void updateFieldValue(@NonNull String name) {
-        final FieldGetter getter = (FieldGetter) properties.get(holderMap.get(name));
-        this.cache.put(name, getter.getValue());
+    protected void updateFieldValue(@NonNull String name)
+    {
+        final FieldGetter getter = (FieldGetter) properties.get( holderMap.get( name ) );
+        this.cache.put( name, getter.getValue() );
     }
 
-    protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull PropertyGetter getter) {
-        final PropertyHolder holder = new PropertyHolder(name, type);
-        properties.put(holder, getter);
+    protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull PropertyGetter getter)
+    {
+        final PropertyHolder holder = new PropertyHolder( name, type );
+        properties.put( holder, getter );
     }
 
-    protected void convertAndRead(@NonNull DeependBuf buf) {
-        final Map<String, String> _v = convert(buf, this.properties.size());
-        for (final Map.Entry<String, String> _k : _v.entrySet()) {
-            try {
-                updateField(_k.getKey(), _k.getValue());
-            } catch(final Exception e) {
-                Logger.get().error("Failed to read \"" + _k.getKey() + "\":\"" + _k.getValue() + "\"", e);
+    protected void convertAndRead(@NonNull DeependBuf buf)
+    {
+        final Map<String, String> _v = convert( buf, this.properties.size() );
+        for ( final Map.Entry<String, String> _k : _v.entrySet() )
+        {
+            try
+            {
+                updateField( _k.getKey(), _k.getValue() );
+            } catch ( final Exception e )
+            {
+                Logger.get().error( "Failed to read \"" + _k.getKey() + "\":\"" + _k.getValue() + "\"", e );
             }
         }
     }
 
-    protected void sendKeys(@NonNull DeependBuf buf) {
+    protected void sendKeys(@NonNull DeependBuf buf)
+    {
         final StringBuilder builder = new StringBuilder();
         final Iterator<String> keys = cache.keySet().iterator();
-        while (keys.hasNext()) {
-            builder.append(keys.next());
-            if (keys.hasNext()) {
-                builder.append(",");
+        while ( keys.hasNext() )
+        {
+            builder.append( keys.next() );
+            if ( keys.hasNext() )
+            {
+                builder.append( "," );
             }
         }
-        buf.writeString(builder.toString());
+        buf.writeString( builder.toString() );
     }
 
     @Override
     public abstract String toString();
 
-    protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull Object value) {
-        final PropertyGetter getter = new PropertyGetter() {
+    protected void addValue(@NonNull String name, @NonNull DataType type, @NonNull Object value)
+    {
+        final PropertyGetter getter = new PropertyGetter()
+        {
             @Override
-            Object getValue() {
+            Object getValue()
+            {
                 return value;
             }
         };
-        addValue(name, type, getter);
+        addValue( name, type, getter );
     }
 
     @Synchronized
-    protected void buildValues() {
+    protected void buildValues()
+    {
         this.isBuilt = false;
         this.cache = new HashMap<>();
         this.holderMap = new HashMap<>();
-        for (final Map.Entry<PropertyHolder, PropertyGetter> entry : properties.entrySet()) {
-            this.cache.put(entry.getKey().getName(), entry.getValue().getValue());
-            this.holderMap.put(entry.getKey().getName(), entry.getKey());
+        for ( final Map.Entry<PropertyHolder, PropertyGetter> entry : properties.entrySet() )
+        {
+            this.cache.put( entry.getKey().getName(), entry.getValue().getValue() );
+            this.holderMap.put( entry.getKey().getName(), entry.getKey() );
         }
         this.isBuilt = true;
     }
 
-    protected void updateField(@NonNull String key, @NonNull String value) {
-        final PropertyHolder holder = holderMap.get(key);
-        final FieldGetter getter = (FieldGetter) properties.get(holder);
-        try {
+    protected void updateField(@NonNull String key, @NonNull String value)
+    {
+        final PropertyHolder holder = holderMap.get( key );
+        final FieldGetter getter = (FieldGetter) properties.get( holder );
+        try
+        {
             Object val = null;
 
-            switch (holder.type) {
+            switch ( holder.type )
+            {
                 case STRING:
                     val = value;
                     break;
                 case INT:
-                    val = Integer.parseInt(value);
+                    val = Integer.parseInt( value );
                     break;
                 case BYTE:
-                    val = Byte.parseByte(value);
+                    val = Byte.parseByte( value );
                     break;
                 default:
                     break;
             }
             assert val != null;
 
-            getter.field.set(getter.object, val);
-        } catch (IllegalAccessException e) {
+            getter.field.set( getter.object, val );
+        } catch ( IllegalAccessException e )
+        {
             e.printStackTrace();
         }
     }
 
-    protected void writeValues(@NonNull DeependBuf buf) {
-        buf.writeInt(cache.size());
-        for (Map.Entry<String, Object> cacheEntry : cache.entrySet()) {
+    protected void writeValues(@NonNull DeependBuf buf)
+    {
+        buf.writeInt( cache.size() );
+        for ( Map.Entry<String, Object> cacheEntry : cache.entrySet() )
+        {
             String entryName = cacheEntry.getKey();
             Object entryValue = cacheEntry.getValue();
-            buf.writeString(entryName + ":" + entryValue.toString());
+            buf.writeString( entryName + ":" + entryValue.toString() );
         }
     }
 
-    public Object getValue(@NonNull String key) {
-        if (this.hasCache()) {
+    public Object getValue(@NonNull String key)
+    {
+        if ( this.hasCache() )
+        {
             this.buildValues();
         }
-        return cache.get(key);
+        return cache.get( key );
     }
 
-    public boolean hasCache() {
+    public boolean hasCache()
+    {
         return this.isBuilt;
-    }
-
-    public DeependObject(ByteProvider objectType) {
-        this(objectType, false, null);
     }
 
     public abstract void write(DeependBuf buf);
@@ -211,47 +248,63 @@ public abstract class DeependObject {
 
     public abstract void request(String requestedKey, DeependBuf buf);
 
-    protected Map<String, String> convert(@NonNull DeependBuf buf, int num) {
+    protected Map<String, String> convert(@NonNull DeependBuf buf, int num)
+    {
         final Map<String, String> map = new HashMap<>();
-        for (int i = 0; i < num; i++) {
-            map.put(buf.getString(), buf.getString());
+        for ( int i = 0; i < num; i++ )
+        {
+            map.put( buf.getString(), buf.getString() );
         }
         return map;
     }
 
-    private class FieldGetter extends PropertyGetter {
+    private class FieldGetter extends PropertyGetter
+    {
 
-        @NonNull private final Field field;
-        @NonNull private final Object object;
+        @NonNull
+        private final Field field;
+        @NonNull
+        private final Object object;
 
-        public FieldGetter(@NonNull Field field, @NonNull Object object) {
-            try {
-                field.setAccessible(true);
-            } catch (final Exception e) {
+        public FieldGetter(@NonNull Field field, @NonNull Object object)
+        {
+            try
+            {
+                field.setAccessible( true );
+            } catch ( final Exception e )
+            {
                 e.printStackTrace();
-            } finally {
+            } finally
+            {
                 this.field = field;
                 this.object = object;
             }
         }
 
         @Override
-        Object getValue() {
-            try {
-                return field.get(object);
-            } catch (IllegalAccessException e) {
+        Object getValue()
+        {
+            try
+            {
+                return field.get( object );
+            } catch ( IllegalAccessException e )
+            {
                 e.printStackTrace();
             }
             return null;
         }
     }
 
-    private abstract class PropertyGetter {
+    private abstract class PropertyGetter
+    {
+
         abstract Object getValue();
     }
 
     @Value
-    private class PropertyHolder {
+    private class PropertyHolder
+    {
+
         String name;
         DataType type;
     }

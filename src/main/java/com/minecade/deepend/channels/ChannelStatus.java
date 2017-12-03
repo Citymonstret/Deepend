@@ -22,10 +22,12 @@ import com.minecade.deepend.object.Status;
  * @author Citymonstret
  */
 @Stable
-public class ChannelStatus extends Status<Channel> {
+public class ChannelStatus extends Status<Channel>
+{
 
-    public ChannelStatus(Channel channel) {
-        super(channel);
+    public ChannelStatus(Channel channel)
+    {
+        super( channel );
     }
 
 }

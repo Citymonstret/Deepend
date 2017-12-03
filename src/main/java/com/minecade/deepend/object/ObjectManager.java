@@ -30,7 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public class ObjectManager {
+public class ObjectManager
+{
 
     /**
      * THE instance
@@ -39,51 +40,63 @@ public class ObjectManager {
 
     private final Map<Byte, Class<? extends DeependObject>> objectMapping;
 
-    ObjectManager() {
+    ObjectManager()
+    {
         this.objectMapping = new ConcurrentHashMap<>();
     }
 
     /**
      * Register the DeependObject mapping
+     *
      * @param clazz Class to register
      */
-    public void registerMapping(Class<? extends DeependObject> clazz) {
-        this.objectMapping.put(getInstance(clazz).getObjectType().getValue(), clazz);
+    public void registerMapping(Class<? extends DeependObject> clazz)
+    {
+        this.objectMapping.put( getInstance( clazz ).getObjectType().getValue(), clazz );
     }
 
     /**
      * Get the instance of a class
+     *
      * @param clazz Class
-     * @param <T> Object type extending DeependObject
+     * @param <T>   Object type extending DeependObject
      * @return instance | null
      */
-    public <T extends DeependObject> T getInstance(@NonNull final Class<T> clazz) {
+    public <T extends DeependObject> T getInstance(@NonNull final Class<T> clazz)
+    {
         T instance = null;
-        try {
+        try
+        {
             instance = clazz.newInstance();
-        } catch(final Exception e) {
-            try {
-                clazz.getConstructor().setAccessible(true);
+        } catch ( final Exception e )
+        {
+            try
+            {
+                clazz.getConstructor().setAccessible( true );
                 instance = clazz.newInstance();
-            } catch(final Exception ee) {
-                Logger.get().error("Failed to initiate object", ee);
+            } catch ( final Exception ee )
+            {
+                Logger.get().error( "Failed to initiate object", ee );
             }
         }
         return instance;
     }
 
-    public DeependObject getInstance(ByteProvider provider) {
-        Class<? extends DeependObject> clazz = this.objectMapping.get(provider.getValue());
-        return getInstance(clazz);
+    public DeependObject getInstance(ByteProvider provider)
+    {
+        Class<? extends DeependObject> clazz = this.objectMapping.get( provider.getValue() );
+        return getInstance( clazz );
     }
 
-    public boolean hasRegisteredType(final byte provider) {
-        return this.objectMapping.containsKey(provider);
+    public boolean hasRegisteredType(final byte provider)
+    {
+        return this.objectMapping.containsKey( provider );
     }
 
-    public DeependObject construct(@NonNull ByteProvider provider, @NonNull DeependBuf buf) {
-        DeependObject instance = getInstance(provider);
-        instance.read(buf);
+    public DeependObject construct(@NonNull ByteProvider provider, @NonNull DeependBuf buf)
+    {
+        DeependObject instance = getInstance( provider );
+        instance.read( buf );
         return instance;
     }
 }

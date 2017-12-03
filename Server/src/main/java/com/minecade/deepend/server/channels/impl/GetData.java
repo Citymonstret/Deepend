@@ -31,52 +31,59 @@ import com.minecade.deepend.values.ValueFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetData extends DeependChannel {
+public class GetData extends DeependChannel
+{
 
-    public GetData() {
-        super(Channel.GET_DATA);
+    public GetData()
+    {
+        super( Channel.GET_DATA );
     }
 
     @Override
-    public void act(DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = connection.getObject("in", DeependBuf.class);
+    public void act(DeependConnection connection, DeependBuf buf)
+    {
+        DeependBuf in = connection.getObject( "in", DeependBuf.class );
 
         // Just echo the request ID
-        buf.writeString(in.getString());
+        buf.writeString( in.getString() );
 
-        scope: {
+        scope:
+        {
             // String category = readString(in);
             byte categoryByte = in.getByte();
-            String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
+            String category = ValueFactory.getFactory( ValueFactory.FactoryType.DATA_TYPE ).getName( categoryByte );
 
-            Logger.get().info("Category: " + category);
+            Logger.get().info( "Category: " + category );
 
-            if (!DataManager.instance.hasDataHolder(category)) {
-                buf.writeByte(GenericResponse.FAILURE);
-                buf.writeString("Category not found: " + category);
+            if ( !DataManager.instance.hasDataHolder( category ) )
+            {
+                buf.writeByte( GenericResponse.FAILURE );
+                buf.writeString( "Category not found: " + category );
                 break scope;
             }
-            DataHolder holder = DataManager.instance.getDataHolder(category);
-            List<DataObject> object = DataUtil.getDataObject(connection, holder, null, in, new ArrayList<>(), false);
+            DataHolder holder = DataManager.instance.getDataHolder( category );
+            List<DataObject> object = DataUtil.getDataObject( connection, holder, null, in, new ArrayList<>(), false );
 
-            if (object == null) {
-                buf.writeByte(GenericResponse.FAILURE);
-                buf.writeString("Object not found :(");
+            if ( object == null )
+            {
+                buf.writeByte( GenericResponse.FAILURE );
+                buf.writeString( "Object not found :(" );
                 break scope;
             }
 
-            buf.writeByte(GenericResponse.SUCCESS);
+            buf.writeByte( GenericResponse.SUCCESS );
 
             // Write some response info
-            buf.writeByte(categoryByte);
-            buf.writeInt(object.size());
+            buf.writeByte( categoryByte );
+            buf.writeInt( object.size() );
 
-            object.forEach(Logger.get()::dump);
+            object.forEach( Logger.get()::dump );
 
             // Write the actual response(s)
-            for (DataObject o : object) {
-                buf.writeString(o.getName());
-                buf.writeString(o.getValue());
+            for ( DataObject o : object )
+            {
+                buf.writeString( o.getName() );
+                buf.writeString( o.getValue() );
             }
         }
     }

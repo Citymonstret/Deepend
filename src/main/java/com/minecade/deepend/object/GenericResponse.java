@@ -33,35 +33,34 @@ import java.util.Map;
  */
 @Stable
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public enum GenericResponse implements ByteProvider {
+public enum GenericResponse implements ByteProvider
+{
 
     /**
      * Something succeeded
      */
-    SUCCESS(getByte(0x00)),
+    SUCCESS( getByte( 0x00 ) ),
 
     /**
      * Something failed
      */
-    FAILURE(getByte(0x01));
-
-    private final byte b;
-
-    @Override
-    public Byte getValue() {
-        return this.b;
-    }
-
-    private static byte getByte(final int i) {
-        return new Integer(i).byteValue();
-    }
+    FAILURE( getByte( 0x01 ) );
 
     private static final Map<Byte, GenericResponse> cache = new HashMap<>();
 
-    static {
-        for (final GenericResponse genericResponse : values()) {
-            cache.put(genericResponse.getValue(), genericResponse);
+    static
+    {
+        for ( final GenericResponse genericResponse : values() )
+        {
+            cache.put( genericResponse.getValue(), genericResponse );
         }
+    }
+
+    private final byte b;
+
+    private static byte getByte(final int i)
+    {
+        return new Integer( i ).byteValue();
     }
 
     /**
@@ -70,11 +69,19 @@ public enum GenericResponse implements ByteProvider {
      * @param b Byte to parse
      * @return value
      */
-    public static GenericResponse getGenericResponse(byte b) {
-        if (!cache.containsKey(b)) {
-            Logger.get().error("Reading invalid GenericResponse value, spoofing ;/");
+    public static GenericResponse getGenericResponse(byte b)
+    {
+        if ( !cache.containsKey( b ) )
+        {
+            Logger.get().error( "Reading invalid GenericResponse value, spoofing ;/" );
             return FAILURE;
         }
-        return cache.get(b);
+        return cache.get( b );
+    }
+
+    @Override
+    public Byte getValue()
+    {
+        return this.b;
     }
 }

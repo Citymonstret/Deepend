@@ -29,24 +29,33 @@ package com.minecade.deepend.server.test;/*
  * limitations under the License.
  */
 
-import com.minecade.deepend.ConnectionFactory;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.ChannelListener;
 import com.minecade.deepend.channels.ChannelManager;
 import com.minecade.deepend.connection.DeependConnection;
-import com.minecade.deepend.data.*;
+import com.minecade.deepend.data.DataHolder;
+import com.minecade.deepend.data.DataManager;
+import com.minecade.deepend.data.DataObject;
+import com.minecade.deepend.data.DeependBuf;
+import com.minecade.deepend.data.MirrorDataHolder;
 import com.minecade.deepend.game.GameCategory;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.object.ProviderGroup;
 import com.minecade.deepend.server.DeependServer;
-import com.minecade.deepend.server.channels.impl.*;
+import com.minecade.deepend.server.channels.impl.AddData;
+import com.minecade.deepend.server.channels.impl.Authentication;
+import com.minecade.deepend.server.channels.impl.CheckData;
+import com.minecade.deepend.server.channels.impl.DeleteData;
+import com.minecade.deepend.server.channels.impl.GetData;
 import com.minecade.deepend.values.ValueFactory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
-import static com.minecade.deepend.game.GameCategory.*;
+import static com.minecade.deepend.game.GameCategory.CATEGORY_SERVERS;
+import static com.minecade.deepend.game.GameCategory.SERVERS;
+import static com.minecade.deepend.game.GameCategory.SERVER_CATEGORIES;
 
 /**
  * Created 2/23/2016 for Deepend
@@ -54,108 +63,122 @@ import static com.minecade.deepend.game.GameCategory.*;
  * @author Citymonstret
  */
 @RequiredArgsConstructor
-public class TestGameServer implements DeependServer.DeependServerApplication {
-
-    public static void main(String[] args) {
-        new TestGameServer(args).start();
-    }
+public class TestGameServer implements DeependServer.DeependServerApplication
+{
 
     @Getter
     private final String[] args;
-
     private DeependServer server;
 
-    void start() {
-        server = new DeependServer(getArgs(), this);
+    public static void main(String[] args)
+    {
+        new TestGameServer( args ).start();
+    }
+
+    void start()
+    {
+        server = new DeependServer( getArgs(), this );
         server.run();
     }
 
     @Override
-    public void registerDataHolders(DataManager dataManager) {
-        DataManager.createDataHolders(SERVERS);
-        DataHolder servers = DataManager.instance.getDataHolder(SERVERS.name());
-        DataManager.instance.registerDataHolder(new MirrorDataHolder(SERVER_CATEGORIES.name(), servers, (o) -> {
-            if (o instanceof DataHolder) {
+    public void registerDataHolders(DataManager dataManager)
+    {
+        DataManager.createDataHolders( SERVERS );
+        DataHolder servers = DataManager.instance.getDataHolder( SERVERS.name() );
+        DataManager.instance.registerDataHolder( new MirrorDataHolder( SERVER_CATEGORIES.name(), servers, (o) -> {
+            if ( o instanceof DataHolder )
+            {
                 DataHolder holder = (DataHolder) o;
-                if (!holder.containsKey("gameType")) {
+                if ( !holder.containsKey( "gameType" ) )
+                {
                     return null;
                 }
-                return new DataObject(((DataObject) holder.get("gameType")).getValue(), "");
+                return new DataObject( ( (DataObject) holder.get( "gameType" ) ).getValue(), "" );
             }
             return null;
-        }), SERVER_CATEGORIES);
-        DataManager.instance.registerDataHolder(new MirrorDataHolder(CATEGORY_SERVERS.name(), servers, (o) -> {
-            if (o instanceof DataHolder) {
+        } ), SERVER_CATEGORIES );
+        DataManager.instance.registerDataHolder( new MirrorDataHolder( CATEGORY_SERVERS.name(), servers, (o) -> {
+            if ( o instanceof DataHolder )
+            {
                 DataHolder holder = (DataHolder) o;
-                if (!holder.containsKey("gameType")) {
+                if ( !holder.containsKey( "gameType" ) )
+                {
                     return null;
                 }
-                DataHolder newH = new DataHolder(((DataObject) holder.get("gameType")).getValue());
-                newH.put(((DataObject) holder.get("serverName")).getValue(), "");
+                DataHolder newH = new DataHolder( ( (DataObject) holder.get( "gameType" ) ).getValue() );
+                newH.put( ( (DataObject) holder.get( "serverName" ) ).getValue(), "" );
                 return newH;
             }
             return null;
-        }), CATEGORY_SERVERS);
+        } ), CATEGORY_SERVERS );
     }
 
     @Override
-    public void registerFactories() {
-        ValueFactory.addValueFactory(ValueFactory.FactoryType.DATA_TYPE, new ValueFactory<>(ProviderGroup.fromEnumClass(GameCategory.class), GameCategory.UNKNOWN));
+    public void registerFactories()
+    {
+        ValueFactory.addValueFactory( ValueFactory.FactoryType.DATA_TYPE, new ValueFactory<>( ProviderGroup.fromEnumClass( GameCategory.class ), GameCategory.UNKNOWN ) );
     }
 
     @Override
-    public void registerChannels(ChannelManager channelManager) {
+    public void registerChannels(ChannelManager channelManager)
+    {
         // Overridden by the ChannelListener below
         // channelManager.addChannel(new Authentication());
 
-        channelManager.addChannel(new GetData());
-        channelManager.addChannel(new DeleteData());
-        channelManager.addChannel(new AddData());
-        channelManager.addChannel(new CheckData());
+        channelManager.addChannel( new GetData() );
+        channelManager.addChannel( new DeleteData() );
+        channelManager.addChannel( new AddData() );
+        channelManager.addChannel( new CheckData() );
 
         // Generate channels from @ChannelListener's
-        channelManager.generate(this);
+        channelManager.generate( this );
     }
 
     @SneakyThrows
     @ChannelListener(channel = Channel.AUTHENTICATE)
-    public void onAuthentication(DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = connection.getObject("in", DeependBuf.class);
+    public void onAuthentication(DeependConnection connection, DeependBuf buf)
+    {
+        DeependBuf in = connection.getObject( "in", DeependBuf.class );
 
         String username = in.getString();
         String password = in.getString();
 
         // For testing purposes
-        Logger.get().debug("IP: " + connection.getRemoteAddress().getHost() + " | Username: " + username + " | Password: " + password);
+        Logger.get().debug( "IP: " + connection.getRemoteAddress().getHost() + " | Username: " + username + " | Password: " + password );
 
         GenericResponse response = GenericResponse.FAILURE;
 
-        if (Authentication.getAccountBundle().containsKey(username + ".password")) {
-            if (Authentication.getAccountBundle().get(username + ".password").equals(password)) {
-                Logger.get().info("Authenticated: " + connection.getRemoteAddress().toString());
-                connection.setAuthenticated(true);
+        if ( Authentication.getAccountBundle().containsKey( username + ".password" ) )
+        {
+            if ( Authentication.getAccountBundle().get( username + ".password" ).equals( password ) )
+            {
+                Logger.get().info( "Authenticated: " + connection.getRemoteAddress().toString() );
+                connection.setAuthenticated( true );
                 response = GenericResponse.SUCCESS;
-                DeependServer.getConnectionFactory().addConnection(connection);
+                DeependServer.getConnectionFactory().addConnection( connection );
             }
         }
 
-        buf.writeByte(response.getValue());
+        buf.writeByte( response.getValue() );
     }
 
     @Override
-    public void after(DeependServer context) {
-        for (int i = 0; i < 20; i++) {
+    public void after(DeependServer context)
+    {
+        for ( int i = 0; i < 20; i++ )
+        {
             String category = i % 2 == 0 ? "lobby" : "hunger";
             DataHolder.DataHolderInitalizer.builder()
-                    .name("SERVER_" + i)
-                    .object("bungeeIdentifier", "server_" + i)
-                    .object("gameType", category)
-                    .object("serverName", "SERVER_" + i)
-                    .object("maxPlayers", "100")
-                    .object("currentPlayers", "" + (100 - i * 5))
-                    .object("gameState", "IN_LOBBY")
-                    .object("serverNum", "" + i)
-                    .build().register(SERVERS);
+                    .name( "SERVER_" + i )
+                    .object( "bungeeIdentifier", "server_" + i )
+                    .object( "gameType", category )
+                    .object( "serverName", "SERVER_" + i )
+                    .object( "maxPlayers", "100" )
+                    .object( "currentPlayers", "" + ( 100 - i * 5 ) )
+                    .object( "gameState", "IN_LOBBY" )
+                    .object( "serverNum", "" + i )
+                    .build().register( SERVERS );
         }
     }
 }

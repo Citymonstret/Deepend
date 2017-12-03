@@ -21,7 +21,7 @@ import com.minecade.deepend.lib.Stable;
 /**
  * The "official" configuration file
  * interface
- *
+ * <p>
  * From <a href="https://github.com/IntellectualSites/IntellectualServer/blob/master/src/main/java/com/intellectualsites/web/config/ConfigurationFile.java">
  * https://github.com/IntellectualSites/IntellectualServer/blob/master/src/main/java/com/intellectualsites/web/config/ConfigurationFile.java</a>
  *
@@ -29,7 +29,8 @@ import com.minecade.deepend.lib.Stable;
  */
 @SuppressWarnings("unused")
 @Stable
-public interface DataFile {
+public interface DataFile
+{
 
     /**
      * Reload the configuration file
@@ -49,9 +50,9 @@ public interface DataFile {
     /**
      * Set a value
      *
-     * @param key Value identifier
+     * @param key   Value identifier
      * @param value The value itself
-     * @param <T> The value type
+     * @param <T>   The value type
      */
     <T> void set(String key, T value);
 
@@ -89,12 +90,11 @@ public interface DataFile {
      * in the case that it doesn't exist.
      * Otherwise it will be ignored.
      *
+     * @param key   Value identifier
+     * @param value Value
+     * @param <T>   Value Type
      * @see #contains(String) To check if a value exists
      * @see #set(String, Object) To set a value
-     *
-     * @param key Value identifier
-     * @param value Value
-     * @param <T> Value Type
      */
     <T> void setIfNotExists(String key, T value);
 

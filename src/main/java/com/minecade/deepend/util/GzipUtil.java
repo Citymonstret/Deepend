@@ -20,63 +20,76 @@ import java.util.zip.Inflater;
  * @author Citymonstret
  */
 @UtilityClass
-public class GzipUtil {
+public class GzipUtil
+{
 
     private static final boolean enabled = false;
 
     private static DeflaterCloud deflaterCloud;
     private static InflaterCloud inflaterCloud;
 
-    static {
-        if (enabled) {
+    static
+    {
+        if ( enabled )
+        {
             deflaterCloud = new DeflaterCloud();
             inflaterCloud = new InflaterCloud();
         }
     }
 
-    public static byte[] compress(@NonNull final byte[] in) {
-        if (!enabled) {
+    public static byte[] compress(@NonNull final byte[] in)
+    {
+        if ( !enabled )
+        {
             return in;
         }
         final int deflaterIndex = deflaterCloud.getIndex();
-        final Deflater deflater = deflaterCloud.get(deflaterIndex);
+        final Deflater deflater = deflaterCloud.get( deflaterIndex );
         byte[] output = null;
-        deflater.setInput(in);
-        try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(in.length)) {
+        deflater.setInput( in );
+        try ( final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream( in.length ) )
+        {
             deflater.finish();
-            final byte[] buffer = new byte[2048];
-            while (!deflater.finished()) {
-                int count = deflater.deflate(buffer);
-                byteArrayOutputStream.write(buffer, 0, count);
+            final byte[] buffer = new byte[ 2048 ];
+            while ( !deflater.finished() )
+            {
+                int count = deflater.deflate( buffer );
+                byteArrayOutputStream.write( buffer, 0, count );
             }
             output = byteArrayOutputStream.toByteArray();
-        } catch (final Exception e) {
+        } catch ( final Exception e )
+        {
             e.printStackTrace();
         }
-        deflaterCloud.setStatus(deflaterIndex, true);
+        deflaterCloud.setStatus( deflaterIndex, true );
         return output;
     }
 
-    public static byte[] extract(@NonNull final byte[] in) {
-        if (!enabled) {
+    public static byte[] extract(@NonNull final byte[] in)
+    {
+        if ( !enabled )
+        {
             return in;
         }
         final int inflaterIndex = inflaterCloud.getIndex();
-        final Inflater inflater = inflaterCloud.get(inflaterIndex);
+        final Inflater inflater = inflaterCloud.get( inflaterIndex );
         byte[] output = null;
-        inflater.setInput(in);
-        try (final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(in.length)) {
+        inflater.setInput( in );
+        try ( final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream( in.length ) )
+        {
             inflater.finished();
-            final byte[] buffer = new byte[2048];
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                byteArrayOutputStream.write(buffer, 0, count);
+            final byte[] buffer = new byte[ 2048 ];
+            while ( !inflater.finished() )
+            {
+                int count = inflater.inflate( buffer );
+                byteArrayOutputStream.write( buffer, 0, count );
             }
             output = byteArrayOutputStream.toByteArray();
-        } catch (final Exception e) {
+        } catch ( final Exception e )
+        {
             e.printStackTrace();
         }
-        inflaterCloud.setStatus(inflaterIndex, true);
+        inflaterCloud.setStatus( inflaterIndex, true );
         return output;
     }
 
@@ -86,72 +99,86 @@ public class GzipUtil {
      *
      * @param <T> Cloud component type
      */
-    private static abstract class Cloud<T> {
-        int index = 0;
+    private static abstract class Cloud<T>
+    {
 
         protected final Map<Integer, T> map = new ConcurrentHashMap<>();
         final Map<Integer, Boolean> statusMap = new ConcurrentHashMap<>();
+        int index = 0;
 
         {
-            add(generate(), true);
+            add( generate(), true );
         }
 
-        int add(T t, boolean status) {
+        int add(T t, boolean status)
+        {
             int index = this.index++;
-            map.put(index, t);
-            statusMap.put(index, status);
+            map.put( index, t );
+            statusMap.put( index, status );
             return index;
         }
 
         abstract T generate();
 
         @Synchronized
-        int getIndex() {
+        int getIndex()
+        {
             int index = -1;
 
-            for (Map.Entry<Integer, Boolean> entry : statusMap.entrySet()) {
-                if (entry.getValue()) {
+            for ( Map.Entry<Integer, Boolean> entry : statusMap.entrySet() )
+            {
+                if ( entry.getValue() )
+                {
                     index = entry.getKey();
                     break;
                 }
             }
 
-            if (index == -1) {
-                return add(generate(), false);
-            } else {
-                setStatus(index, false);
+            if ( index == -1 )
+            {
+                return add( generate(), false );
+            } else
+            {
+                setStatus( index, false );
                 return index;
             }
         }
 
         abstract void reset(int index);
 
-        void setStatus(int index, boolean status) {
-            if (status) {
-                reset(index);
+        void setStatus(int index, boolean status)
+        {
+            if ( status )
+            {
+                reset( index );
                 cleanup();
             }
-            statusMap.put(index, status);
+            statusMap.put( index, status );
         }
 
-        private void cleanup() {
-            new Thread() {
+        private void cleanup()
+        {
+            new Thread()
+            {
                 @Override
-                public void run() {
-                    Stream<Map.Entry<Integer, Boolean>> stream = new HashMap<>(statusMap).entrySet().parallelStream().filter(Map.Entry::getValue);
-                    if (stream.count() < 5) {
+                public void run()
+                {
+                    Stream<Map.Entry<Integer, Boolean>> stream = new HashMap<>( statusMap ).entrySet().parallelStream().filter( Map.Entry::getValue );
+                    if ( stream.count() < 5 )
+                    {
                         return;
                     }
-                    stream.limit(stream.count() - 5).forEach(e -> {
-                        statusMap.remove(e.getKey());
-                        map.remove(e.getKey());
-                    });
+                    stream.limit( stream.count() - 5 ).forEach( e -> {
+                        statusMap.remove( e.getKey() );
+                        map.remove( e.getKey() );
+                    } );
                 }
             }.start();
         }
 
-        T get(int index) {
-            return map.get(index);
+        T get(int index)
+        {
+            return map.get( index );
         }
     }
 
@@ -159,29 +186,35 @@ public class GzipUtil {
     // Implementations
     //
 
-    private static final class InflaterCloud extends Cloud<Inflater> {
+    private static final class InflaterCloud extends Cloud<Inflater>
+    {
 
         @Override
-        Inflater generate() {
+        Inflater generate()
+        {
             return new Inflater();
         }
 
         @Override
-        void reset(int index) {
-            map.get(index).reset();
+        void reset(int index)
+        {
+            map.get( index ).reset();
         }
     }
 
-    private static final class DeflaterCloud extends Cloud<Deflater> {
+    private static final class DeflaterCloud extends Cloud<Deflater>
+    {
 
         @Override
-        Deflater generate() {
+        Deflater generate()
+        {
             return new Deflater();
         }
 
         @Override
-        void reset(int index) {
-            map.get(index).reset();
+        void reset(int index)
+        {
+            map.get( index ).reset();
         }
     }
 }

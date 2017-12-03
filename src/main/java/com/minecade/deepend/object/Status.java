@@ -21,7 +21,11 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Used to retrieve and set the status of
@@ -31,38 +35,46 @@ import java.util.*;
  */
 @Stable
 @RequiredArgsConstructor
-public class Status<T> {
+public class Status<T>
+{
 
-    private final List<String> receivedUpdate = Collections.synchronizedList(new ArrayList<>());
+    private final List<String> receivedUpdate = Collections.synchronizedList( new ArrayList<>() );
 
     @Getter
     private final T t;
 
-    final public boolean needsUpdate(@NonNull final SimpleAddress address) {
-        return !receivedUpdate.contains(address.toString());
+    final public boolean needsUpdate(@NonNull final SimpleAddress address)
+    {
+        return !receivedUpdate.contains( address.toString() );
     }
 
-    final public boolean fetchUpdate(@NonNull final SimpleAddress address) {
-        if (needsUpdate(address)) {
-            setUpdated(address);
+    final public boolean fetchUpdate(@NonNull final SimpleAddress address)
+    {
+        if ( needsUpdate( address ) )
+        {
+            setUpdated( address );
             return true;
         }
         return false;
     }
 
-    final public void resetStatus() {
+    final public void resetStatus()
+    {
         receivedUpdate.clear();
     }
 
-    final public void setUpdated(@NonNull final SimpleAddress address) {
-        if (needsUpdate(address)) {
-            receivedUpdate.add(address.toString());
-        }
+    final public Collection<SimpleAddress> getUpdated()
+    {
+        Collection<SimpleAddress> collection = new HashSet<>();
+        receivedUpdate.forEach( s -> collection.add( SimpleAddress.fromString( s ) ) );
+        return collection;
     }
 
-    final public Collection<SimpleAddress> getUpdated() {
-        Collection<SimpleAddress> collection = new HashSet<>();
-        receivedUpdate.forEach(s -> collection.add(SimpleAddress.fromString(s)));
-        return collection;
+    final public void setUpdated(@NonNull final SimpleAddress address)
+    {
+        if ( needsUpdate( address ) )
+        {
+            receivedUpdate.add( address.toString() );
+        }
     }
 }

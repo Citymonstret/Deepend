@@ -21,14 +21,19 @@ import com.minecade.deepend.util.Assert;
 import lombok.AccessLevel;
 import lombok.Getter;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * A simple configuration/storage file implementation
  * based on individual lines
- *
+ * <p>
  * The format is really simple:
  * <pre>
  * key1: value\n
@@ -38,170 +43,215 @@ import java.util.Map;
  * @author Citymonstret
  */
 @Beta
-public class DeependBundle implements ObjectGetter<String, String>, DataFile {
+public class DeependBundle implements ObjectGetter<String, String>, DataFile
+{
+
+    public final static File folder;
+
+    static
+    {
+        folder = new File( "./.deepend" );
+        if ( !folder.exists() )
+        {
+            if ( !folder.mkdirs() )
+            {
+                throw new RuntimeException( "Couldn't create ./configs, please do it manually!" );
+            }
+        }
+    }
 
     @Getter(AccessLevel.PRIVATE)
     private final Map<String, String> properties;
-
     private final File file;
 
-    public DeependBundle(String propertyFile) {
-        this(propertyFile, false, DefaultBuilder.create());
+    public DeependBundle(String propertyFile)
+    {
+        this( propertyFile, false, DefaultBuilder.create() );
     }
 
-    public final static File folder;
-    static {
-        folder = new File("./.deepend");
-        if (!folder.exists()) {
-            if (!folder.mkdirs()) {
-                throw new RuntimeException("Couldn't create ./configs, please do it manually!");
-            }
-        }
-    }
-
-    public DeependBundle(String propertyFile, boolean hasToExist, DefaultBuilder builder) {
-        file = new File(folder, Assert.notEmpty(propertyFile) + ".deepend");
+    public DeependBundle(String propertyFile, boolean hasToExist, DefaultBuilder builder)
+    {
+        file = new File( folder, Assert.notEmpty( propertyFile ) + ".deepend" );
 
         this.properties = new HashMap<>();
-        this.properties.putAll(builder.compiled);
-        if (!file.exists()) {
-            if (hasToExist) {
-                throw new RuntimeException("Missing property file: " + file.getName());
+        this.properties.putAll( builder.compiled );
+        if ( !file.exists() )
+        {
+            if ( hasToExist )
+            {
+                throw new RuntimeException( "Missing property file: " + file.getName() );
             }
-            try {
-                if (file.createNewFile()) {
+            try
+            {
+                if ( file.createNewFile() )
+                {
                     saveFile();
                 }
-            } catch (IOException e) {
+            } catch ( IOException e )
+            {
                 e.printStackTrace();
             }
-        } else {
-           loadFile();
+        } else
+        {
+            loadFile();
         }
     }
 
-    public DeependBundle(String clientStrings, boolean b) {
-        this(clientStrings, b, DefaultBuilder.create());
+    public DeependBundle(String clientStrings, boolean b)
+    {
+        this( clientStrings, b, DefaultBuilder.create() );
     }
 
     @Override
-    public String get(String key) {
-        key = Assert.notEmpty(key);
+    public String get(String key)
+    {
+        key = Assert.notEmpty( key );
 
-        if (properties.containsKey(key)) {
-            return properties.get(key);
+        if ( properties.containsKey( key ) )
+        {
+            return properties.get( key );
         }
 
         return "";
     }
 
     @Override
-    public boolean containsKey(String s) {
-        return properties.containsKey(s);
+    public boolean containsKey(String s)
+    {
+        return properties.containsKey( s );
     }
 
     @Override
-    public void reload() {}
+    public void reload()
+    {
+    }
 
     @Override
-    public void saveFile() {
-        try (FileWriter writer = new FileWriter(file)) {
-            try (BufferedWriter bWriter = new BufferedWriter(writer)) {
-                this.properties.forEach((k, v) -> {
-                    try {
-                        bWriter.write(k + ": " + v + "\n");
-                    } catch (IOException e) {
+    public void saveFile()
+    {
+        try ( FileWriter writer = new FileWriter( file ) )
+        {
+            try ( BufferedWriter bWriter = new BufferedWriter( writer ) )
+            {
+                this.properties.forEach( (k, v) -> {
+                    try
+                    {
+                        bWriter.write( k + ": " + v + "\n" );
+                    } catch ( IOException e )
+                    {
                         e.printStackTrace();
                     }
-                });
-            } catch (Exception e) {
+                } );
+            } catch ( Exception e )
+            {
                 e.printStackTrace();
             }
-        } catch(Exception ee) {
+        } catch ( Exception ee )
+        {
             ee.printStackTrace();
         }
     }
 
     @Override
-    public void loadFile() {
+    public void loadFile()
+    {
         Map<String, String> l_properties = new HashMap<>();
 
-        try (FileReader reader = new FileReader(file)) {
-            try (BufferedReader bReader = new BufferedReader(reader)) {
+        try ( FileReader reader = new FileReader( file ) )
+        {
+            try ( BufferedReader bReader = new BufferedReader( reader ) )
+            {
                 String line;
-                while ((line = bReader.readLine()) != null) {
-                    String[] parts = line.split(": ");
-                    if (parts.length < 2) {
+                while ( ( line = bReader.readLine() ) != null )
+                {
+                    String[] parts = line.split( ": " );
+                    if ( parts.length < 2 )
+                    {
                         continue;
                     }
-                    parts[0] = parts[0].replaceAll("\\s+", "");
-                    l_properties.put(parts[0], parts[1]);
+                    parts[ 0 ] = parts[ 0 ].replaceAll( "\\s+", "" );
+                    l_properties.put( parts[ 0 ], parts[ 1 ] );
                 }
-            } catch(final Exception ee) {
+            } catch ( final Exception ee )
+            {
                 ee.printStackTrace();
             }
-        } catch(Exception e) {
+        } catch ( Exception e )
+        {
             e.printStackTrace();
         }
 
         boolean needsSaving = false;
-        for (String key : properties.keySet()) {
-            if (!l_properties.containsKey(key)) {
+        for ( String key : properties.keySet() )
+        {
+            if ( !l_properties.containsKey( key ) )
+            {
                 needsSaving = true;
-                l_properties.put(key, properties.get(key));
+                l_properties.put( key, properties.get( key ) );
             }
         }
 
-        if (needsSaving) {
+        if ( needsSaving )
+        {
             this.properties.clear();
         }
-        this.properties.putAll(l_properties);
+        this.properties.putAll( l_properties );
 
-        if (needsSaving) {
+        if ( needsSaving )
+        {
             saveFile();
         }
     }
 
     @Override
-    public <T> void set(String key, T value) {
-        properties.put(Assert.notEmpty(key), Assert.notNull(value).toString());
+    public <T> void set(String key, T value)
+    {
+        properties.put( Assert.notEmpty( key ), Assert.notNull( value ).toString() );
     }
 
     @Override
-    public boolean contains(String key) {
-        return properties.containsKey(Assert.notEmpty(key));
+    public boolean contains(String key)
+    {
+        return properties.containsKey( Assert.notEmpty( key ) );
     }
 
     @Override
-    public <T> T get(String key, T def) {
-        return (T) properties.get(key);
+    public <T> T get(String key, T def)
+    {
+        return (T) properties.get( key );
     }
 
     @Override
-    public <T> void setIfNotExists(String key, T value) {
-        if (!containsKey(key)) {
-            set(key, value);
+    public <T> void setIfNotExists(String key, T value)
+    {
+        if ( !containsKey( key ) )
+        {
+            set( key, value );
         }
     }
 
-    public static class DefaultBuilder {
+    public static class DefaultBuilder
+    {
 
         private final Map<String, String> compiled = new HashMap<>();
         private final Map<String, String> defaults = new HashMap<>();
 
-        public DefaultBuilder add(String key, Object value) {
-            this.defaults.put(key, value.toString());
+        public static DefaultBuilder create()
+        {
+            return new DefaultBuilder();
+        }
+
+        public DefaultBuilder add(String key, Object value)
+        {
+            this.defaults.put( key, value.toString() );
             return this;
         }
 
-        public DefaultBuilder build() {
-            compiled.putAll(defaults);
+        public DefaultBuilder build()
+        {
+            compiled.putAll( defaults );
             defaults.clear();
             return this;
-        }
-
-        public static DefaultBuilder create() {
-            return new DefaultBuilder();
         }
     }
 }

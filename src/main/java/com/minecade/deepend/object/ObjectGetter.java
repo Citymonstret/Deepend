@@ -23,8 +23,10 @@ import com.minecade.deepend.lib.Stable;
  * @author Citymonstret
  */
 @Stable
-public interface ObjectGetter<K, V> {
-    
+public interface ObjectGetter<K, V>
+{
+
     V get(K k);
+
     boolean containsKey(K k);
 }

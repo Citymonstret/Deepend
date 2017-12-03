@@ -30,68 +30,64 @@ package com.minecade.deepend.client.test;
  * limitations under the License.
  */
 
-import com.minecade.deepend.bits.EnumBitField;
-import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.client.DeependClient;
-import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.game.GameCategory;
 import com.minecade.deepend.game.GamePlayer;
-import com.minecade.deepend.game.GameServer;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.ObjectManager;
 import com.minecade.deepend.object.ProviderGroup;
-import com.minecade.deepend.object.StringList;
-import com.minecade.deepend.request.*;
+import com.minecade.deepend.request.GetRequest;
 import com.minecade.deepend.values.ValueFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created 2/23/2016 for Deepend
  *
  * @author Citymonstret
  */
-public class TestGameClient implements DeependClient.DeependClientApplication {
+public class TestGameClient implements DeependClient.DeependClientApplication
+{
 
-    public static void main(String[] args) {
-        new DeependClient(new TestGameClient());
+    public static void main(String[] args)
+    {
+        new DeependClient( new TestGameClient() );
 
     }
 
     @Override
-    public void registerInitialRequests(DeependClient client) {
-        _registerInitialRequests(client);
+    public void registerInitialRequests(DeependClient client)
+    {
+        _registerInitialRequests( client );
     }
 
-    private void _registerInitialRequests(DeependClient client) {
-        client.addPendingRequest(new GetRequest(list -> {
-            Logger.get().info("Got a response with " + list.size() + " objects!");
-            list.forEach(System.out::println);
-        }) {
+    private void _registerInitialRequests(DeependClient client)
+    {
+        client.addPendingRequest( new GetRequest( list -> {
+            Logger.get().info( "Got a response with " + list.size() + " objects!" );
+            list.forEach( System.out::println );
+        } )
+        {
             @Override
-            public void buildRequest(DeependBuf buf) {
-                buf.writeByte(GameCategory.SERVER_CATEGORIES);
-                buf.writeString("*");
+            public void buildRequest(DeependBuf buf)
+            {
+                buf.writeByte( GameCategory.SERVER_CATEGORIES );
+                buf.writeString( "*" );
             }
-        });
+        } );
     }
 
     @Override
-    public void registerObjectMappings(ObjectManager objectManager) {
+    public void registerObjectMappings(ObjectManager objectManager)
+    {
         // Will make sure that all requests using the category PLAYERS
         // returns a GamePlayer instance, rather than returning
         // raw data
-        ObjectManager.instance.registerMapping(GamePlayer.class);
+        ObjectManager.instance.registerMapping( GamePlayer.class );
     }
 
     @Override
-    public void registerFactories() {
-        ValueFactory.addValueFactory(ValueFactory.FactoryType.DATA_TYPE, new ValueFactory<>(ProviderGroup.fromEnumClass(GameCategory.class), GameCategory.UNKNOWN));
+    public void registerFactories()
+    {
+        ValueFactory.addValueFactory( ValueFactory.FactoryType.DATA_TYPE, new ValueFactory<>( ProviderGroup.fromEnumClass( GameCategory.class ), GameCategory.UNKNOWN ) );
     }
 }

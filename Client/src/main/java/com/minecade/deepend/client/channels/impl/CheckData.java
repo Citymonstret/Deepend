@@ -29,34 +29,44 @@ import lombok.NonNull;
  *
  * @author Citymonstret
  */
-public class CheckData extends DeependChannel {
+public class CheckData extends DeependChannel
+{
 
-    private static final byte TYPE_CHECK =          0;
-    private static final byte TYPE_SUBSCRIPTION =   1;
+    private static final byte TYPE_CHECK = 0;
+    private static final byte TYPE_SUBSCRIPTION = 1;
 
-    public CheckData() {
-        super(Channel.CHECK_DATA);
+    public CheckData()
+    {
+        super( Channel.CHECK_DATA );
     }
 
     @Override
-    public void act(@NonNull DeependConnection connection, DeependBuf buf) {
-        DeependBuf in = connection.getBuf("in");
+    public void act(@NonNull DeependConnection connection, DeependBuf buf)
+    {
+        DeependBuf in = connection.getBuf( "in" );
         byte type = in.getByte();
-        if (type == TYPE_CHECK) {
+        if ( type == TYPE_CHECK )
+        {
             String getID = in.getString();
-            StatusRequest request = StatusRequest.getRequest(getID);
-            if (request == null) {
-                Logger.get().error("Got response for unregistered request, throwing!");
+            StatusRequest request = StatusRequest.getRequest( getID );
+            if ( request == null )
+            {
+                Logger.get().error( "Got response for unregistered request, throwing!" );
                 return;
             }
-            request.call(in.getInt());
-        } else {
-            GenericResponse response = GenericResponse.getGenericResponse(in.getByte());
-            switch (response) {
-                case FAILURE: {
-                    Logger.get().error("Subscription channel error: " + in.getString());
-                } return;
-                default: {
+            request.call( in.getInt() );
+        } else
+        {
+            GenericResponse response = GenericResponse.getGenericResponse( in.getByte() );
+            switch ( response )
+            {
+                case FAILURE:
+                {
+                    Logger.get().error( "Subscription channel error: " + in.getString() );
+                }
+                return;
+                default:
+                {
                     break;
                 }
             }

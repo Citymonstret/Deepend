@@ -5,7 +5,10 @@ import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.DeependObject;
 import com.minecade.deepend.object.ObjectProperty;
 import com.minecade.deepend.object.StringList;
-import com.minecade.deepend.request.*;
+import com.minecade.deepend.request.DataRequest;
+import com.minecade.deepend.request.GetRequest;
+import com.minecade.deepend.request.ObjectCallback;
+import com.minecade.deepend.request.ObjectGetRequest;
 import lombok.Getter;
 
 import java.util.Collections;
@@ -15,7 +18,8 @@ import java.util.List;
 /**
  * @author Citymonstret
  */
-public class GameServer extends DeependObject {
+public class GameServer extends DeependObject
+{
 
     @Getter
     @ObjectProperty(name = "serverName")
@@ -33,84 +37,104 @@ public class GameServer extends DeependObject {
     @ObjectProperty(name = "maxCount")
     protected int playerCountMax = 0;
 
-    public GameServer() {
-        super(GameCategory.SERVERS, true, GameServer.class);
+    public GameServer()
+    {
+        super( GameCategory.SERVERS, true, GameServer.class );
     }
 
-    public GameServer(String name) {
-        super(GameCategory.SERVERS, false, GameServer.class);
+    public GameServer(String name)
+    {
+        super( GameCategory.SERVERS, false, GameServer.class );
         this.serverName = name;
         // We'll need to delay this until
         // the field has been set
-        scan(GameServer.class);
+        scan( GameServer.class );
     }
 
-    @Override
-    public String toString() {
-        return serverName;
-    }
-
-    @Override
-    public void write(DeependBuf buf) {
-        writeValues(buf);
-    }
-
-    @Override
-    public void read(DeependBuf buf) {
-        convertAndRead(buf);
-    }
-
-    @Override
-    public void request(String key, DeependBuf buf) {
-        buf.writeString(key);
-        sendKeys(buf);
-    }
-
-    public static GetRequest requestServers(List<String> names, ServerCallback callback) {
+    public static GetRequest requestServers(List<String> names, ServerCallback callback)
+    {
         StringBuilder name = new StringBuilder();
         Iterator<String> i = names.iterator();
-        while (i.hasNext()) {
-            name.append(i.next());
-            if (i.hasNext()) {
-                name.append(",");
+        while ( i.hasNext() )
+        {
+            name.append( i.next() );
+            if ( i.hasNext() )
+            {
+                name.append( "," );
             }
         }
 
-        DeependObject object = new GameServer() {
+        DeependObject object = new GameServer()
+        {
             @Override
-            public void request(String key, DeependBuf buf) {
-                buf.writeString(name.toString());
-                sendKeys(buf);
+            public void request(String key, DeependBuf buf)
+            {
+                buf.writeString( name.toString() );
+                sendKeys( buf );
             }
         };
 
         DataRequest.DataRecipient recipient = data -> {
-            if (data.isEmpty()) {
-                callback.act(null);
-            } else {
-                for (Object o : data) {
-                    if (o instanceof GameServer) {
-                        callback.act((GameServer) o);
-                    } else {
+            if ( data.isEmpty() )
+            {
+                callback.act( null );
+            } else
+            {
+                for ( Object o : data )
+                {
+                    if ( o instanceof GameServer )
+                    {
+                        callback.act( (GameServer) o );
+                    } else
+                    {
                         Logger.get()
-                                .error("Unknown type recieved when reading servers; "
-                                        + o.getClass().getName());
+                                .error( "Unknown type recieved when reading servers; "
+                                        + o.getClass().getName() );
                     }
                 }
             }
         };
 
-        return new ObjectGetRequest(name.toString(), object, recipient);
+        return new ObjectGetRequest( name.toString(), object, recipient );
     }
 
-    public static GetRequest requestServer(String name, ServerCallback callback) {
-        if (name.contains(",")) {
-            return requestServers(new StringList(name.split(",")), callback);
+    public static GetRequest requestServer(String name, ServerCallback callback)
+    {
+        if ( name.contains( "," ) )
+        {
+            return requestServers( new StringList( name.split( "," ) ), callback );
         }
-        return requestServers(Collections.singletonList(name), callback);
+        return requestServers( Collections.singletonList( name ), callback );
     }
 
-    public interface ServerCallback extends ObjectCallback<GameServer> {
+    @Override
+    public String toString()
+    {
+        return serverName;
+    }
+
+    @Override
+    public void write(DeependBuf buf)
+    {
+        writeValues( buf );
+    }
+
+    @Override
+    public void read(DeependBuf buf)
+    {
+        convertAndRead( buf );
+    }
+
+    @Override
+    public void request(String key, DeependBuf buf)
+    {
+        buf.writeString( key );
+        sendKeys( buf );
+    }
+
+    public interface ServerCallback extends ObjectCallback<GameServer>
+    {
+
         void act(GameServer server);
     }
 }

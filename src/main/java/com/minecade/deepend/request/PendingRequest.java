@@ -25,7 +25,6 @@ import com.minecade.deepend.nativeprot.NativeBuf;
 import com.minecade.deepend.pipeline.DeependContext;
 import com.minecade.deepend.prot.ProtocolDecoder;
 import com.minecade.deepend.util.Constants;
-
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -41,7 +40,8 @@ import java.io.InputStream;
  * @author Citymonstret
  */
 @Stable
-public abstract class PendingRequest extends Request {
+public abstract class PendingRequest extends Request
+{
 
     @Getter
     private Channel requestedChannel;
@@ -54,18 +54,22 @@ public abstract class PendingRequest extends Request {
      *                         request will be sent to
      */
     @SneakyThrows(IllegalArgumentException.class)
-    public PendingRequest(Channel requestedChannel) {
+    public PendingRequest(Channel requestedChannel)
+    {
         this.requestedChannel = requestedChannel;
     }
 
     @Override
-    public boolean handle(@NonNull final DeependContext context, @NonNull final ChannelHandler handler) {
+    public boolean handle(@NonNull final DeependContext context, @NonNull final ChannelHandler handler)
+    {
         boolean status;
-        try {
-            this.send(context, handler);
+        try
+        {
+            this.send( context, handler );
             status = true;
-        } catch (final Exception e) {
-            Logger.get().error("Something went wrong when handing the pending request", e);
+        } catch ( final Exception e )
+        {
+            Logger.get().error( "Something went wrong when handing the pending request", e );
             status = false;
         }
         return status;
@@ -81,62 +85,72 @@ public abstract class PendingRequest extends Request {
 
     @Stable
     public void send(@NonNull final DeependContext context,
-                     @NonNull final ChannelHandler handler) {
+                     @NonNull final ChannelHandler handler)
+    {
         // This is our buf for the output
         final DeependBuf out = new NativeBuf();
         // This is the channel ID
-        out.writeInt(requestedChannel.getValue());
+        out.writeInt( requestedChannel.getValue() );
         // Now we'll write the request specific data to the buf
-        makeRequest(out);
+        makeRequest( out );
         // This writes the data from the buf to the stream
-        out.writeAndFlush(context);
+        out.writeAndFlush( context );
         // This removes all data from the buf
         out.nullify();
 
         // This makes sure that we have a working
         // ByteArrayOutputStream to pass our data through
         final ByteArrayOutputStream byteArrayOutputStream;
-        if (!context.hasMeta("bufferStream")) {
+        if ( !context.hasMeta( "bufferStream" ) )
+        {
             byteArrayOutputStream = new ByteArrayOutputStream();
-            context.setMeta("bufferStream", byteArrayOutputStream);
-        } else {
-            byteArrayOutputStream = context.getMeta("bufferStream");
+            context.setMeta( "bufferStream", byteArrayOutputStream );
+        } else
+        {
+            byteArrayOutputStream = context.getMeta( "bufferStream" );
         }
         byteArrayOutputStream.reset();
 
         // This is the stream from which we'll read the data
         final InputStream stream;
-        try {
+        try
+        {
             stream = context.getSocket().getInputStream();
-        } catch (final IOException e) {
+        } catch ( final IOException e )
+        {
             Logger.get()
-                    .error("Failed to read from socket InputStream", e);
+                    .error( "Failed to read from socket InputStream", e );
             return;
         }
 
         // A simple 1MB buffer
-        final byte[] data = new byte[Constants.MEGABYTE];
+        final byte[] data = new byte[ Constants.MEGABYTE ];
 
         // Here we read all available data (up to a megabyte)
         final int nRead;
-        try {
-            nRead = stream.read(data, 0, data.length);
-        } catch (final IOException e) {
-            Logger.get().error("Failed to read from stream", e);
+        try
+        {
+            nRead = stream.read( data, 0, data.length );
+        } catch ( final IOException e )
+        {
+            Logger.get().error( "Failed to read from stream", e );
             return;
         }
 
-        if (nRead == -1) {
-            Logger.get().error("Stream returned no bytes");
+        if ( nRead == -1 )
+        {
+            Logger.get().error( "Stream returned no bytes" );
             return;
         }
 
         // Now we write the read data to the buffer
-        byteArrayOutputStream.write(data, 0, nRead);
-        try {
+        byteArrayOutputStream.write( data, 0, nRead );
+        try
+        {
             byteArrayOutputStream.flush();
-        } catch (final IOException e) {
-            Logger.get().error("Failed to flush stream", e);
+        } catch ( final IOException e )
+        {
+            Logger.get().error( "Failed to flush stream", e );
             return;
         }
 
@@ -147,18 +161,21 @@ public abstract class PendingRequest extends Request {
         // 4 bytes = 1 32bit integer,
         // which is the size indicator for the protocol
         // Any less, and we just get rid of it
-        if (readBytes.length > 4) {
+        if ( readBytes.length > 4 )
+        {
             final NativeBuf inputBuf;
-            try {
+            try
+            {
                 // Here we turn the raw data into objects
                 inputBuf = ProtocolDecoder.decoder
-                        .decode(readBytes);
-            } catch (final Exception e) {
-                Logger.get().error("Failed to extract NativeBuf", e);
+                        .decode( readBytes );
+            } catch ( final Exception e )
+            {
+                Logger.get().error( "Failed to extract NativeBuf", e );
                 return;
             }
             // And now we pass the data to the channel handler
-            handler.handle(inputBuf, null, context);
+            handler.handle( inputBuf, null, context );
         }
     }
 

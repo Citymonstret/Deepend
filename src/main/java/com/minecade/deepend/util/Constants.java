@@ -4,7 +4,8 @@ import lombok.experimental.UtilityClass;
 
 @SuppressWarnings("unused")
 @UtilityClass
-public class Constants {
+public class Constants
+{
 
     public static final int BYTE = 1;
     public static final int KILOBYTE = 1024 * BYTE;

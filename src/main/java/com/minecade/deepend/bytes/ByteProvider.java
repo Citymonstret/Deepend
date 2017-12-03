@@ -27,7 +27,8 @@ import com.minecade.deepend.values.NumberProvider;
  */
 @Stable
 @FunctionalInterface
-public interface ByteProvider extends NumberProvider<Byte> {
+public interface ByteProvider extends NumberProvider<Byte>
+{
 
     @Override
     Byte getValue();

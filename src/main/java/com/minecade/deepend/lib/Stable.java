@@ -23,14 +23,16 @@ import java.lang.annotation.Target;
 /**
  * Annotates a stable method
  * or class
- *
+ * <p>
  * This means that the class members
  * won't change names or signatures
  * in a foreseeable future
  *
  * @author Citymonstret
  */
-@Target({ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD})
+@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.SOURCE)
-public @interface Stable {
+public @interface Stable
+{
+
 }

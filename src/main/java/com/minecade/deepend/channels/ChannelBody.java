@@ -9,17 +9,20 @@ import com.minecade.deepend.reflection.ReflectionMethod;
  *
  * @author Citymonstret
  */
-public final class ChannelBody extends DeependChannel {
+public final class ChannelBody extends DeependChannel
+{
 
     private final ReflectionMethod<Void> method;
 
-    protected ChannelBody(final Channel channel, final ReflectionMethod<Void> method) {
-        super(channel);
+    protected ChannelBody(final Channel channel, final ReflectionMethod<Void> method)
+    {
+        super( channel );
         this.method = method;
     }
 
     @Override
-    public void act(final DeependConnection connection, final DeependBuf buf) {
-        this.method.handle(connection, buf);
+    public void act(final DeependConnection connection, final DeependBuf buf)
+    {
+        this.method.handle( connection, buf );
     }
 }

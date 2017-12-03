@@ -20,11 +20,12 @@ import com.minecade.deepend.lib.Stable;
 /**
  * This simply returns a value
  *
- * @author Citymonstret
  * @param <T> Value return type
+ * @author Citymonstret
  */
 @Stable
-public interface ValueProvider<T> {
+public interface ValueProvider<T>
+{
 
     /**
      * Get the byte value of the object
@@ -37,11 +38,12 @@ public interface ValueProvider<T> {
      * Get the identifier for this provider
      *
      * @return The identifier of this provider,
-     *         if it hasn't been overridden then
-     *         a combination of the class name
-     *         and the byte value will be returned
+     * if it hasn't been overridden then
+     * a combination of the class name
+     * and the byte value will be returned
      */
-    default String getIdentifier() {
+    default String getIdentifier()
+    {
         return getClass().getName() + ":" + getValue();
     }
 }

@@ -26,7 +26,9 @@ import java.lang.annotation.Target;
  *
  * @author Citymonstret
  */
-@Target({ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD})
+@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.SOURCE)
-public @interface Beta {
+public @interface Beta
+{
+
 }

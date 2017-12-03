@@ -25,11 +25,11 @@ import lombok.Getter;
  * This is a wrapper for GetRequest
  * that allows you to specify the object
  *
- * @see com.minecade.deepend.request.GetRequest
- *
  * @author Citymonstret
+ * @see com.minecade.deepend.request.GetRequest
  */
-public class ObjectGetRequest extends GetRequest {
+public class ObjectGetRequest extends GetRequest
+{
 
     private DeependObject object;
 
@@ -38,18 +38,21 @@ public class ObjectGetRequest extends GetRequest {
 
     /**
      * Constructor
-     * @param object DeependObject to use for the request
+     *
+     * @param object        DeependObject to use for the request
      * @param dataRecipient Recipient that will handle incoming data
      */
-    public ObjectGetRequest(String requestedKey, DeependObject object, DataRecipient dataRecipient) {
-        super(dataRecipient);
+    public ObjectGetRequest(String requestedKey, DeependObject object, DataRecipient dataRecipient)
+    {
+        super( dataRecipient );
         this.object = object;
         this.key = requestedKey;
     }
 
     @Override
-    protected void buildRequest(DeependBuf buf) {
-        buf.writeByte(this.object.getObjectType());
-        this.object.request(getKey(), buf);
+    protected void buildRequest(DeependBuf buf)
+    {
+        buf.writeByte( this.object.getObjectType() );
+        this.object.request( getKey(), buf );
     }
 }

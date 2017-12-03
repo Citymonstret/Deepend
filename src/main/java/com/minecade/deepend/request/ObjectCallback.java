@@ -19,12 +19,12 @@ package com.minecade.deepend.request;
 import com.minecade.deepend.object.DeependObject;
 
 /**
- * @author Citymonstret
- *
  * @param <T> Object type
+ * @author Citymonstret
  */
 @FunctionalInterface
-public interface ObjectCallback<T extends DeependObject> {
+public interface ObjectCallback<T extends DeependObject>
+{
 
     /**
      * Act on the specified object

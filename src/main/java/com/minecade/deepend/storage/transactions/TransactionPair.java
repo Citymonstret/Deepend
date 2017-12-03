@@ -25,7 +25,8 @@ import lombok.RequiredArgsConstructor;
  * @author Citymonstret
  */
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
-public final class TransactionPair {
+public final class TransactionPair
+{
 
     @Getter
     private final PendingTransaction pendingTransaction;

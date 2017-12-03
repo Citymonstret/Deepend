@@ -20,14 +20,11 @@ import com.minecade.deepend.connection.DeependConnection;
 import com.minecade.deepend.connection.SimpleAddress;
 import com.minecade.deepend.lib.Beta;
 import com.minecade.deepend.lib.Stable;
-import com.minecade.deepend.pipeline.DeependContext;
 import lombok.NonNull;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The factory responsible for
@@ -37,10 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public interface ConnectionFactory {
+public interface ConnectionFactory
+{
 
     /**
      * Get the connection for a simple address
+     *
      * @param simpleAddress Simple Address
      * @return Connection | Null
      */
@@ -49,6 +48,7 @@ public interface ConnectionFactory {
 
     /**
      * Add a connection
+     *
      * @param connection Connection
      */
     @Stable
@@ -57,6 +57,7 @@ public interface ConnectionFactory {
 
     /**
      * Create and add a connection
+     *
      * @param remoteAddress Socket Address
      * @return Registered connection
      */
@@ -68,8 +69,7 @@ public interface ConnectionFactory {
      * otherwise it will be created
      *
      * @param socketAddress Socket Address
-     * @param uuid Authentication UUID
-     *
+     * @param uuid          Authentication UUID
      * @return Created, or re-used connection
      */
     @Beta

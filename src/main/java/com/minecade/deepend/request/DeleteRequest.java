@@ -22,18 +22,20 @@ import com.minecade.deepend.channels.Channel;
  * This will request the deletion of the
  * specified objects
  *
- * @see com.minecade.deepend.request.DataRequest
- *
  * @author Citymonstret
+ * @see com.minecade.deepend.request.DataRequest
  */
-public abstract class DeleteRequest extends DataRequest {
+public abstract class DeleteRequest extends DataRequest
+{
 
     /**
      * Constructor
+     *
      * @param dataRecipient Recipient that will handle the data
-     * @param provider Provider used for authentication
+     * @param provider      Provider used for authentication
      */
-    public DeleteRequest(DataRecipient dataRecipient) {
-        super(Channel.REMOVE_DATA, dataRecipient);
+    public DeleteRequest(DataRecipient dataRecipient)
+    {
+        super( Channel.REMOVE_DATA, dataRecipient );
     }
 }

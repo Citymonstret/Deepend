@@ -27,11 +27,11 @@ import java.util.Map;
 /**
  * Response codes that the
  * server may return
- *
+ * <p>
  * This might change from version to version,
  * so it is quite important that you keep
  * your server and clients on the same version
- *
+ * <p>
  * It is highly recommended to use the enum
  * as much as possible, and only rely on the
  * actual byte when reading or sending the data
@@ -40,7 +40,8 @@ import java.util.Map;
  */
 @Beta
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public enum ServerResponse implements ByteProvider {
+public enum ServerResponse implements ByteProvider
+{
 
     /**
      * The server was unable
@@ -48,81 +49,87 @@ public enum ServerResponse implements ByteProvider {
      * OR
      * version mismatch
      */
-    UNKNOWN(getNextByte()),
+    UNKNOWN( getNextByte() ),
 
     /**
      * The client must authenticate
      * before doing anything
      */
-    REQUIRES_AUTHENTICATION(getNextByte()),
+    REQUIRES_AUTHENTICATION( getNextByte() ),
 
     /**
      * The server tried to authenticate
      * the client
      */
-    AUTHENTICATION_ATTEMPTED(getNextByte()),
+    AUTHENTICATION_ATTEMPTED( getNextByte() ),
 
     /**
      * The client has already been
      * authenticated
      */
-    ALREADY_AUTHENTICATED(getNextByte()),
+    ALREADY_AUTHENTICATED( getNextByte() ),
 
     /**
      * Everything went well
      */
-    SUCCESS(getNextByte()),
+    SUCCESS( getNextByte() ),
 
     /**
      * The client provided an invalid
      * UUID
      */
-    INVALID_UUID(getNextByte()),
+    INVALID_UUID( getNextByte() ),
 
     /**
      * The channel couldn't generate
      * the data
      */
-    CHANNEL_EXCEPTION(getNextByte()),
+    CHANNEL_EXCEPTION( getNextByte() ),
 
     /**
      * The client requested a channel
      * which isn't present on the
      * server
      */
-    INVALID_CHANNEL(getNextByte());
+    INVALID_CHANNEL( getNextByte() );
+
+    private static final Map<Byte, ServerResponse> cache;
+    private static byte b = 0;
+
+    static
+    {
+        cache = new HashMap<>();
+        for ( final ServerResponse response : values() )
+        {
+            cache.put( response.getValue(), response );
+        }
+    }
 
     private final byte responseCode;
 
-    @Override
-    public Byte getValue() {
-        return this.responseCode;
-    }
-
-    private static byte b = 0;
-
-    private static byte getNextByte() {
+    private static byte getNextByte()
+    {
         return b++;
-    }
-
-    private static final Map<Byte, ServerResponse> cache;
-
-    static {
-        cache = new HashMap<>();
-        for (final ServerResponse response : values()) {
-            cache.put(response.getValue(), response);
-        }
     }
 
     /**
      * Get the response for a byte
+     *
      * @param b Byte
      * @return Response | UNKNOWN if not found
      */
-    public static ServerResponse getServerResponse(final byte b) {
-        if (!cache.containsKey(b)) {
+    public static ServerResponse getServerResponse(final byte b)
+    {
+        if ( !cache.containsKey( b ) )
+        {
             return UNKNOWN;
         }
-        return cache.get(b);
+        return cache.get( b );
+    }
+
+    @Override
+    public Byte getValue()
+    {
+        return this.responseCode;
     }
 }

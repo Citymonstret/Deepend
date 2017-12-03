@@ -24,7 +24,6 @@ import com.minecade.deepend.data.DataStatus;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.object.GenericResponse;
-import com.minecade.deepend.server.DeependServer;
 import com.minecade.deepend.server.channels.SubscriptionManager;
 import com.minecade.deepend.values.ValueFactory;
 import lombok.NonNull;
@@ -38,52 +37,59 @@ import java.util.HashSet;
  *
  * @author Citymonstret
  */
-public class CheckData extends DeependChannel {
+public class CheckData extends DeependChannel
+{
+
+    private static final byte TYPE_CHECK = 0;
+    private static final byte TYPE_SUBSCRIPTION = 1;
+
+    public CheckData()
+    {
+        super( Channel.CHECK_DATA );
+    }
 
     @SuppressWarnings("ALL")
-    private static Collection<ByteProvider> convert(Collection in) {
+    private static Collection<ByteProvider> convert(Collection in)
+    {
         Collection<ByteProvider> collection = new HashSet<>();
-        in.stream().filter(o -> o instanceof ByteProvider).forEach(o -> collection.add((ByteProvider) o));
+        in.stream().filter( o -> o instanceof ByteProvider ).forEach( o -> collection.add( (ByteProvider) o ) );
         return collection;
     }
 
-    public CheckData() {
-        super(Channel.CHECK_DATA);
-    }
-
-    private static final byte TYPE_CHECK =          0;
-    private static final byte TYPE_SUBSCRIPTION =   1;
-
     @SuppressWarnings("unchecked")
     @Override
-    public void act(@NonNull DeependConnection connection, @NonNull DeependBuf buf) {
-        DeependBuf in = connection.getBuf("in");
+    public void act(@NonNull DeependConnection connection, @NonNull DeependBuf buf)
+    {
+        DeependBuf in = connection.getBuf( "in" );
         byte type = in.getByte();
-        if (type == TYPE_CHECK) {
-            buf.writeByte(TYPE_CHECK);
+        if ( type == TYPE_CHECK )
+        {
+            buf.writeByte( TYPE_CHECK );
             String request = in.getString();
-            Logger.get().debug("Received request: " + request);
-            buf.writeString(request); // Just echo the request ID
-            Collection<ByteProvider> requested = convert(ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).constructBitField().extract(in.getInt()));
+            Logger.get().debug( "Received request: " + request );
+            buf.writeString( request ); // Just echo the request ID
+            Collection<ByteProvider> requested = convert( ValueFactory.getFactory( ValueFactory.FactoryType.DATA_TYPE ).constructBitField().extract( in.getInt() ) );
             Collection<ByteProvider> updated = new ArrayList<>();
             requested.stream()
-                    .filter(r -> {
-                        DataStatus status = DataManager.instance.getDataStatus(r);
-                        return status != null && status.fetchUpdate(connection.getRemoteAddress());
-                    })
-                    .forEach(updated::add);
-            int field = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).constructBitField().construct(updated);
-            Logger.get().debug("Field: " + field);
-            buf.writeInt(field);
-        } else {
+                    .filter( r -> {
+                        DataStatus status = DataManager.instance.getDataStatus( r );
+                        return status != null && status.fetchUpdate( connection.getRemoteAddress() );
+                    } )
+                    .forEach( updated::add );
+            int field = ValueFactory.getFactory( ValueFactory.FactoryType.DATA_TYPE ).constructBitField().construct( updated );
+            Logger.get().debug( "Field: " + field );
+            buf.writeInt( field );
+        } else
+        {
             // Subscription request
-            buf.writeByte(TYPE_SUBSCRIPTION);
-            buf.writeByte(GenericResponse.SUCCESS);
-            String[] parts = "".split(",");
-            for (String part : parts) {
-                SubscriptionManager.addSubscription(connection.getRemoteAddress().getHost(), Byte.parseByte(part));
-                Logger.get().info("Added subscription for host: + "
-                        + connection.getRemoteAddress().getHost() + ", for channel: " + part);
+            buf.writeByte( TYPE_SUBSCRIPTION );
+            buf.writeByte( GenericResponse.SUCCESS );
+            String[] parts = "".split( "," );
+            for ( String part : parts )
+            {
+                SubscriptionManager.addSubscription( connection.getRemoteAddress().getHost(), Byte.parseByte( part ) );
+                Logger.get().info( "Added subscription for host: + "
+                        + connection.getRemoteAddress().getHost() + ", for channel: " + part );
             }
         }
     }

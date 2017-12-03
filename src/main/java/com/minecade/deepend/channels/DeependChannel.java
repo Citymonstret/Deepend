@@ -30,7 +30,8 @@ import lombok.RequiredArgsConstructor;
  */
 @Stable
 @RequiredArgsConstructor
-public abstract class DeependChannel {
+public abstract class DeependChannel
+{
 
     @NonNull
     @Getter
@@ -41,15 +42,16 @@ public abstract class DeependChannel {
      * to do
      *
      * @param connection Connection listing
-     * @param buf Output buffer. This is
-     *            NOT the input buf
+     * @param buf        Output buffer. This is
+     *                   NOT the input buf
      */
     public abstract void act(final DeependConnection connection, final DeependBuf buf);
 
     /**
      * Reset the status of this channel
      */
-    protected void resetStatus() {
-        ChannelManager.instance.getChannelStatus(getChannelType()).resetStatus();
+    protected void resetStatus()
+    {
+        ChannelManager.instance.getChannelStatus( getChannelType() ).resetStatus();
     }
 }

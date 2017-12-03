@@ -21,7 +21,11 @@ import com.minecade.deepend.values.ValueProvider;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
 /**
@@ -29,10 +33,11 @@ import java.util.stream.Collectors;
  *
  * @param <DataType> Number implementation
  * @param <Provider> ValueProvider returning the
- *                  specified DataType
+ *                   specified DataType
  */
 @Stable
-public class BitField<DataType extends Number, Provider extends ValueProvider<DataType>> {
+public class BitField<DataType extends Number, Provider extends ValueProvider<DataType>>
+{
 
     @Getter
     private final ProviderGroup<DataType, Provider> providerGroup;
@@ -41,7 +46,8 @@ public class BitField<DataType extends Number, Provider extends ValueProvider<Da
      * @param providerGroup ProvidierGroup containing the values
      *                      that will be used in this BitField
      */
-    public BitField(ProviderGroup<DataType, Provider> providerGroup) {
+    public BitField(ProviderGroup<DataType, Provider> providerGroup)
+    {
         this.providerGroup = providerGroup;
     }
 
@@ -51,32 +57,37 @@ public class BitField<DataType extends Number, Provider extends ValueProvider<Da
      * @param field Bit Field
      * @return Extracted objects (will never be null)
      */
-    public final Collection<Provider> extract(final int field) {
-        if (field == 0) {
+    public final Collection<Provider> extract(final int field)
+    {
+        if ( field == 0 )
+        {
             return Collections.emptySet();
         }
-        return providerGroup.getInternalMap().keySet().stream().filter(b -> (field & b.intValue()) == b.intValue()).map(providerGroup.getInternalMap()::get).collect(Collectors.toCollection(HashSet::new));
+        return providerGroup.getInternalMap().keySet().stream().filter( b -> ( field & b.intValue() ) == b.intValue() ).map( providerGroup.getInternalMap()::get ).collect( Collectors.toCollection( HashSet::new ) );
     }
 
     @SafeVarargs
-    public final int construct(Provider ... objects) {
-        return construct(Arrays.asList(objects));
+    public final int construct(Provider... objects)
+    {
+        return construct( Arrays.asList( objects ) );
     }
 
     /**
      * Construct a BitField from the specified objects
      *
      * @param objects Objects to construct from
-     *
      * @return Constructed BitField
      */
-    public final int construct(@NonNull final Collection<Provider> objects) {
+    public final int construct(@NonNull final Collection<Provider> objects)
+    {
         Iterator<Provider> iterator = objects.iterator();
-        if (!iterator.hasNext()) {
+        if ( !iterator.hasNext() )
+        {
             return 0;
         }
         int i = iterator.next().getValue().intValue();
-        while (iterator.hasNext()) {
+        while ( iterator.hasNext() )
+        {
             i |= iterator.next().getValue().intValue();
         }
         return i;

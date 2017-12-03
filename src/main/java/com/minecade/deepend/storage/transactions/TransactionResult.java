@@ -21,6 +21,8 @@ package com.minecade.deepend.storage.transactions;
  * @author Citymonstret
  */
 @FunctionalInterface
-public interface TransactionResult {
+public interface TransactionResult
+{
+
     void performAction(Object in) throws Exception;
 }

@@ -28,57 +28,60 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public final class StatusRequest extends PendingRequest {
+public final class StatusRequest extends PendingRequest
+{
 
     private static final byte TYPE = 0;
 
     private static Map<String, StatusRequest> requestMap = new ConcurrentHashMap<>();
-
-    /**
-     * Get a request based on its ID
-     * @param s Request ID
-     * @return Request
-     */
-    public static StatusRequest getRequest(String s) {
-        return requestMap.get(s);
-    }
-
     private static volatile int currentIndex = 0;
-
     @Getter
     private final int index;
-
     @Getter
     private final int field;
-
     @Getter
     private final StatusRecipient recipient;
 
-    public StatusRequest(int field, @NonNull StatusRecipient statusRecipient) {
-        super(Channel.CHECK_DATA);
+    public StatusRequest(int field, @NonNull StatusRecipient statusRecipient)
+    {
+        super( Channel.CHECK_DATA );
         this.index = currentIndex++;
         this.field = field;
         this.recipient = statusRecipient;
-        requestMap.put("request::" + index, this);
+        requestMap.put( "request::" + index, this );
     }
 
-    public void call(final int field) {
-        this.recipient.act(field);
+    /**
+     * Get a request based on its ID
+     *
+     * @param s Request ID
+     * @return Request
+     */
+    public static StatusRequest getRequest(String s)
+    {
+        return requestMap.get( s );
+    }
+
+    public void call(final int field)
+    {
+        this.recipient.act( field );
         this.delete();
     }
 
     @Override
-    final protected void makeRequest(DeependBuf buf) {
-        buf.writeByte(TYPE);
-        buf.writeString("request::" + index);
-        buf.writeInt(getField());
+    final protected void makeRequest(DeependBuf buf)
+    {
+        buf.writeByte( TYPE );
+        buf.writeString( "request::" + index );
+        buf.writeInt( getField() );
     }
 
     /**
      * This will delete the request from the request map
      */
-    public void delete() {
-        requestMap.remove("request::" + index);
+    public void delete()
+    {
+        requestMap.remove( "request::" + index );
     }
 
     /**
@@ -86,7 +89,9 @@ public final class StatusRequest extends PendingRequest {
      * of returned items
      */
     @FunctionalInterface
-    public interface StatusRecipient {
+    public interface StatusRecipient
+    {
+
         void act(int field);
     }
 }

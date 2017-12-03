@@ -16,7 +16,6 @@
 
 package com.minecade.deepend.server.channels.impl;
 
-import com.minecade.deepend.ConnectionFactory;
 import com.minecade.deepend.channels.Channel;
 import com.minecade.deepend.channels.DeependChannel;
 import com.minecade.deepend.connection.DeependConnection;
@@ -27,36 +26,43 @@ import com.minecade.deepend.resources.DeependBundle;
 import com.minecade.deepend.server.DeependServer;
 import lombok.Getter;
 
-public class Authentication extends DeependChannel {
-
-    public Authentication() {
-        super(Channel.AUTHENTICATE);
-    }
+public class Authentication extends DeependChannel
+{
 
     @Getter
     private static DeependBundle accountBundle;
-    static {
-        accountBundle = new DeependBundle("accounts", false, DeependBundle.DefaultBuilder.create().add("admin.password", "password").build());
+
+    static
+    {
+        accountBundle = new DeependBundle( "accounts", false, DeependBundle.DefaultBuilder.create().add( "admin.password", "password" ).build() );
+    }
+
+    public Authentication()
+    {
+        super( Channel.AUTHENTICATE );
     }
 
     @Override
-    public void act(final DeependConnection connection, final DeependBuf buf) {
-        final DeependBuf in = connection.getObject("in", DeependBuf.class);
+    public void act(final DeependConnection connection, final DeependBuf buf)
+    {
+        final DeependBuf in = connection.getObject( "in", DeependBuf.class );
 
         final String username = in.getString();
         final String password = in.getString();
 
         GenericResponse response = GenericResponse.FAILURE;
 
-        if (accountBundle.containsKey(username + ".password")) {
-            if (accountBundle.get(username + ".password").equals(password)) {
-                Logger.get().info("Authenticated: " + connection.getRemoteAddress().toString());
-                connection.setAuthenticated(true);
+        if ( accountBundle.containsKey( username + ".password" ) )
+        {
+            if ( accountBundle.get( username + ".password" ).equals( password ) )
+            {
+                Logger.get().info( "Authenticated: " + connection.getRemoteAddress().toString() );
+                connection.setAuthenticated( true );
                 response = GenericResponse.SUCCESS;
-                DeependServer.getConnectionFactory().addConnection(connection);
+                DeependServer.getConnectionFactory().addConnection( connection );
             }
         }
 
-        buf.writeByte(response.getValue());
+        buf.writeByte( response.getValue() );
     }
 }

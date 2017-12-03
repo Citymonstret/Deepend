@@ -22,10 +22,12 @@ import com.minecade.deepend.channels.Channel;
  *
  * @author Citymonstret
  */
-public abstract class AddRequest extends DataRequest {
+public abstract class AddRequest extends DataRequest
+{
 
-    public AddRequest(final DataRecipient dataRecipient) {
-        super(Channel.ADD_DATA, dataRecipient);
+    public AddRequest(final DataRecipient dataRecipient)
+    {
+        super( Channel.ADD_DATA, dataRecipient );
     }
 
 }

@@ -32,19 +32,20 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Citymonstret
  */
-public class ChannelManager {
-
-    private boolean locked = false;
-
-    private final Map<Channel, DeependChannel> channelMap = new ConcurrentHashMap<>();
-    private final Map<Channel, ChannelStatus> channelStatusMap = new ConcurrentHashMap<>();
+public class ChannelManager
+{
 
     /**
      * The global instance
      */
     public static final ChannelManager instance = new ChannelManager();
+    private final Map<Channel, DeependChannel> channelMap = new ConcurrentHashMap<>();
+    private final Map<Channel, ChannelStatus> channelStatusMap = new ConcurrentHashMap<>();
+    private boolean locked = false;
 
-    private ChannelManager() {}
+    private ChannelManager()
+    {
+    }
 
     /**
      * Register a channel, can only
@@ -54,43 +55,53 @@ public class ChannelManager {
      * @param channel Channel to add
      */
     @SneakyThrows(RuntimeException.class)
-    public void addChannel(@NonNull final DeependChannel channel) {
-        if (locked) {
-            throw new RuntimeException("Cannot add channels to locked manager");
+    public void addChannel(@NonNull final DeependChannel channel)
+    {
+        if ( locked )
+        {
+            throw new RuntimeException( "Cannot add channels to locked manager" );
         }
-        channelMap.put(channel.getChannelType(), channel);
-        channelStatusMap.put(channel.getChannelType(), new ChannelStatus(channel.getChannelType()));
+        channelMap.put( channel.getChannelType(), channel );
+        channelStatusMap.put( channel.getChannelType(), new ChannelStatus( channel.getChannelType() ) );
     }
 
-    public void generate(@NonNull Object instance) {
-        this.generate(instance.getClass(), instance);
+    public void generate(@NonNull Object instance)
+    {
+        this.generate( instance.getClass(), instance );
     }
 
-    public void generate(@NonNull final Class<?> clazz, Object instance) {
-        final Collection<AnnotatedMethod<ChannelListener>> annotatedMethods = AnnotationUtil.getAnnotatedMethods(ChannelListener.class, clazz);
+    public void generate(@NonNull final Class<?> clazz, Object instance)
+    {
+        final Collection<AnnotatedMethod<ChannelListener>> annotatedMethods = AnnotationUtil.getAnnotatedMethods( ChannelListener.class, clazz );
 
-        for (final AnnotatedMethod<ChannelListener> annotatedMethod : annotatedMethods) {
-            final Method m =  annotatedMethod.getMethod();
+        for ( final AnnotatedMethod<ChannelListener> annotatedMethod : annotatedMethods )
+        {
+            final Method m = annotatedMethod.getMethod();
 
-            if (!void.class.equals(m.getReturnType())) {
-                new IllegalArgumentException("M doesn't return null").printStackTrace();
-            } else {
-                addChannel(new ChannelBody(annotatedMethod.getAnnotation().channel(), new ReflectionMethod<>(m, instance, Void.class)));
+            if ( !void.class.equals( m.getReturnType() ) )
+            {
+                new IllegalArgumentException( "M doesn't return null" ).printStackTrace();
+            } else
+            {
+                addChannel( new ChannelBody( annotatedMethod.getAnnotation().channel(), new ReflectionMethod<>( m, instance, Void.class ) ) );
             }
         }
     }
 
     /**
      * Get the channel implementation
+     *
      * @param channel Channel Enum
      * @return Implementation of the requested channel
      */
-    public DeependChannel getChannel(@NonNull final Channel channel) {
-        return channelMap.get(channel);
+    public DeependChannel getChannel(@NonNull final Channel channel)
+    {
+        return channelMap.get( channel );
     }
 
-    public ChannelStatus getChannelStatus(@NonNull final Channel channel) {
-        return channelStatusMap.get(channel);
+    public ChannelStatus getChannelStatus(@NonNull final Channel channel)
+    {
+        return channelStatusMap.get( channel );
     }
 
     /**
@@ -99,7 +110,8 @@ public class ChannelManager {
      * new channels may
      * be added
      */
-    public void lock() {
+    public void lock()
+    {
         locked = true;
     }
 }

@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-@SuppressWarnings({"unused"})
-public class DeependBukkit extends JavaPlugin {
+@SuppressWarnings({ "unused" })
+public class DeependBukkit extends JavaPlugin
+{
 
     static Logger logger;
 
@@ -26,60 +27,74 @@ public class DeependBukkit extends JavaPlugin {
 
     private boolean created = false;
 
-    public void addMapping(Class<? extends DeependObject> deependObject) {
-        this.objects.add(deependObject);
+    public void addMapping(Class<? extends DeependObject> deependObject)
+    {
+        this.objects.add( deependObject );
     }
 
-    public void addFactory(ValueFactory.FactoryType type, ValueFactory factory) {
-        this.factories.put(type, factory);
+    public void addFactory(ValueFactory.FactoryType type, ValueFactory factory)
+    {
+        this.factories.put( type, factory );
     }
 
-    public void addRequest(Request request) {
-        this.requests.add(request);
+    public void addRequest(Request request)
+    {
+        this.requests.add( request );
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         logger = this.getLogger();
         com.minecade.deepend.logging.Logger.logHandler = BukkitLogger.class;
     }
 
     @SneakyThrows
-    public void create() {
-        if (created) {
-            throw new IllegalAccessException("Cannot re-create client");
+    public void create()
+    {
+        if ( created )
+        {
+            throw new IllegalAccessException( "Cannot re-create client" );
         }
-        getServer().getScheduler().runTaskAsynchronously(this,
-                () -> new DeependClient(new DeependClient.DeependClientApplication() {
+        getServer().getScheduler().runTaskAsynchronously( this,
+                () -> new DeependClient( new DeependClient.DeependClientApplication()
+                {
                     @Override
-                    public void registerInitialRequests(DeependClient client) {
-                        requests.forEach(client::addPendingRequest);
+                    public void registerInitialRequests(DeependClient client)
+                    {
+                        requests.forEach( client::addPendingRequest );
                         requests = null; // Delete reference
                     }
 
                     @Override
-                    public void registerObjectMappings(ObjectManager objectManager) {
-                        objects.forEach(objectManager::registerMapping);
+                    public void registerObjectMappings(ObjectManager objectManager)
+                    {
+                        objects.forEach( objectManager::registerMapping );
                         objects = null; // Delete reference
                     }
 
                     @Override
-                    public void registerFactories() {
-                        factories.forEach(ValueFactory::addValueFactory);
+                    public void registerFactories()
+                    {
+                        factories.forEach( ValueFactory::addValueFactory );
                         factories = null; // Delete reference
                     }
-                }));
+                } ) );
         created = true;
     }
 
     @Override
-    public void onDisable() {
-        DeependClient.getInstance().addPendingRequest(new ShutdownRequest());
+    public void onDisable()
+    {
+        DeependClient.getInstance().addPendingRequest( new ShutdownRequest() );
         //noinspection StatementWithEmptyBody
-        while (!DeependClient.getInstance().isShutdown()) {}
+        while ( !DeependClient.getInstance().isShutdown() )
+        {
+        }
     }
 
-    public boolean isWriteLocked() {
+    public boolean isWriteLocked()
+    {
         return !DeependClient.getCurrentConnection().isAuthenticated();
     }
 }

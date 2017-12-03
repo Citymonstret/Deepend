@@ -19,46 +19,54 @@ package com.minecade.deepend.data;
 /**
  * A mirror of another data holder
  */
-public class MirrorDataHolder extends DataHolder {
+public class MirrorDataHolder extends DataHolder
+{
 
     private final DataHolder toMirror;
     private final MirrorFilter mirrorFilter;
 
     /**
      * Constructor
-     * @param identifier Holder identifier
-     * @param toMirror Holder to mirror values from
+     *
+     * @param identifier   Holder identifier
+     * @param toMirror     Holder to mirror values from
      * @param mirrorFilter Value filter
      */
-    public MirrorDataHolder(String identifier, DataHolder toMirror, MirrorFilter mirrorFilter) {
-        super(identifier);
+    public MirrorDataHolder(String identifier, DataHolder toMirror, MirrorFilter mirrorFilter)
+    {
+        super( identifier );
 
         this.toMirror = toMirror;
         this.mirrorFilter = mirrorFilter;
 
         // Aren't lambdas beautiful?
-        this.toMirror.addListener(MirrorDataHolder.this::sync);
+        this.toMirror.addListener( MirrorDataHolder.this::sync );
     }
 
-    void sync() {
+    void sync()
+    {
         this.clear();
-        this.toMirror.forEach((key, value) -> {
-            if ((value = mirrorFilter.filter(value)) != null) {
-                if (value instanceof DataHolder) {
+        this.toMirror.forEach( (key, value) -> {
+            if ( ( value = mirrorFilter.filter( value ) ) != null )
+            {
+                if ( value instanceof DataHolder )
+                {
                     DataHolder holder = (DataHolder) value;
-                    this.put(holder.getIdentifier(), holder);
-                } else {
-                    this.put(((DataObject) value).getName(), value);
+                    this.put( holder.getIdentifier(), holder );
+                } else
+                {
+                    this.put( ( (DataObject) value ).getName(), value );
                 }
             }
-        });
+        } );
     }
 
     /**
      * Filter which decides
      * what values are mirrored
      */
-    public interface MirrorFilter {
+    public interface MirrorFilter
+    {
 
         /**
          * Return null to

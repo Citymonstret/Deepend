@@ -32,51 +32,57 @@ import java.net.URI;
  *
  * @author Citymonstret
  */
-public class LogFactory extends ConfigurationFactory {
+public class LogFactory extends ConfigurationFactory
+{
 
     private final static String COLOR_STYLES = "{INFO=cyan bold bright, WARN=yellow bold, TRACE=blue, ERROR=red bright bold, DEBUG=magenta bold}";
 
-    private static String style(String s, String ss) {
+    private static String style(String s, String ss)
+    {
         return "%highlight{" + s + "}{INFO=" + ss + ", WARN=" + ss + ", TRACE=" + ss + ", ERROR=" + ss + ", DEBUG=" + ss + "}";
     }
 
-    private static Configuration createConfiguration(final String name, ConfigurationBuilder<BuiltConfiguration> builder) {
-        builder.setConfigurationName(name);
-        builder.setStatusLevel(Level.ERROR);
+    private static Configuration createConfiguration(final String name, ConfigurationBuilder<BuiltConfiguration> builder)
+    {
+        builder.setConfigurationName( name );
+        builder.setStatusLevel( Level.ERROR );
 
-        String pattern = "[" + style("%d{HH:mm:ss}", "white") +
+        String pattern = "[" + style( "%d{HH:mm:ss}", "white" ) +
                 "][%highlight{%level}" + COLOR_STYLES + "][" +
-                style("%logger{36}", "white") + "][" + style("%t", "cyan") + "]: " +
-                style("%msg", "bright") + "%n";
+                style( "%logger{36}", "white" ) + "][" + style( "%t", "cyan" ) + "]: " +
+                style( "%msg", "bright" ) + "%n";
 
-        AppenderComponentBuilder appenderComponentBuilder = builder.newAppender("Stdout", "CONSOLE")
-                .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
-        appenderComponentBuilder.add(builder.newLayout("PatternLayout")
-                .addAttribute("pattern", pattern));
+        AppenderComponentBuilder appenderComponentBuilder = builder.newAppender( "Stdout", "CONSOLE" )
+                .addAttribute( "target", ConsoleAppender.Target.SYSTEM_OUT );
+        appenderComponentBuilder.add( builder.newLayout( "PatternLayout" )
+                .addAttribute( "pattern", pattern ) );
 
-        builder.add(appenderComponentBuilder);
+        builder.add( appenderComponentBuilder );
 
-        builder.add(builder.newLogger("Deepend", Level.ALL)
-                .add(builder.newAppenderRef("Stdout"))
-                .addAttribute("additivity", false));
+        builder.add( builder.newLogger( "Deepend", Level.ALL )
+                .add( builder.newAppenderRef( "Stdout" ) )
+                .addAttribute( "additivity", false ) );
 
-        builder.add(builder.newRootLogger(Level.ALL).add(builder.newAppenderRef("Stdout")));
+        builder.add( builder.newRootLogger( Level.ALL ).add( builder.newAppenderRef( "Stdout" ) ) );
 
         return builder.build();
     }
 
     @Override
-    protected String[] getSupportedTypes() {
-        return new String[] {"*"};
+    protected String[] getSupportedTypes()
+    {
+        return new String[]{ "*" };
     }
 
     @Override
-    public Configuration getConfiguration(@NonNull final String name, @NonNull final URI configurationLocation) {
-        return createConfiguration(name, newConfigurationBuilder());
+    public Configuration getConfiguration(@NonNull final String name, @NonNull final URI configurationLocation)
+    {
+        return createConfiguration( name, newConfigurationBuilder() );
     }
 
     @Override
-    public Configuration getConfiguration(@NonNull final ConfigurationSource source) {
-        return createConfiguration(source.toString(), null);
+    public Configuration getConfiguration(@NonNull final ConfigurationSource source)
+    {
+        return createConfiguration( source.toString(), null );
     }
 }

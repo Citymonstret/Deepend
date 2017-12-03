@@ -1,7 +1,6 @@
 package com.minecade.deepend.nativeprot;
 
 import com.minecade.deepend.data.DeependBuf;
-import com.minecade.deepend.logging.Logger;
 import com.minecade.deepend.pipeline.DeependContext;
 import com.minecade.deepend.prot.JavaProtocol;
 import com.minecade.deepend.prot.Protocol;
@@ -19,166 +18,201 @@ import java.util.List;
  *
  * @author Citymonstret
  */
-public class NativeBuf extends DeependBuf {
+public class NativeBuf extends DeependBuf
+{
 
     private static final Protocol protocol = new JavaProtocol(); // Make this customizable
-
-    private NativeObj[] objects;
     private final List<NativeObj> i_objects;
+    private NativeObj[] objects;
     private byte[] bytes;
 
     private int readIndex = 0;
     private boolean updated = false;
 
+    public NativeBuf(final NativeObj[] objects)
+    {
+        this( objects, null, null );
+    }
+
+    public NativeBuf(final byte[] bytes, int size)
+    {
+        this.bytes = bytes;
+        NativeBuf tmp = protocol.readNativeBuf( size, bytes );
+        this.objects = tmp.getObjects();
+        this.i_objects = tmp.i_objects;
+    }
+
+    public NativeBuf(final ByteBuffer in, int size)
+    {
+        this( in.array(), size );
+    }
+
+    public NativeBuf(final NativeObj[] objects, final byte[] bytes, ByteBuffer buf)
+    {
+        this.objects = objects;
+        this.bytes = bytes;
+        if ( objects == null )
+        {
+            this.i_objects = new ArrayList<>();
+        } else
+        {
+            this.i_objects = new ArrayList<>( Arrays.asList( objects ) );
+        }
+    }
+
+    public NativeBuf()
+    {
+        this( null, null, null );
+    }
+
     @Override
-    public void nullify() {
+    public void nullify()
+    {
         this.objects = null;
         this.i_objects.clear();
         this.bytes = null;
     }
 
-    public NativeBuf(final NativeObj[] objects) {
-        this(objects, null, null);
-    }
-
-    public NativeBuf(final byte[] bytes, int size) {
-        this.bytes = bytes;
-        NativeBuf tmp = protocol.readNativeBuf(size, bytes);
-        this.objects = tmp.getObjects();
-        this.i_objects = tmp.i_objects;
-    }
-
-    public NativeBuf(final ByteBuffer in, int size) {
-        this(in.array(), size);
-    }
-
-    public NativeBuf(final NativeObj[] objects, final byte[] bytes, ByteBuffer buf) {
-        this.objects = objects;
-        this.bytes = bytes;
-        if (objects == null) {
-            this.i_objects = new ArrayList<>();
-        } else {
-            this.i_objects = new ArrayList<>(Arrays.asList(objects));
-        }
-    }
-
-    public NativeBuf() {
-        this(null, null, null);
-    }
-
-    public NativeObj[] getObjects() {
-        if (updated) {
-            this.objects = this.i_objects.toArray(new NativeObj[this.i_objects.size()]);
+    public NativeObj[] getObjects()
+    {
+        if ( updated )
+        {
+            this.objects = this.i_objects.toArray( new NativeObj[ this.i_objects.size() ] );
             this.updated = false;
         }
         return this.objects;
     }
 
-    public byte[] getBytes() {
+    public byte[] getBytes()
+    {
         return this.bytes;
     }
 
-    public void setBytes(byte[] bytes) {
+    public void setBytes(byte[] bytes)
+    {
         this.bytes = bytes;
     }
 
     @Override
-    protected void _writeByte(byte b) {
-        this.i_objects.add(new NativeObj(b));
+    protected void _writeByte(byte b)
+    {
+        this.i_objects.add( new NativeObj( b ) );
         setUpdated();
     }
 
-    private void setUpdated() {
+    private void setUpdated()
+    {
         this.updated = true;
     }
 
     @Override
-    protected void _writeString(String str) {
-        this.i_objects.add(new NativeObj(str));
+    protected void _writeString(String str)
+    {
+        this.i_objects.add( new NativeObj( str ) );
         setUpdated();
     }
 
     @Override
-    protected String readString() {
-        if (objects == null) {
+    protected String readString()
+    {
+        if ( objects == null )
+        {
             checkCompile();
         }
-        return objects[readIndex++].getS();
+        return objects[ readIndex++ ].getS();
     }
 
     @Override
-    protected byte readByte() {
-        if (objects == null) {
+    protected byte readByte()
+    {
+        if ( objects == null )
+        {
             checkCompile();
         }
-        return objects[readIndex++].getB();
+        return objects[ readIndex++ ].getB();
     }
 
     @Override
-    protected int readInt() {
-        if (objects == null) {
+    protected int readInt()
+    {
+        if ( objects == null )
+        {
             checkCompile();
         }
-        return objects[readIndex++].getI();
+        return objects[ readIndex++ ].getI();
     }
 
     @Override
-    protected void _writeInt(int n) {
-        this.i_objects.add(new NativeObj(n));
+    protected void _writeInt(int n)
+    {
+        this.i_objects.add( new NativeObj( n ) );
         setUpdated();
     }
 
     @Override
-    public boolean readable() {
+    public boolean readable()
+    {
         return readIndex < objects.length;
     }
 
     @Override
-    public void reset() {
+    public void reset()
+    {
         this.readIndex = 0;
         this.i_objects.clear();
         this.updated = false;
     }
 
     @Override
-    public void writeAndFlush(DeependContext context) {
-        try {
+    public void writeAndFlush(DeependContext context)
+    {
+        try
+        {
             OutputStream outputStream = context.getSocket().getOutputStream();
-            outputStream.write(ProtocolEncoder.getEncoder().encode(this));
+            outputStream.write( ProtocolEncoder.getEncoder().encode( this ) );
             outputStream.flush();
-        } catch (IOException e) {
+        } catch ( IOException e )
+        {
             e.printStackTrace();
         }
     }
 
-    public void compile(ByteBuffer out) {
+    public void compile(ByteBuffer out)
+    {
         checkCompile();
-        out.putInt(bytes.length);
-        out.put(bytes);
+        out.putInt( bytes.length );
+        out.put( bytes );
     }
 
-    private void checkCompile() {
-        if (updated || this.bytes == null) {
-            if (this.objects == null) {
-                this.objects = new NativeObj[0];
+    private void checkCompile()
+    {
+        if ( updated || this.bytes == null )
+        {
+            if ( this.objects == null )
+            {
+                this.objects = new NativeObj[ 0 ];
             }
-            protocol.writeNativeBuf(0, this);
+            protocol.writeNativeBuf( 0, this );
         }
     }
 
-    public void copyTo(NativeBuf buf) {
+    public void copyTo(NativeBuf buf)
+    {
         checkCompile();
-        for (NativeObj nativeObj : objects) {
-            buf.addObj(nativeObj);
+        for ( NativeObj nativeObj : objects )
+        {
+            buf.addObj( nativeObj );
         }
     }
 
-    private void addObj(NativeObj obj) {
-        this.i_objects.add(obj);
+    private void addObj(NativeObj obj)
+    {
+        this.i_objects.add( obj );
         setUpdated();
     }
 
-    public int getSize() {
+    public int getSize()
+    {
         checkCompile();
         return 4 + bytes.length;
     }

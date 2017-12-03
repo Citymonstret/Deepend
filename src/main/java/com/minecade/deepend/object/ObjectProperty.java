@@ -33,10 +33,12 @@ import java.lang.annotation.Target;
 @Stable
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ObjectProperty {
+public @interface ObjectProperty
+{
 
     /**
      * Get the property name
+     *
      * @return Property name
      */
     String name();
@@ -44,6 +46,7 @@ public @interface ObjectProperty {
     /**
      * Get the property type,
      * defaults to {@link DataType#STRING}
+     *
      * @return Property type
      */
     DataType type() default DataType.DEFAULT;

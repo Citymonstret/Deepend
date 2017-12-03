@@ -23,9 +23,9 @@ import com.minecade.deepend.data.DataManager;
 import com.minecade.deepend.data.DataObject;
 import com.minecade.deepend.data.DeependBuf;
 import com.minecade.deepend.logging.Logger;
+import com.minecade.deepend.object.GenericResponse;
 import com.minecade.deepend.server.channels.SubscriptionManager;
 import com.minecade.deepend.values.ValueFactory;
-import com.minecade.deepend.object.GenericResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,48 +33,57 @@ import java.util.List;
 /**
  * @author Citymonstret
  */
-public class AddData extends DeependChannel {
+public class AddData extends DeependChannel
+{
 
-    public AddData() {
-        super(Channel.ADD_DATA);
+    public AddData()
+    {
+        super( Channel.ADD_DATA );
     }
 
     @Override
-    public void act(final DeependConnection connection, final DeependBuf buf) {
-        final DeependBuf in = connection.getObject("in", DeependBuf.class);
+    public void act(final DeependConnection connection, final DeependBuf buf)
+    {
+        final DeependBuf in = connection.getObject( "in", DeependBuf.class );
 
         // Just echo the request ID
-        buf.writeString(in.getString());
+        buf.writeString( in.getString() );
 
-        scope: {
+        scope:
+        {
             // String category = readString(in);
             final byte categoryByte = in.getByte();
-            final String category = ValueFactory.getFactory(ValueFactory.FactoryType.DATA_TYPE).getName(categoryByte);
+            final String category = ValueFactory.getFactory( ValueFactory.FactoryType.DATA_TYPE ).getName( categoryByte );
 
-            if (!DataManager.instance.hasDataHolder(category)) {
-                buf.writeByte(GenericResponse.FAILURE);
-                buf.writeString("Category not found :(");
+            if ( !DataManager.instance.hasDataHolder( category ) )
+            {
+                buf.writeByte( GenericResponse.FAILURE );
+                buf.writeString( "Category not found :(" );
                 break scope;
             }
 
-            DataHolder holder = DataManager.instance.getDataHolder(category);
+            DataHolder holder = DataManager.instance.getDataHolder( category );
 
             // Reset main holder status
-            DataManager.instance.getDataStatus(category).resetStatus();
+            DataManager.instance.getDataStatus( category ).resetStatus();
 
             final String providerPath = in.getString();
-            String[] pathParts = providerPath.split(".");
+            String[] pathParts = providerPath.split( "." );
 
-            if (pathParts.length < 1) {
-                pathParts = new String[] {providerPath};
+            if ( pathParts.length < 1 )
+            {
+                pathParts = new String[]{ providerPath };
             }
 
-            for (final String part : pathParts) {
-                if (holder.containsKey(part)) {
-                    holder = (DataHolder) holder.get(part);
-                } else {
-                    DataHolder newHolder = new DataHolder(part);
-                    holder.put(part, newHolder);
+            for ( final String part : pathParts )
+            {
+                if ( holder.containsKey( part ) )
+                {
+                    holder = (DataHolder) holder.get( part );
+                } else
+                {
+                    DataHolder newHolder = new DataHolder( part );
+                    holder.put( part, newHolder );
                     holder = newHolder;
                 }
             }
@@ -83,38 +92,40 @@ public class AddData extends DeependChannel {
 
             int numObjects = in.getInt();
 
-            for (int i = 0; i < numObjects; i++) {
-                String[] pieces = in.getString().split(":");
+            for ( int i = 0; i < numObjects; i++ )
+            {
+                String[] pieces = in.getString().split( ":" );
 
-                if (pieces.length < 2) {
-                    pieces = new String[] {pieces[0], ""};
+                if ( pieces.length < 2 )
+                {
+                    pieces = new String[]{ pieces[ 0 ], "" };
                 }
 
-                DataObject o = new DataObject(pieces[0], pieces[1]);
-                holder.put(pieces[0], o);
+                DataObject o = new DataObject( pieces[ 0 ], pieces[ 1 ] );
+                holder.put( pieces[ 0 ], o );
 
-                Logger.get().debug("Added " + pieces[0] + " to " + category + "@" + providerPath);
+                Logger.get().debug( "Added " + pieces[ 0 ] + " to " + category + "@" + providerPath );
 
-                object.add(o);
+                object.add( o );
             }
 
-            buf.writeByte(GenericResponse.SUCCESS);
+            buf.writeByte( GenericResponse.SUCCESS );
 
             // Write some response info
-            buf.writeByte(categoryByte);
-            buf.writeInt(object.size());
+            buf.writeByte( categoryByte );
+            buf.writeInt( object.size() );
 
-            object.forEach(Logger.get()::dump);
-            object.forEach(o -> {
-                buf.writeString(o.getName());
-                buf.writeString(o.getValue());
-            });
+            object.forEach( Logger.get()::dump );
+            object.forEach( o -> {
+                buf.writeString( o.getName() );
+                buf.writeString( o.getValue() );
+            } );
 
             // This will reset the
             // channel status
             resetStatus();
 
-            SubscriptionManager.act(Channel.ADD_DATA, categoryByte, holder);
+            SubscriptionManager.act( Channel.ADD_DATA, categoryByte, holder );
         }
     }
 }

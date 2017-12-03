@@ -18,9 +18,20 @@ package com.minecade.deepend.data;
 
 import com.minecade.deepend.bytes.ByteProvider;
 import com.minecade.deepend.object.Status;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.Singular;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -29,31 +40,288 @@ import java.util.function.BiConsumer;
  * @author Citymonstret
  */
 @RequiredArgsConstructor
-public class DataHolder implements Map<String, Object> {
+public class DataHolder implements Map<String, Object>
+{
 
+    @NonNull
+    private final Map<String, Object> data = new HashMap<>();
+    @Getter
+    @NonNull
+    private final String identifier;
+    @NonNull
+    private final List<DataListener> listeners = new ArrayList<>();
     @Setter
     private DataHolder parent;
-
     @Getter
-    private Status<DataHolder> status = new Status<>(this);
+    private Status<DataHolder> status = new Status<>( this );
+    @Setter
+    private String fallback;
 
     /**
      * Delete this holder from the
      * parent holder
      */
-    public void delete() {
+    public void delete()
+    {
         // This will basically
         // remove this from
         // everywhere, slightly
         // wasteful, but oh well
-        if (parent != null) {
-            parent.remove(this.getIdentifier());
+        if ( parent != null )
+        {
+            parent.remove( this.getIdentifier() );
         }
     }
 
-    public void register(ByteProvider provider) {
-        DataManager.instance.getDataHolder(provider)
-                .put(this.getIdentifier(), this);
+    public void register(ByteProvider provider)
+    {
+        DataManager.instance.getDataHolder( provider )
+                .put( this.getIdentifier(), this );
+    }
+
+    /**
+     * Get the fallback value, if
+     * declared. Otherwise it will
+     * return a new data object
+     * where everything is set to
+     * return the identifier of the holder
+     *
+     * @return Fallback value
+     */
+    public Object getFallback()
+    {
+        if ( this.fallback == null )
+        {
+            return new DataObject( this.identifier, this.identifier );
+        }
+        return new DataObject( this.identifier, ( (DataObject) this.get( fallback ) ).getValue() );
+    }
+
+    /**
+     * Add a data listener, which will receive
+     * update notifications for this holder
+     *
+     * @param listener Listener
+     */
+    public void addListener(final DataListener listener)
+    {
+        this.listeners.add( listener );
+    }
+
+    /**
+     * Called whenever the values of
+     * this holder are updated
+     */
+    protected void pushSync()
+    {
+        this.status.resetStatus();
+        this.listeners.forEach( DataListener::requestSync );
+    }
+
+    @Override
+    final public String toString()
+    {
+        return this.getIdentifier();
+    }
+
+    @Override
+    public int size()
+    {
+        return this.data.size();
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        return this.data.isEmpty();
+    }
+
+    @Override
+    public Object get(Object key)
+    {
+        if ( !this.data.containsKey( key.toString() ) )
+        {
+            return null;
+        }
+        return this.data.get( key );
+    }
+
+    @Override
+    public boolean containsKey(Object key)
+    {
+        return get( key ) != null;
+    }
+
+    @Override
+    public Object put(String key, Object value)
+    {
+        if ( value == null )
+        {
+            value = getIdentifier();
+        }
+
+        // Automatically wrap strings to
+        // data objects, for convenience
+        if ( value instanceof String )
+        {
+            value = new DataObject( key, value.toString() );
+        }
+
+        // Auto-register holders for deletion
+        // purposes
+        if ( value instanceof DataObject )
+        {
+            ( (DataObject) value ).setHolder( this );
+        }
+
+        // Will just add the values to any
+        // pre-existent data holder, if the
+        // data holder is already registered
+        if ( value instanceof DataHolder )
+        {
+            DataHolder holder = (DataHolder) value;
+
+            // This is a bit hackish
+            if ( containsKey( holder.getIdentifier() ) )
+            {
+                DataHolder oldHolder = (DataHolder) get( holder.getIdentifier() );
+                oldHolder.putAll( holder );
+                this.pushSync();
+                return holder;
+            }
+
+            holder.setParent( this );
+        }
+
+        Object o = this.data.put( key, value );
+
+        // Push changes to listeners
+        this.pushSync();
+
+        return o;
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ?> m)
+    {
+        // Make sure that it goes
+        // through all filters
+        m.forEach( this::put );
+        // this.data.putAll(m);
+        this.pushSync();
+    }
+
+    @Override
+    public Object remove(Object key)
+    {
+        Object o = this.data.remove( key );
+        pushSync();
+        return o;
+    }
+
+    @Override
+    public boolean containsValue(Object value)
+    {
+        return this.data.containsValue( value );
+    }
+
+    @Override
+    public void clear()
+    {
+        this.data.clear();
+        this.pushSync();
+    }
+
+    @Override
+    public Set<String> keySet()
+    {
+        Set<String> keySet = new HashSet<>();
+        this.forEach( (k, v) -> keySet.add( k ) );
+        return keySet;
+    }
+
+    @Override
+    public Collection<Object> values()
+    {
+        Set<Object> values = new HashSet<>();
+        this.forEach( (k, v) -> values.add( v ) );
+        return values;
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet()
+    {
+        Set<Entry<String, Object>> entrySet = new HashSet<>();
+        Set<Entry<String, Object>> superSet = this.data.entrySet();
+        superSet.forEach( (e) -> {
+            if ( containsKey( e.getKey() ) )
+            {
+                entrySet.add( e );
+            }
+        } );
+        return entrySet;
+    }
+
+    @Override
+    public Object getOrDefault(@NonNull final Object key, final Object defaultValue)
+    {
+        if ( this.containsKey( key ) )
+        {
+            return this.get( key );
+        }
+        return defaultValue;
+    }
+
+    @Override
+    public Object putIfAbsent(String key, Object value)
+    {
+        if ( containsKey( key ) )
+        {
+            return null;
+        }
+        return put( key, value );
+    }
+
+    @Override
+    public boolean remove(@NonNull final Object key, @NonNull final Object value)
+    {
+        boolean b = this.data.remove( key, value );
+        this.pushSync();
+        return b;
+    }
+
+    @Override
+    public boolean replace(@NonNull final String key, @NonNull final Object oldValue, @NonNull final Object newValue)
+    {
+        return this.data.replace( key, oldValue, newValue );
+    }
+
+    @Override
+    public Object replace(@NonNull final String key, @NonNull final Object value)
+    {
+        return this.data.replace( key, value );
+    }
+
+    @Override
+    public void forEach(@NonNull final BiConsumer<? super String, ? super Object> action)
+    {
+        // This will make sure that
+        // data gets deleted, when
+        // it's supposed to, etc
+        this.data.keySet().forEach(
+                key -> {
+                    if ( key == null )
+                    {
+                        return;
+                    }
+                    Object value = get( key );
+                    if ( value == null )
+                    {
+                        return;
+                    }
+                    action.accept( key, value );
+                }
+        );
     }
 
     /**
@@ -63,7 +331,8 @@ public class DataHolder implements Map<String, Object> {
      *
      * @author Citymonstret
      */
-    public interface DataListener {
+    public interface DataListener
+    {
 
         /**
          * This is called whenever
@@ -75,248 +344,34 @@ public class DataHolder implements Map<String, Object> {
         void requestSync();
     }
 
-    @NonNull private final Map<String, Object> data = new HashMap<>();
-
-    @Getter
-    @NonNull
-    private final String identifier;
-    @NonNull private final List<DataListener> listeners = new ArrayList<>();
-
-    @Setter
-    private String fallback;
-
-    /**
-     * Get the fallback value, if
-     * declared. Otherwise it will
-     * return a new data object
-     * where everything is set to
-     * return the identifier of the holder
-     *
-     * @return Fallback value
-     */
-    public Object getFallback() {
-        if (this.fallback == null) {
-            return new DataObject(this.identifier, this.identifier);
-        }
-        return new DataObject(this.identifier, ((DataObject) this.get(fallback)).getValue());
-    }
-
-    /**
-     * Add a data listener, which will receive
-     * update notifications for this holder
-     * @param listener Listener
-     */
-    public void addListener(final DataListener listener) {
-        this.listeners.add(listener);
-    }
-
-    /**
-     * Called whenever the values of
-     * this holder are updated
-     */
-    protected void pushSync() {
-        this.status.resetStatus();
-        this.listeners.forEach(DataListener::requestSync);
-    }
-
-    @Override
-    final public String toString() {
-        return this.getIdentifier();
-    }
-
-    @Override
-    public int size() {
-        return this.data.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.data.isEmpty();
-    }
-
-    @Override
-    public Object get(Object key) {
-        if (!this.data.containsKey(key.toString())) {
-            return null;
-        }
-        return this.data.get(key);
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-        return get(key) != null;
-    }
-
-    @Override
-    public Object put(String key, Object value) {
-        if (value == null) {
-            value = getIdentifier();
-        }
-
-        // Automatically wrap strings to
-        // data objects, for convenience
-        if (value instanceof String) {
-            value = new DataObject(key, value.toString());
-        }
-
-        // Auto-register holders for deletion
-        // purposes
-        if (value instanceof DataObject) {
-            ((DataObject) value).setHolder(this);
-        }
-
-        // Will just add the values to any
-        // pre-existent data holder, if the
-        // data holder is already registered
-        if (value instanceof DataHolder) {
-            DataHolder holder = (DataHolder) value;
-
-            // This is a bit hackish
-            if (containsKey(holder.getIdentifier())) {
-                DataHolder oldHolder = (DataHolder) get(holder.getIdentifier());
-                oldHolder.putAll(holder);
-                this.pushSync();
-                return holder;
-            }
-
-            holder.setParent(this);
-        }
-
-        Object o = this.data.put(key, value);
-
-        // Push changes to listeners
-        this.pushSync();
-
-        return o;
-    }
-
-    @Override
-    public void putAll(Map<? extends String, ?> m) {
-        // Make sure that it goes
-        // through all filters
-        m.forEach(this::put);
-        // this.data.putAll(m);
-        this.pushSync();
-    }
-
-    @Override
-    public Object remove(Object key) {
-        Object o = this.data.remove(key);
-        pushSync();
-        return o;
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return this.data.containsValue(value);
-    }
-
-    @Override
-    public void clear() {
-        this.data.clear();
-        this.pushSync();
-    }
-
-    @Override
-    public Set<String> keySet() {
-        Set<String> keySet = new HashSet<>();
-        this.forEach((k,v) -> keySet.add(k));
-        return keySet;
-    }
-
-    @Override
-    public Collection<Object> values() {
-        Set<Object> values = new HashSet<>();
-        this.forEach((k,v) -> values.add(v));
-        return values;
-    }
-
-    @Override
-    public Set<Entry<String, Object>> entrySet() {
-        Set<Entry<String,Object>> entrySet = new HashSet<>();
-        Set<Entry<String,Object>> superSet = this.data.entrySet();
-        superSet.forEach((e) -> {
-            if (containsKey(e.getKey())) {
-                entrySet.add(e);
-            }
-        });
-        return entrySet;
-    }
-
-    @Override
-    public Object getOrDefault(@NonNull final Object key, final Object defaultValue) {
-        if (this.containsKey(key)) {
-            return this.get(key);
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public Object putIfAbsent(String key, Object value) {
-        if (containsKey(key)) {
-            return null;
-        }
-        return put(key, value);
-    }
-
-    @Override
-    public boolean remove(@NonNull final Object key, @NonNull final Object value) {
-        boolean b = this.data.remove(key, value);
-        this.pushSync();
-        return b;
-    }
-
-    @Override
-    public boolean replace(@NonNull final String key, @NonNull final Object oldValue, @NonNull final Object newValue) {
-        return this.data.replace(key, oldValue, newValue);
-    }
-
-    @Override
-    public Object replace(@NonNull final String key, @NonNull final Object value) {
-        return this.data.replace(key, value);
-    }
-
-    @Override
-    public void forEach(@NonNull final BiConsumer<? super String, ? super Object> action) {
-        // This will make sure that
-        // data gets deleted, when
-        // it's supposed to, etc
-        this.data.keySet().forEach(
-                key -> {
-                    if (key == null) {
-                        return;
-                    }
-                    Object value = get(key);
-                    if (value == null) {
-                        return;
-                    }
-                    action.accept(key, value);
-                }
-        );
-    }
-
     @Builder
-    public static class DataHolderInitalizer {
+    public static class DataHolderInitalizer
+    {
 
         final private String name;
         private String fallback;
         private DataHolder parent;
-        @Singular("object") private Map<String, Object> objects;
+        @Singular("object")
+        private Map<String, Object> objects;
 
-        DataHolder getDataHolder() {
-            final DataHolder holder = new DataHolder(name);
-            if (this.fallback != null) {
-                holder.setFallback(this.fallback);
+        DataHolder getDataHolder()
+        {
+            final DataHolder holder = new DataHolder( name );
+            if ( this.fallback != null )
+            {
+                holder.setFallback( this.fallback );
             }
-            if (this.parent != null) {
-                holder.setParent(parent);
+            if ( this.parent != null )
+            {
+                holder.setParent( parent );
             }
-            holder.putAll(this.objects);
+            holder.putAll( this.objects );
             return holder;
         }
 
-        public void register(@NonNull final ByteProvider provider) {
-            this.getDataHolder().register(provider);
+        public void register(@NonNull final ByteProvider provider)
+        {
+            this.getDataHolder().register( provider );
         }
     }
 }

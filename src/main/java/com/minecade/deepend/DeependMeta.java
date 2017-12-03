@@ -29,16 +29,24 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Stable
 @UtilityClass
-@SuppressWarnings({"unused"})
-public final class DeependMeta {
+@SuppressWarnings({ "unused" })
+public final class DeependMeta
+{
 
     /**
      * The storage for the meta system
-     *
+     * <p>
      * It's using ConcurrentHashMap as it will be used by loads of
      * different threads
      */
     private static final Map<String, String> map;
+
+    static
+    {
+        // There's no real need for initial sizing
+        // as this won't be used that often
+        map = new ConcurrentHashMap<>();
+    }
 
     /**
      * Check if a key value exists
@@ -46,20 +54,21 @@ public final class DeependMeta {
      * @param key Key to check for
      * @return True if exists | False if it doesn't
      */
-    public static boolean hasMeta(@NonNull final String key) {
-        return map.containsKey(key);
+    public static boolean hasMeta(@NonNull final String key)
+    {
+        return map.containsKey( key );
     }
 
     /**
      * Get a meta value
      *
-     * @see #hasMeta(String) To see if exists
-     *
      * @param key Value key
      * @return Value
+     * @see #hasMeta(String) To see if exists
      */
-    public static String getMeta(@NonNull final String key) {
-        return map.get(key);
+    public static String getMeta(@NonNull final String key)
+    {
+        return map.get( key );
     }
 
     /**
@@ -68,8 +77,9 @@ public final class DeependMeta {
      * @param key Key to (add | update)
      * @param val Meta value
      */
-    public static void setMeta(@NonNull final String key, @NonNull final String val) {
-        map.put(key, val);
+    public static void setMeta(@NonNull final String key, @NonNull final String val)
+    {
+        map.put( key, val );
     }
 
     /**
@@ -77,13 +87,8 @@ public final class DeependMeta {
      *
      * @param key Value to remove
      */
-    public static void removeMeta(@NonNull final String key) {
-        map.remove(key);
-    }
-
-    static {
-        // There's no real need for initial sizing
-        // as this won't be used that often
-        map = new ConcurrentHashMap<>();
+    public static void removeMeta(@NonNull final String key)
+    {
+        map.remove( key );
     }
 }

@@ -16,14 +16,18 @@
 
 package com.minecade.deepend.data;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 /**
  * A simple data object
  *
  * @author Citymonstret
  */
-public class DataObject {
+public class DataObject
+{
 
     @NonNull
     @Getter
@@ -42,25 +46,30 @@ public class DataObject {
 
     /**
      * Constructor
-     * @param name Data Key
+     *
+     * @param name  Data Key
      * @param value Data Value
      */
-    public DataObject(final String name, final String value) {
+    public DataObject(final String name, final String value)
+    {
         this.name = name;
         this.value = value;
     }
 
     @Override
-    final public String toString() {
+    final public String toString()
+    {
         return this.getName();
     }
 
     /**
      * Get the value
+     *
      * @return Data Value
      */
-    final public String getValue() {
-        return this.processValue(value);
+    final public String getValue()
+    {
+        return this.processValue( value );
     }
 
     /**
@@ -68,26 +77,31 @@ public class DataObject {
      * Will return the input value,
      * unless the method has been
      * overridden
+     *
      * @param value Value to process
      * @return Value
      */
-    public String processValue(String value) {
+    public String processValue(String value)
+    {
         return value;
     }
 
     /**
      * Delete the object
      */
-    public void delete() {
-        getHolder().remove(name);
+    public void delete()
+    {
+        getHolder().remove( name );
     }
 
     /**
      * Write the value of this
      * object to a buf
+     *
      * @param buf Buf to write to
      */
-    public void write(DeependBuf buf) {
-        buf.writeString(this.value);
+    public void write(DeependBuf buf)
+    {
+        buf.writeString( this.value );
     }
 }
